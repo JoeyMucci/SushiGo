@@ -7,7 +7,9 @@
 // 'src/pages/HomePage/HomePage.js'         -> HomePage
 // 'src/pages/Admin/BooksPage/BooksPage.js' -> AdminBooksPage
 
-import { Router, Route } from '@redwoodjs/router'
+import { Router, Route, Set } from '@redwoodjs/router'
+
+import RollLayout from 'src/layouts/RollLayout'
 
 import { useAuth } from './auth'
 
@@ -20,7 +22,9 @@ const Routes = () => {
       <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
       <Route path="/instructions" page={InstructionsPage} name="instructions" />
       <Route path="/achievements" page={AchievementsPage} name="achievements" />
-      <Route path="/" page={HomePage} name="home" />
+      <Set wrap={RollLayout}>
+        <Route path="/" page={HomePage} name="home" />
+      </Set>
       <Route path="/play" page={PlayPage} name="play" />
       <Route path="/leaderboard" page={LeaderboardPage} name="leaderboard" />
       <Route notfound page={NotFoundPage} />
