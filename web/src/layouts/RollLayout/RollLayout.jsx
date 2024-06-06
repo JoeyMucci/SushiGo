@@ -15,7 +15,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-mono text-[color:var(--color-salmon)]"
                 to={routes.play()}
               >
                 Play
@@ -23,7 +23,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-serif text-[color:var(--color-salmon)]"
                 to={routes.instructions()}
               >
                 Instructions
@@ -31,7 +31,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
                 to={routes.achievements()}
               >
                 Achievements

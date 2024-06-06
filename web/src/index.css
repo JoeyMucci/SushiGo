@@ -13,8 +13,16 @@
   :root {
     --color-nightwing: rgb(0, 0, 64);
     --color-salmon: rgb(255, 145, 125);
+
+    @font-face {
+      font-family: 'Caveat';
+      src: url("web/public/Caveat-SemiBold.ttf");
+    }
   }
 }
+
+
+
 /**
  * END --- SETUP TAILWINDCSS EDIT
  */
