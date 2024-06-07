@@ -20,13 +20,16 @@ const Routes = () => {
       <Route path="/signup" page={SignupPage} name="signup" />
       <Route path="/forgot-password" page={ForgotPasswordPage} name="forgotPassword" />
       <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
-      <Route path="/instructions" page={InstructionsPage} name="instructions" />
-      <Route path="/achievements" page={AchievementsPage} name="achievements" />
+
       <Set wrap={RollLayout}>
         <Route path="/" page={HomePage} name="home" />
+        <Route path="/play" page={PlayPage} name="play" />
+        <Route path="/instructions" page={InstructionsPage} name="instructions" />
+        <Route path="/achievements" page={AchievementsPage} name="achievements" />
+        <Route path="/leaderboard" page={LeaderboardPage} name="leaderboard" />
+        <Route path="/account" page={AccountPage} name="account" />
       </Set>
-      <Route path="/play" page={PlayPage} name="play" />
-      <Route path="/leaderboard" page={LeaderboardPage} name="leaderboard" />
+
       <Route notfound page={NotFoundPage} />
     </Router>
   )
