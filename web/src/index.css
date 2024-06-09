@@ -14,7 +14,7 @@
     --color-nightwing: rgb(0, 0, 64);
     --color-salmon: rgb(255, 145, 125);
     --color-oak: rgb(198, 162, 126);
-    --color-nature: rgb(50, 205, 50);
+    --color-nature: rgb(48, 69, 41);
 
     @font-face {
       font-family: 'Caveat';
@@ -42,5 +42,5 @@
 
 /* OUTLINE*/
 [type=checkbox]:checked + img {
-  outline: 5px solid rgb(50, 205, 50);
+  outline: 5px solid rgb(48, 69, 41);
 }
