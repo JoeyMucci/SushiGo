@@ -40,6 +40,10 @@
   cursor: pointer;
 }
 
+[type=checkbox] + p {
+  cursor: pointer;
+}
+
 /* OUTLINE*/
 [type=checkbox]:checked + img {
   outline: 5px solid rgb(48, 69, 41);
