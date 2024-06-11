@@ -36,7 +36,7 @@
 }
 
 /* IMAGE STYLES */
-[type=checkbox] + img {
+img {
   cursor: pointer;
 }
 

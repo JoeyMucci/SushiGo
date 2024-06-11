@@ -1,25 +1,71 @@
+import chopsticks1 from 'web/public/chopsticks(1).jpg'
+import chopsticks2 from 'web/public/chopsticks(2).jpg'
+import chopsticks3 from 'web/public/chopsticks(3).jpg'
 import chopsticks from 'web/public/chopsticks.jpg'
-import dumpling from 'web/public/dumplingguide.jpg'
-import edamame from 'web/public/edamameguide.jpg'
-import eel from 'web/public/eelguide.jpg'
+import dumpling from 'web/public/dumpling.jpg'
+import dumplingguide from 'web/public/dumplingguide.jpg'
+import edamame from 'web/public/edamame.jpg'
+import edamameguide from 'web/public/edamameguide.jpg'
+import eel from 'web/public/eel.jpg'
+import eelguide from 'web/public/eelguide.jpg'
+import eggnigiri from 'web/public/egg_nigiri.jpg'
+import fruitdoubleorange from 'web/public/fruit(double_orange).jpg'
+import fruitdoublepineapple from 'web/public/fruit(double_pineapple).jpg'
+import fruitdoublewatermelon from 'web/public/fruit(double_watermelon).jpg'
+import fruitpineappleorange from 'web/public/fruit(pineapple_orange).jpg'
+import fruitwatermelonorange from 'web/public/fruit(watermelon_orange).jpg'
+import fruitwatermelonpineapple from 'web/public/fruit(watermelon_pineapple).jpg'
 import fruit from 'web/public/fruit.jpg'
-import greenteaicecream from 'web/public/gticguide.jpg'
+import greenteaicecream from 'web/public/green_tea_ice_cream.jpg'
+import gticguide from 'web/public/gticguide.jpg'
+import maki1 from 'web/public/maki(1).jpg'
+import maki2 from 'web/public/maki(2).jpg'
+import maki3 from 'web/public/maki(3).jpg'
 import maki from 'web/public/maki.jpg'
+import menu7 from 'web/public/menu(7).jpg'
+import menu8 from 'web/public/menu(8).jpg'
+import menu9 from 'web/public/menu(9).jpg'
 import menu from 'web/public/menu.jpg'
-import misosoup from 'web/public/misoguide.jpg'
+import misosoup from 'web/public/miso_soup.jpg'
+import misoguide from 'web/public/misoguide.jpg'
+import onigiricircle from 'web/public/onigiri(circle).jpg'
+import onigiriflat from 'web/public/onigiri(flat).jpg'
+import onigirisquare from 'web/public/onigiri(square).jpg'
+import onigiritriangle from 'web/public/onigiri(triangle).jpg'
 import onigiri from 'web/public/onigiri.jpg'
-import pudding from 'web/public/puddingguide.jpg'
-import sashimi from 'web/public/sashimiguide.jpg'
-import soysauce from 'web/public/soysauceguide.jpg'
-import specialorder from 'web/public/specialguide.jpg'
+import pudding from 'web/public/pudding.jpg'
+import puddingguide from 'web/public/puddingguide.jpg'
+import salmonnigiri from 'web/public/salmon_nigiri.jpg'
+import sashimi from 'web/public/sashimi.jpg'
+import sashimiguide from 'web/public/sashimiguide.jpg'
+import soysauce from 'web/public/soysauce.jpg'
+import soysauceguide from 'web/public/soysauceguide.jpg'
+import specialorder from 'web/public/special_order.jpg'
+import specialguide from 'web/public/specialguide.jpg'
+import spoon4 from 'web/public/spoon(4).jpg'
+import spoon5 from 'web/public/spoon(5).jpg'
+import spoon6 from 'web/public/spoon(6).jpg'
 import spoon from 'web/public/spoon.jpg'
+import squidnigiri from 'web/public/squid_nigiri.jpg'
+import takeoutbox10 from 'web/public/takeout_box(10).jpg'
+import takeoutbox11 from 'web/public/takeout_box(11).jpg'
+import takeoutbox12 from 'web/public/takeout_box(12).jpg'
 import takeoutbox from 'web/public/takeout_box.jpg'
-import tea from 'web/public/teaguide.jpg'
-import temaki from 'web/public/temakiguide.jpg'
-import tempura from 'web/public/tempuraguide.jpg'
-import tofu from 'web/public/tofuguide.jpg'
+import tea from 'web/public/tea.jpg'
+import teaguide from 'web/public/teaguide.jpg'
+import temaki from 'web/public/temaki.jpg'
+import temakiguide from 'web/public/temakiguide.jpg'
+import tempura from 'web/public/tempura.jpg'
+import tempuraguide from 'web/public/tempuraguide.jpg'
+import tofu from 'web/public/tofu.jpg'
+import tofuguide from 'web/public/tofuguide.jpg'
+import turnedovercard from 'web/public/turned_over_card.jpg'
+import uramaki3 from 'web/public/uramaki(3).jpg'
+import uramaki4 from 'web/public/uramaki(4).jpg'
+import uramaki5 from 'web/public/uramaki(5).jpg'
 import uramaki from 'web/public/uramaki.jpg'
-import wasabi from 'web/public/wasabiguide.jpg'
+import wasabi from 'web/public/wasabi.jpg'
+import wasabiguide from 'web/public/wasabiguide.jpg'
 
 import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
 
@@ -28,6 +74,62 @@ const PlayPage = () => {
     SELECTION: 1,
     GAME: 2,
   })
+
+  const types = Object.freeze({
+    EGG: 1,
+    SALMON: 2,
+    SQUID: 3,
+    MAKIONE: 4,
+    MAKITWO: 5,
+    MAKITHREE: 6,
+    TEMAKI: 7,
+    URAMAKITHREE: 8,
+    URAMAKIFOUR: 9,
+    URAMAKIFIVE: 10,
+    CHOPSTICKSONE: 11,
+    CHOPSTICKSTWO: 12,
+    CHOPSTICKSTHREE: 13,
+    SPOONFOUR: 14,
+    SPOONFIVE: 15,
+    SPOONSIX: 16,
+    MENUSEVEN: 17,
+    MENUEIGHT: 18,
+    MENUNINE: 19,
+    TAKEOUTTEN: 20,
+    TAKEOUTELEVEN: 21,
+    TAKEOUTTWELVE: 22,
+    TEA: 23,
+    WASABI: 24,
+    SOYSAUCE: 25,
+    SPECIALO: 26,
+    DUMPLING: 27,
+    TEMPURA: 28,
+    SASHIMI: 29,
+    MISO: 30,
+    EDAMAME: 31,
+    EEL: 32,
+    TOFU: 33,
+    ONICIRCLE: 34,
+    ONISQUARE: 35,
+    ONITRI: 36,
+    ONIFLAT: 37,
+    PUDDING: 38,
+    GTIC: 39,
+    FRUITDUBWAT: 40,
+    FRUITDUBPINE: 41,
+    FRUITDUBO: 42,
+    FRUITWATERO: 43,
+    FRUITPINEO: 44,
+    FRUITWATERPINE: 45,
+  })
+
+  let order = {
+    roll: [],
+    spec: [],
+    app: [],
+    dess: [],
+    diff: [],
+  }
 
   const SelectionScreen = () => {
     const ROLLCAP = 1
@@ -38,14 +140,6 @@ const PlayPage = () => {
 
     const BUTTONCLASS =
       'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
-
-    let order = {
-      roll: [],
-      spec: [],
-      app: [],
-      dess: [],
-      diff: [],
-    }
 
     let allowSelection = false
 
@@ -137,7 +231,11 @@ const PlayPage = () => {
                   name="roll"
                   onChange={registerSelection}
                 />
-                <img src={temaki} alt="temaki roll" className="h-48 w-36" />
+                <img
+                  src={temakiguide}
+                  alt="temaki roll"
+                  className="h-48 w-36"
+                />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -187,7 +285,7 @@ const PlayPage = () => {
                   name="spec"
                   onChange={registerSelection}
                 />
-                <img src={tea} alt="tea" className="h-48 w-36" />
+                <img src={teaguide} alt="tea" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -195,7 +293,7 @@ const PlayPage = () => {
                   name="spec"
                   onChange={registerSelection}
                 />
-                <img src={wasabi} alt="wasabi" className="h-48 w-36" />
+                <img src={wasabiguide} alt="wasabi" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -203,7 +301,7 @@ const PlayPage = () => {
                   name="spec"
                   onChange={registerSelection}
                 />
-                <img src={soysauce} alt="soysauce" className="h-48 w-36" />
+                <img src={soysauceguide} alt="soysauce" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -212,7 +310,7 @@ const PlayPage = () => {
                   onChange={registerSelection}
                 />
                 <img
-                  src={specialorder}
+                  src={specialguide}
                   alt="special order"
                   className="h-48 w-36"
                 />
@@ -225,7 +323,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={dumpling} alt="dumpling" className="h-48 w-36" />
+                <img src={dumplingguide} alt="dumpling" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -233,7 +331,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={tempura} alt="tempura" className="h-48 w-36" />
+                <img src={tempuraguide} alt="tempura" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -241,7 +339,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={sashimi} alt="sashimi" className="h-48 w-36" />
+                <img src={sashimiguide} alt="sashimi" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -249,7 +347,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={misosoup} alt="miso soup" className="h-48 w-36" />
+                <img src={misoguide} alt="miso soup" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -257,7 +355,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={edamame} alt="edamame" className="h-48 w-36" />
+                <img src={edamameguide} alt="edamame" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -265,7 +363,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={eel} alt="eel" className="h-48 w-36" />
+                <img src={eelguide} alt="eel" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -273,7 +371,7 @@ const PlayPage = () => {
                   name="app"
                   onChange={registerSelection}
                 />
-                <img src={tofu} alt="tofu" className="h-48 w-36" />
+                <img src={tofuguide} alt="tofu" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -291,7 +389,7 @@ const PlayPage = () => {
                   name="dess"
                   onChange={registerSelection}
                 />
-                <img src={pudding} alt="pudding" className="h-48 w-36" />
+                <img src={puddingguide} alt="pudding" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
@@ -300,7 +398,7 @@ const PlayPage = () => {
                   onChange={registerSelection}
                 />
                 <img
-                  src={greenteaicecream}
+                  src={gticguide}
                   alt="green tea ice cream"
                   className="h-48 w-36"
                 />
@@ -370,16 +468,246 @@ const PlayPage = () => {
   }
 
   const GameScreen = () => {
-    return <p>PPP</p>
+    let player = {
+      cards: [1, 2, 3],
+      score: 0,
+      dessert: 0,
+    }
+
+    const Hand = ({ cardTypes }) => {
+      const Card = ({ type }) => {
+        let picpath
+        let text
+        switch (type) {
+          case types.EGG:
+            picpath = eggnigiri
+            text = 'egg nigiri'
+            break
+          case types.SALMON:
+            picpath = salmonnigiri
+            text = 'salmon nigiri'
+            break
+          case types.SQUID:
+            picpath = squidnigiri
+            text = 'squid nigiri'
+            break
+          case types.MAKIONE:
+            picpath = maki1
+            text = 'one maki roll'
+            break
+          case types.MAKITWO:
+            picpath = maki2
+            text = 'two maki rolls'
+            break
+          case types.MAKITHREE:
+            picpath = maki3
+            text = 'three maki rolls'
+            break
+          case types.TEMAKI:
+            picpath = temaki
+            text = 'temaki'
+            break
+          case types.URAMAKITHREE:
+            picpath = uramaki3
+            text = 'three uramaki rolls'
+            break
+          case types.URAMAKIFOUR:
+            picpath = uramaki4
+            text = 'four uramaki rolls'
+            break
+          case types.URAMAKIFIVE:
+            picpath = uramaki5
+            text = 'five uramaki rolls'
+            break
+          case types.CHOPSTICKSONE:
+            picpath = chopsticks1
+            text = 'chopsticks'
+            break
+          case types.CHOPSTICKSTWO:
+            picpath = chopsticks2
+            text = 'chopsticks'
+            break
+          case types.CHOPSTICKSTHREE:
+            picpath = chopsticks3
+            text = 'chopsticks'
+            break
+          case types.SPOONFOUR:
+            picpath = spoon4
+            text = 'spoon'
+            break
+          case types.SPOONFIVE:
+            picpath = spoon5
+            text = 'spoon'
+            break
+          case types.SPOONSIX:
+            picpath = spoon6
+            text = 'spoon'
+            break
+          case types.MENUSEVEN:
+            picpath = menu7
+            text = 'menu'
+            break
+          case types.MENUEIGHT:
+            picpath = menu8
+            text = 'menu'
+            break
+          case types.MENUNINE:
+            picpath = menu9
+            text = 'menu'
+            break
+          case types.TAKEOUTTEN:
+            picpath = takeoutbox10
+            text = 'takeout box'
+            break
+          case types.TAKEOUTELEVEN:
+            picpath = takeoutbox11
+            text = 'takeout box'
+            break
+          case types.TAKEOUTTWELVE:
+            picpath = takeoutbox12
+            text = 'takeout box'
+            break
+          case types.TEA:
+            picpath = tea
+            text = 'tea'
+            break
+          case types.WASABI:
+            picpath = wasabi
+            text = 'wasabi'
+            break
+          case types.SOYSAUCE:
+            picpath = soysauce
+            text = 'soysauce'
+            break
+          case types.SPECIALO:
+            picpath = specialorder
+            text = 'special order'
+            break
+          case types.DUMPLING:
+            picpath = dumpling
+            text = 'dumpling'
+            break
+          case types.TEMPURA:
+            picpath = tempura
+            text = 'tempura'
+            break
+          case types.SASHIMI:
+            picpath = sashimi
+            text = 'sashimi'
+            break
+          case types.MISO:
+            picpath = misosoup
+            text = 'miso soup'
+            break
+          case types.EDAMAME:
+            picpath = edamame
+            text = 'edamame'
+            break
+          case types.EEL:
+            picpath = eel
+            text = 'eel'
+            break
+          case types.TOFU:
+            picpath = tofu
+            text = 'tofu'
+            break
+          case types.ONICIRCLE:
+            picpath = onigiricircle
+            text = 'circle onigiri'
+            break
+          case types.ONISQUARE:
+            picpath = onigirisquare
+            text = 'square onigiri'
+            break
+          case types.ONITRI:
+            picpath = onigiritriangle
+            text = 'triangle onigiri'
+            break
+          case types.ONIFLAT:
+            picpath = onigiriflat
+            text = 'flat onigiri'
+            break
+          case types.PUDDING:
+            picpath = pudding
+            text = 'pudding'
+            break
+          case types.GTIC:
+            picpath = greenteaicecream
+            text = 'green tea ice cream'
+            break
+          case types.FRUITDUBWAT:
+            picpath = fruitdoublewatermelon
+            text = 'two watermelons'
+            break
+          case types.FRUITDUBPINE:
+            picpath = fruitdoublepineapple
+            text = 'two pineapples'
+            break
+          case types.FRUITDUBO:
+            picpath = fruitdoubleorange
+            text = 'two oranges'
+            break
+          case types.FRUITWATERO:
+            picpath = fruitwatermelonorange
+            text = 'one watermelon and one orange'
+            break
+          case types.FRUITPINEO:
+            picpath = fruitpineappleorange
+            text = 'one pineapple and one orange'
+            break
+          case types.FRUITWATERPINE:
+            picpath = fruitwatermelonpineapple
+            text = 'one watermlon and one pineapple'
+            break
+          case types.TOC:
+            picpath = turnedovercard
+            text = 'turned over card'
+        }
+
+        return <img src={picpath} alt={text} className="h-36 w-24" />
+      }
+
+      return (
+        <div className="flex basis-1/2 flex-row items-center justify-center">
+          {cardTypes.map((cardType, i) => {
+            return <Card key={i} type={cardType} />
+          })}
+        </div>
+      )
+    }
+
+    return (
+      <>
+        <div className="flex h-screen flex-col">
+          <div className="flex basis-1/4 flex-row">
+            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              Score: {player.score}
+            </p>
+            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              Score: {player.score}
+            </p>
+          </div>
+          <div className="flex basis-1/4 flex-row">
+            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              Dessert: {player.dessert}
+            </p>
+            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              Dessert: {player.dessert}
+            </p>
+          </div>
+          <Hand cardTypes={player.cards} />
+        </div>
+      </>
+    )
   }
 
   return (
     <>
-      <div name={screens.SELECTION}>
-        <SelectionScreen className="" />
+      <div name={screens.SELECTION} className="hidden">
+        <SelectionScreen />
       </div>
-      <div name={screens.GAME} className="hidden">
-        <GameScreen className="hidden" />
+      <div name={screens.GAME} className="">
+        <GameScreen />
       </div>
     </>
   )
