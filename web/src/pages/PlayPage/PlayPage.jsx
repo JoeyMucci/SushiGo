@@ -75,210 +75,6 @@ const PlayPage = () => {
     GAME: 2,
   })
 
-  const cards = Object.freeze({
-    EGG: { type: 0, text: 'egg nigiri', picpath: eggnigiri, color: 'yellow' },
-    SALMON: {
-      type: 1,
-      text: 'salmon nigiri',
-      picpath: salmonnigiri,
-      color: 'yellow',
-    },
-    SQUID: {
-      type: 2,
-      text: 'squid nigiri',
-      picpath: squidnigiri,
-      color: 'yellow',
-    },
-    MAKIONE: {
-      type: 3,
-      text: 'one maki roll',
-      picpath: maki1,
-      color: 'red',
-    },
-    MAKITWO: {
-      type: 4,
-      text: 'two maki rolls',
-      picpath: maki2,
-      color: 'red',
-    },
-    MAKITHREE: {
-      type: 5,
-      text: 'three maki rolls',
-      picpath: maki3,
-      color: 'red',
-    },
-    TEMAKI: { type: 6, text: 'temaki', picpath: temaki, color: 'plum' },
-    URAMAKITHREE: {
-      type: 7,
-      text: 'three uramaki rolls',
-      picpath: uramaki3,
-      color: 'lime',
-    },
-    URAMAKIFOUR: {
-      type: 8,
-      text: 'four uramaki rolls',
-      picpath: uramaki4,
-      color: 'lime',
-    },
-    URAMAKIFIVE: {
-      type: 9,
-      text: 'five uramaki rolls',
-      picpath: uramaki5,
-      color: 'lime',
-    },
-    CHOPSTICKSONE: {
-      type: 10,
-      text: 'chopsticks',
-      picpath: chopsticks1,
-      color: 'sky blue',
-    },
-    CHOPSTICKSTWO: {
-      type: 11,
-      text: 'chopsticks',
-      picpath: chopsticks2,
-      color: 'sky blue',
-    },
-    CHOPSTICKSTHREE: {
-      type: 12,
-      text: 'chopsticks',
-      picpath: chopsticks3,
-      color: 'sky blue',
-    },
-    SPOONFOUR: { type: 13, text: 'spoon', picpath: spoon4, color: 'gray' },
-    SPOONFIVE: { type: 14, text: 'spoon', picpath: spoon5, color: 'gray' },
-    SPOONSIX: { type: 15, text: 'spoon', picpath: spoon6, color: 'gray' },
-    MENUSEVEN: { type: 16, text: 'menu', picpath: menu7, color: 'off white' },
-    MENUEIGHT: { type: 17, text: 'menu', picpath: menu8, color: 'off white' },
-    MENUNINE: { type: 18, text: 'menu', picpath: menu9, color: 'off white' },
-    TAKEOUTTEN: {
-      type: 19,
-      text: 'takeout box',
-      picpath: takeoutbox10,
-      color: 'tan',
-    },
-    TAKEOUTELEVEN: {
-      type: 20,
-      text: 'takeout box',
-      picpath: takeoutbox11,
-      color: 'tan',
-    },
-    TAKEOUTTWELVE: {
-      type: 21,
-      text: 'takeout box',
-      picpath: takeoutbox12,
-      color: 'tan',
-    },
-    TEA: { type: 22, text: 'tea', picpath: tea, color: 'brown' },
-    WASABI: { type: 23, text: 'wasabi', picpath: wasabi, color: 'yellow' },
-    SOYSAUCE: {
-      type: 24,
-      text: 'soysauce',
-      picpath: soysauce,
-      color: 'orange',
-    },
-    SPECIALO: {
-      type: 25,
-      text: 'special order',
-      picpath: specialorder,
-      color: 'rainbow',
-    },
-    DUMPLING: {
-      type: 26,
-      text: 'dumpling',
-      picpath: dumpling,
-      color: 'indigo',
-    },
-    TEMPURA: {
-      type: 27,
-      text: 'tempura',
-      picpath: tempura,
-      color: 'light purple',
-    },
-    SASHIMI: {
-      type: 28,
-      text: 'sashimi',
-      picpath: sashimi,
-      color: 'light green',
-    },
-    MISO: { type: 29, text: 'miso soup', picpath: misosoup, color: 'teal' },
-    EDAMAME: { type: 30, text: 'edamame', picpath: edamame, color: 'purple' },
-    EEL: { type: 31, text: 'eel', picpath: eel, color: 'yellow' },
-    TOFU: { type: 32, text: 'tofu', picpath: tofu, color: 'green' },
-    ONICIRCLE: {
-      type: 33,
-      text: 'circle onigiri',
-      picpath: onigiricircle,
-      color: 'hot pink',
-    },
-    ONISQUARE: {
-      type: 34,
-      text: 'square onigiri',
-      picpath: onigirisquare,
-      color: 'hot pink',
-    },
-    ONITRI: {
-      type: 35,
-      text: 'triangle onigiri',
-      picpath: onigiritriangle,
-      color: 'hot pink',
-    },
-    ONIFLAT: {
-      type: 36,
-      text: 'flat onigiri',
-      picpath: onigiriflat,
-      color: 'hot pink',
-    },
-    PUDDING: { type: 37, text: 'pudding', picpath: pudding, color: 'pink' },
-    GTIC: {
-      type: 38,
-      text: 'green tea ice cream',
-      picpath: greenteaicecream,
-      color: 'blue',
-    },
-    FRUITDUBWAT: {
-      type: 39,
-      text: 'two watermelons',
-      picpath: fruitdoublewatermelon,
-      color: 'peach',
-    },
-    FRUITDUBPINE: {
-      type: 40,
-      text: 'two pineapples',
-      picpath: fruitdoublepineapple,
-      color: 'peach',
-    },
-    FRUITDUBO: {
-      type: 41,
-      text: 'two oranges',
-      picpath: fruitdoubleorange,
-      color: 'peach',
-    },
-    FRUITWATERO: {
-      type: 42,
-      text: 'one watermelon and one orange',
-      picpath: fruitwatermelonorange,
-      color: 'peach',
-    },
-    FRUITPINEO: {
-      type: 43,
-      text: 'one pineapple and one orange',
-      picpath: fruitpineappleorange,
-      color: 'peach',
-    },
-    FRUITWATERPINE: {
-      type: 44,
-      text: 'one watermlon and one pineapple',
-      picpath: fruitwatermelonpineapple,
-      color: 'peach',
-    },
-    TOC: {
-      type: 45,
-      text: 'turned over card',
-      picpath: turnedovercard,
-      color: 'gamewright',
-    },
-  })
-
   let order = {
     roll: [],
     spec: [],
@@ -624,33 +420,503 @@ const PlayPage = () => {
   }
 
   const GameScreen = () => {
-    let player = {
-      name: 'Joey',
-      cards: [cards.EGG, cards.TEA, cards.WASABI],
-      score: 0,
-      dessert: 0,
+    const cards = Object.freeze({
+      EGG: {
+        type: 0,
+        text: 'egg nigiri',
+        picpath: eggnigiri,
+        color: 'yellow',
+        count: 4,
+      },
+      SALMON: {
+        type: 1,
+        text: 'salmon nigiri',
+        picpath: salmonnigiri,
+        color: 'yellow',
+        count: 5,
+      },
+      SQUID: {
+        type: 2,
+        text: 'squid nigiri',
+        picpath: squidnigiri,
+        color: 'yellow',
+        count: 3,
+      },
+      MAKIONE: {
+        type: 3,
+        text: 'one maki roll',
+        picpath: maki1,
+        color: 'red',
+        count: 4,
+      },
+      MAKITWO: {
+        type: 4,
+        text: 'two maki rolls',
+        picpath: maki2,
+        color: 'red',
+        count: 5,
+      },
+      MAKITHREE: {
+        type: 5,
+        text: 'three maki rolls',
+        picpath: maki3,
+        color: 'red',
+        count: 3,
+      },
+      TEMAKI: {
+        type: 6,
+        text: 'temaki',
+        picpath: temaki,
+        color: 'plum',
+        count: 12,
+      },
+      URAMAKITHREE: {
+        type: 7,
+        text: 'three uramaki rolls',
+        picpath: uramaki3,
+        color: 'lime',
+        count: 4,
+      },
+      URAMAKIFOUR: {
+        type: 8,
+        text: 'four uramaki rolls',
+        picpath: uramaki4,
+        color: 'lime',
+        count: 4,
+      },
+      URAMAKIFIVE: {
+        type: 9,
+        text: 'five uramaki rolls',
+        picpath: uramaki5,
+        color: 'lime',
+        count: 4,
+      },
+      CHOPSTICKSONE: {
+        type: 10,
+        text: 'chopsticks',
+        picpath: chopsticks1,
+        color: 'sky blue',
+        count: 1,
+      },
+      CHOPSTICKSTWO: {
+        type: 11,
+        text: 'chopsticks',
+        picpath: chopsticks2,
+        color: 'sky blue',
+        count: 1,
+      },
+      CHOPSTICKSTHREE: {
+        type: 12,
+        text: 'chopsticks',
+        picpath: chopsticks3,
+        color: 'sky blue',
+        count: 1,
+      },
+      SPOONFOUR: {
+        type: 13,
+        text: 'spoon',
+        picpath: spoon4,
+        color: 'gray',
+        count: 1,
+      },
+      SPOONFIVE: {
+        type: 14,
+        text: 'spoon',
+        picpath: spoon5,
+        color: 'gray',
+        count: 1,
+      },
+      SPOONSIX: {
+        type: 15,
+        text: 'spoon',
+        picpath: spoon6,
+        color: 'gray',
+        count: 1,
+      },
+      MENUSEVEN: {
+        type: 16,
+        text: 'menu',
+        picpath: menu7,
+        color: 'off white',
+        count: 1,
+      },
+      MENUEIGHT: {
+        type: 17,
+        text: 'menu',
+        picpath: menu8,
+        color: 'off white',
+        count: 1,
+      },
+      MENUNINE: {
+        type: 18,
+        text: 'menu',
+        picpath: menu9,
+        color: 'off white',
+        count: 1,
+      },
+      TAKEOUTTEN: {
+        type: 19,
+        text: 'takeout box',
+        picpath: takeoutbox10,
+        color: 'tan',
+        count: 1,
+      },
+      TAKEOUTELEVEN: {
+        type: 20,
+        text: 'takeout box',
+        picpath: takeoutbox11,
+        color: 'tan',
+        count: 1,
+      },
+      TAKEOUTTWELVE: {
+        type: 21,
+        text: 'takeout box',
+        picpath: takeoutbox12,
+        color: 'tan',
+        count: 1,
+      },
+      TEA: { type: 22, text: 'tea', picpath: tea, color: 'brown', count: 3 },
+      WASABI: {
+        type: 23,
+        text: 'wasabi',
+        picpath: wasabi,
+        color: 'yellow',
+        count: 3,
+      },
+      SOYSAUCE: {
+        type: 24,
+        text: 'soysauce',
+        picpath: soysauce,
+        color: 'orange',
+        count: 3,
+      },
+      SPECIALO: {
+        type: 25,
+        text: 'special order',
+        picpath: specialorder,
+        color: 'rainbow',
+        count: 3,
+      },
+      DUMPLING: {
+        type: 26,
+        text: 'dumpling',
+        picpath: dumpling,
+        color: 'indigo',
+        count: 8,
+      },
+      TEMPURA: {
+        type: 27,
+        text: 'tempura',
+        picpath: tempura,
+        color: 'light purple',
+        count: 8,
+      },
+      SASHIMI: {
+        type: 28,
+        text: 'sashimi',
+        picpath: sashimi,
+        color: 'light green',
+        count: 8,
+      },
+      MISO: {
+        type: 29,
+        text: 'miso soup',
+        picpath: misosoup,
+        color: 'teal',
+        count: 8,
+      },
+      EDAMAME: {
+        type: 30,
+        text: 'edamame',
+        picpath: edamame,
+        color: 'purple',
+        count: 8,
+      },
+      EEL: { type: 31, text: 'eel', picpath: eel, color: 'yellow', count: 8 },
+      TOFU: { type: 32, text: 'tofu', picpath: tofu, color: 'green', count: 8 },
+      ONICIRCLE: {
+        type: 33,
+        text: 'circle onigiri',
+        picpath: onigiricircle,
+        color: 'hot pink',
+        count: 2,
+      },
+      ONISQUARE: {
+        type: 34,
+        text: 'square onigiri',
+        picpath: onigirisquare,
+        color: 'hot pink',
+        count: 2,
+      },
+      ONITRI: {
+        type: 35,
+        text: 'triangle onigiri',
+        picpath: onigiritriangle,
+        color: 'hot pink',
+        count: 2,
+      },
+      ONIFLAT: {
+        type: 36,
+        text: 'flat onigiri',
+        picpath: onigiriflat,
+        color: 'hot pink',
+        count: 2,
+      },
+      PUDDING: {
+        type: 37,
+        text: 'pudding',
+        picpath: pudding,
+        color: 'pink',
+        count: 15,
+      },
+      GTIC: {
+        type: 38,
+        text: 'green tea ice cream',
+        picpath: greenteaicecream,
+        color: 'blue',
+        count: 15,
+      },
+      FRUITDUBWAT: {
+        type: 39,
+        text: 'two watermelons',
+        picpath: fruitdoublewatermelon,
+        color: 'peach',
+        count: 2,
+      },
+      FRUITDUBPINE: {
+        type: 40,
+        text: 'two pineapples',
+        picpath: fruitdoublepineapple,
+        color: 'peach',
+        count: 2,
+      },
+      FRUITDUBO: {
+        type: 41,
+        text: 'two oranges',
+        picpath: fruitdoubleorange,
+        color: 'peach',
+        count: 2,
+      },
+      FRUITWATERO: {
+        type: 42,
+        text: 'one watermelon and one orange',
+        picpath: fruitwatermelonorange,
+        color: 'peach',
+        count: 3,
+      },
+      FRUITPINEO: {
+        type: 43,
+        text: 'one pineapple and one orange',
+        picpath: fruitpineappleorange,
+        color: 'peach',
+        count: 3,
+      },
+      FRUITWATERPINE: {
+        type: 44,
+        text: 'one watermlon and one pineapple',
+        picpath: fruitwatermelonpineapple,
+        color: 'peach',
+        count: 3,
+      },
+      TOC: {
+        type: 45,
+        text: 'turned over card',
+        picpath: turnedovercard,
+        color: 'gamewright',
+        count: 0,
+      },
+    })
+
+    // DECK PREPERATION
+    const DESSERTCOUNTONE = 5
+
+    let deck = {
+      pile: [],
+      dessertPile: [],
     }
 
-    let cpuOne = {
-      name: 'cpu one',
-      cards: [cards.ONIFLAT, cards.ONISQUARE, cards.EEL],
-      score: 0,
-      dessert: 0,
+    const addNigiri = () => {
+      for (let i = 0; i < cards.EGG.count; i++) deck.pile.push(cards.EGG)
+      for (let i = 0; i < cards.SALMON.count; i++) deck.pile.push(cards.SALMON)
+      for (let i = 0; i < cards.SQUID.count; i++) deck.pile.push(cards.SQUID)
     }
 
-    let cpuTwo = {
-      name: 'cpu two',
-      cards: [cards.DUMPLING, cards.TEMPURA, cards.SASHIMI],
-      score: 0,
-      dessert: 0,
+    const addRolls = (rollName) => {
+      if (rollName == 'maki') {
+        for (let i = 0; i < cards.MAKIONE.count; i++)
+          deck.pile.push(cards.MAKIONE)
+        for (let i = 0; i < cards.MAKITWO.count; i++)
+          deck.pile.push(cards.MAKITWO)
+        for (let i = 0; i < cards.MAKITHREE.count; i++)
+          deck.pile.push(cards.MAKITHREE)
+      } else if (rollName == 'temaki')
+        for (let i = 0; i < cards.TEMAKI.count; i++)
+          deck.pile.push(cards.TEMAKI)
+      else {
+        for (let i = 0; i < cards.URAMAKITHREE.count; i++)
+          deck.pile.push(cards.URAMAKITHREE)
+        for (let i = 0; i < cards.URAMAKIFOUR.count; i++)
+          deck.pile.push(cards.URAMAKIFOUR)
+        for (let i = 0; i < cards.URAMAKIFIVE.count; i++)
+          deck.pile.push(cards.URAMAKIFIVE)
+      }
     }
 
-    let cpuThree = {
-      name: 'cpu three',
-      cards: [cards.MISO, cards.SPOONSIX, cards.MISO],
-      score: 0,
-      dessert: 0,
+    const addSpecials = (specialName) => {
+      if (specialName == 'chopsticks') {
+        for (let i = 0; i < cards.CHOPSTICKONE.count; i++)
+          deck.pile.push(cards.CHOPSTICKONE)
+        for (let i = 0; i < cards.CHOPSTICKTWO.count; i++)
+          deck.pile.push(cards.CHOPSTICKTWO)
+        for (let i = 0; i < cards.CHOPSTICKTHREE.count; i++)
+          deck.pile.push(cards.CHOPSTICKTHREE)
+      } else if (specialName == 'spoon') {
+        for (let i = 0; i < cards.SPOONFOUR.count; i++)
+          deck.pile.push(cards.SPOONFOUR)
+        for (let i = 0; i < cards.SPOONFIVE.count; i++)
+          deck.pile.push(cards.SPOONFIVE)
+        for (let i = 0; i < cards.SPOONSIX.count; i++)
+          deck.pile.push(cards.SPOONSIX)
+      } else if (specialName == 'menu') {
+        for (let i = 0; i < cards.MENUSEVEN.count; i++)
+          deck.pile.push(cards.MENUSEVEN)
+        for (let i = 0; i < cards.MENUEIGHT.count; i++)
+          deck.pile.push(cards.MENUEIGHT)
+        for (let i = 0; i < cards.MENUNINE.count; i++)
+          deck.pile.push(cards.MENUNINE)
+      } else if (specialName == 'takeoutbox') {
+        for (let i = 0; i < cards.TAKEOUTTEN.count; i++)
+          deck.pile.push(cards.TAKEOUTTEN)
+        for (let i = 0; i < cards.TAKEOUTELEVEN.count; i++)
+          deck.pile.push(cards.TAKEOUTELEVEN)
+        for (let i = 0; i < cards.TAKEOUTTWELVE.count; i++)
+          deck.pile.push(cards.TAKEOUTTWELVE)
+      } else if (specialName == 'tea')
+        for (let i = 0; i < cards.TEA.count; i++) deck.pile.push(cards.TEA)
+      else if (specialName == 'wasabi')
+        for (let i = 0; i < cards.WASABI.count; i++)
+          deck.pile.push(cards.WASABI)
+      else if (specialName == 'soysauce')
+        for (let i = 0; i < cards.SOYSAUCE.count; i++)
+          deck.pile.push(cards.SOYSAUCE)
+      else
+        for (let i = 0; i < cards.SPECIALO.count; i++)
+          deck.pile.push(cards.SPECIALO)
     }
+
+    const addApps = (appName) => {
+      if (appName == 'dumpling')
+        for (let i = 0; i < cards.DUMPLING.count; i++)
+          deck.pile.push(cards.DUMPLING)
+      else if (appName == 'tempura')
+        for (let i = 0; i < cards.TEMPURA.count; i++)
+          deck.pile.push(cards.TEMPURA)
+      else if (appName == 'sashimi')
+        for (let i = 0; i < cards.SASHIMI.count; i++)
+          deck.pile.push(cards.SASHIMI)
+      else if (appName == 'misosoup')
+        for (let i = 0; i < cards.MISO.count; i++) deck.pile.push(cards.MISO)
+      else if (appName == 'edamame')
+        for (let i = 0; i < cards.EDAMAME.count; i++)
+          deck.pile.push(cards.EDAMAME)
+      else if (appName == 'eel')
+        for (let i = 0; i < cards.EEL.count; i++) deck.pile.push(cards.EEL)
+      else if (appName == 'tofu')
+        for (let i = 0; i < cards.TOFU.count; i++) deck.pile.push(cards.TOFU)
+      else {
+        for (let i = 0; i < cards.ONICIRCLE.count; i++)
+          deck.pile.push(cards.ONICIRCLE)
+        for (let i = 0; i < cards.ONISQUARE.count; i++)
+          deck.pile.push(cards.ONISQUARE)
+        for (let i = 0; i < cards.ONITRI.count; i++)
+          deck.pile.push(cards.ONITRI)
+        for (let i = 0; i < cards.ONIFLAT.count; i++)
+          deck.pile.push(cards.ONIFLAT)
+      }
+    }
+
+    const fillDessertPile = (dessertName) => {
+      if (dessertName == 'pudding')
+        for (let i = 0; i < cards.PUDDING.count; i++)
+          deck.pile.push(cards.PUDDING)
+      else if (dessertName == 'greenteaicecream')
+        for (let i = 0; i < cards.TEMAKI.count; i++)
+          deck.pile.push(cards.TEMAKI)
+      else {
+        for (let i = 0; i < cards.FRUITDUBWAT.count; i++)
+          deck.pile.push(cards.FRUITDUBWAT)
+        for (let i = 0; i < cards.FRUITDUBPINE.count; i++)
+          deck.pile.push(cards.FRUITDUBPINE)
+        for (let i = 0; i < cards.FRUITDUBO.count; i++)
+          deck.pile.push(cards.FRUITDUBO)
+        for (let i = 0; i < cards.FRUITWATERO.count; i++)
+          deck.pile.push(cards.FRUITWATERO)
+        for (let i = 0; i < cards.FRUITPINEO.count; i++)
+          deck.pile.push(cards.FRUITPINEO)
+        for (let i = 0; i < cards.FRUITWATERPINE.count; i++)
+          deck.pile.push(cards.FRUITDUBO)
+      }
+    }
+
+    const shuffle = (neatPile) => {
+      for (let i = neatPile.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1))
+        let temp = neatPile[i]
+        neatPile[i] = neatPile[j]
+        neatPile[j] = temp
+      }
+    }
+
+    addNigiri()
+    for (let i = 0; i < order.roll.length; i++) addRolls(order.roll[i])
+    for (let i = 0; i < order.spec.length; i++) addSpecials(order.spec[i])
+    for (let i = 0; i < order.app.length; i++) addApps(order.app[i])
+    for (let i = 0; i < order.dess.length; i++) fillDessertPile(order.dess[i])
+
+    shuffle(deck.dessertPile)
+
+    for (let i = 0; i < DESSERTCOUNTONE; i++)
+      deck.pile.push(deck.dessertPile.pop())
+
+    shuffle(deck.pile)
+
+    // PLAYER INITIALIZATION
+    const STARTCARDS = 9
+
+    let players = [
+      {
+        name: 'Joey',
+        hand: [],
+        stash: [],
+        score: 0,
+        dessert: 0,
+      },
+      {
+        name: 'cpu one',
+        hand: [],
+        stash: [],
+        score: 0,
+        dessert: 0,
+      },
+      {
+        name: 'cpu two',
+        hand: [],
+        stash: [],
+        score: 0,
+        dessert: 0,
+      },
+      {
+        name: 'cpu three',
+        hand: [],
+        stash: [],
+        score: 0,
+        dessert: 0,
+      },
+    ]
+
+    for (let i = 0; i < STARTCARDS; i++)
+      for (let j = 0; j < players.length; j++)
+        players[j].hand.push(deck.pile.pop())
 
     const Card = ({ info }) => {
       return <img src={info.picpath} alt={info.text} className="h-36 w-24" />
@@ -683,7 +949,7 @@ const PlayPage = () => {
         <div className="flex flex-row">
           {cardColumns.map((cardColumn, i) => {
             return (
-              <div key={i} className="absolute bottom-0 flex flex-col">
+              <div key={i}>
                 {cardColumn.map((card, j) => {
                   return <Card key={j} info={card} />
                 })}
@@ -697,43 +963,46 @@ const PlayPage = () => {
     return (
       <>
         <div className="flex h-screen flex-col">
-          <div className="relative basis-2/5">
+          <div className="basis-2/5">
             <div className="flex flex-row">
               <div className="basis-1/2">
-                <Stash cards={cpuThree.cards} />
+                <Stash cards={players[3].stash} />
               </div>
               <div className="basis-1/2">
-                <Stash cards={cpuTwo.cards} />
+                <Stash cards={players[2].stash} />
               </div>
             </div>
           </div>
           <div className="basis-1/5">
             <div className="flex flex-row">
               <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {cpuThree.name}: Score: {cpuThree.score}, Dessert:{' '}
-                {cpuThree.dessert}
+                {players[3].name}: Score: {players[3].score}, Dessert:{' '}
+                {players[3].dessert}
               </div>
               <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {cpuTwo.name}: Score: {cpuTwo.score}, Dessert: {cpuTwo.dessert}
+                {players[2].name}: Score: {players[2].score}, Dessert:{' '}
+                {players[2].dessert}
               </div>
             </div>
-            <Hand cards={player.cards} />
+            <Hand cards={players[0].hand} />
             <div className="flex flex-row">
               <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {player.name}: Score: {player.score}, Dessert: {player.dessert}
+                {players[0].name}: Score: {players[0].score}, Dessert:{' '}
+                {players[0].dessert}
               </div>
               <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {cpuOne.name}: Score: {cpuOne.score}, Dessert: {cpuOne.dessert}
+                {players[1].name}: Score: {players[1].score}, Dessert:{' '}
+                {players[1].dessert}
               </div>
             </div>
           </div>
           <div className="basis-2/5">
             <div className="flex flex-row">
               <div className="basis-1/2">
-                <Stash cards={player.cards} />
+                <Stash cards={players[0].stash} />
               </div>
               <div className="basis-1/2">
-                <Stash cards={cpuOne.cards} />
+                <Stash cards={players[1].stash} />
               </div>
             </div>
           </div>
