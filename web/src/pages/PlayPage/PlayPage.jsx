@@ -75,52 +75,208 @@ const PlayPage = () => {
     GAME: 2,
   })
 
-  const types = Object.freeze({
-    EGG: 1,
-    SALMON: 2,
-    SQUID: 3,
-    MAKIONE: 4,
-    MAKITWO: 5,
-    MAKITHREE: 6,
-    TEMAKI: 7,
-    URAMAKITHREE: 8,
-    URAMAKIFOUR: 9,
-    URAMAKIFIVE: 10,
-    CHOPSTICKSONE: 11,
-    CHOPSTICKSTWO: 12,
-    CHOPSTICKSTHREE: 13,
-    SPOONFOUR: 14,
-    SPOONFIVE: 15,
-    SPOONSIX: 16,
-    MENUSEVEN: 17,
-    MENUEIGHT: 18,
-    MENUNINE: 19,
-    TAKEOUTTEN: 20,
-    TAKEOUTELEVEN: 21,
-    TAKEOUTTWELVE: 22,
-    TEA: 23,
-    WASABI: 24,
-    SOYSAUCE: 25,
-    SPECIALO: 26,
-    DUMPLING: 27,
-    TEMPURA: 28,
-    SASHIMI: 29,
-    MISO: 30,
-    EDAMAME: 31,
-    EEL: 32,
-    TOFU: 33,
-    ONICIRCLE: 34,
-    ONISQUARE: 35,
-    ONITRI: 36,
-    ONIFLAT: 37,
-    PUDDING: 38,
-    GTIC: 39,
-    FRUITDUBWAT: 40,
-    FRUITDUBPINE: 41,
-    FRUITDUBO: 42,
-    FRUITWATERO: 43,
-    FRUITPINEO: 44,
-    FRUITWATERPINE: 45,
+  const cards = Object.freeze({
+    EGG: { type: 0, text: 'egg nigiri', picpath: eggnigiri, color: 'yellow' },
+    SALMON: {
+      type: 1,
+      text: 'salmon nigiri',
+      picpath: salmonnigiri,
+      color: 'yellow',
+    },
+    SQUID: {
+      type: 2,
+      text: 'squid nigiri',
+      picpath: squidnigiri,
+      color: 'yellow',
+    },
+    MAKIONE: {
+      type: 3,
+      text: 'one maki roll',
+      picpath: maki1,
+      color: 'red',
+    },
+    MAKITWO: {
+      type: 4,
+      text: 'two maki rolls',
+      picpath: maki2,
+      color: 'red',
+    },
+    MAKITHREE: {
+      type: 5,
+      text: 'three maki rolls',
+      picpath: maki3,
+      color: 'red',
+    },
+    TEMAKI: { type: 6, text: 'temaki', picpath: temaki, color: 'plum' },
+    URAMAKITHREE: {
+      type: 7,
+      text: 'three uramaki rolls',
+      picpath: uramaki3,
+      color: 'lime',
+    },
+    URAMAKIFOUR: {
+      type: 8,
+      text: 'four uramaki rolls',
+      picpath: uramaki4,
+      color: 'lime',
+    },
+    URAMAKIFIVE: {
+      type: 9,
+      text: 'five uramaki rolls',
+      picpath: uramaki5,
+      color: 'lime',
+    },
+    CHOPSTICKSONE: {
+      type: 10,
+      text: 'chopsticks',
+      picpath: chopsticks1,
+      color: 'sky blue',
+    },
+    CHOPSTICKSTWO: {
+      type: 11,
+      text: 'chopsticks',
+      picpath: chopsticks2,
+      color: 'sky blue',
+    },
+    CHOPSTICKSTHREE: {
+      type: 12,
+      text: 'chopsticks',
+      picpath: chopsticks3,
+      color: 'sky blue',
+    },
+    SPOONFOUR: { type: 13, text: 'spoon', picpath: spoon4, color: 'gray' },
+    SPOONFIVE: { type: 14, text: 'spoon', picpath: spoon5, color: 'gray' },
+    SPOONSIX: { type: 15, text: 'spoon', picpath: spoon6, color: 'gray' },
+    MENUSEVEN: { type: 16, text: 'menu', picpath: menu7, color: 'off white' },
+    MENUEIGHT: { type: 17, text: 'menu', picpath: menu8, color: 'off white' },
+    MENUNINE: { type: 18, text: 'menu', picpath: menu9, color: 'off white' },
+    TAKEOUTTEN: {
+      type: 19,
+      text: 'takeout box',
+      picpath: takeoutbox10,
+      color: 'tan',
+    },
+    TAKEOUTELEVEN: {
+      type: 20,
+      text: 'takeout box',
+      picpath: takeoutbox11,
+      color: 'tan',
+    },
+    TAKEOUTTWELVE: {
+      type: 21,
+      text: 'takeout box',
+      picpath: takeoutbox12,
+      color: 'tan',
+    },
+    TEA: { type: 22, text: 'tea', picpath: tea, color: 'brown' },
+    WASABI: { type: 23, text: 'wasabi', picpath: wasabi, color: 'yellow' },
+    SOYSAUCE: {
+      type: 24,
+      text: 'soysauce',
+      picpath: soysauce,
+      color: 'orange',
+    },
+    SPECIALO: {
+      type: 25,
+      text: 'special order',
+      picpath: specialorder,
+      color: 'rainbow',
+    },
+    DUMPLING: {
+      type: 26,
+      text: 'dumpling',
+      picpath: dumpling,
+      color: 'indigo',
+    },
+    TEMPURA: {
+      type: 27,
+      text: 'tempura',
+      picpath: tempura,
+      color: 'light purple',
+    },
+    SASHIMI: {
+      type: 28,
+      text: 'sashimi',
+      picpath: sashimi,
+      color: 'light green',
+    },
+    MISO: { type: 29, text: 'miso soup', picpath: misosoup, color: 'teal' },
+    EDAMAME: { type: 30, text: 'edamame', picpath: edamame, color: 'purple' },
+    EEL: { type: 31, text: 'eel', picpath: eel, color: 'yellow' },
+    TOFU: { type: 32, text: 'tofu', picpath: tofu, color: 'green' },
+    ONICIRCLE: {
+      type: 33,
+      text: 'circle onigiri',
+      picpath: onigiricircle,
+      color: 'hot pink',
+    },
+    ONISQUARE: {
+      type: 34,
+      text: 'square onigiri',
+      picpath: onigirisquare,
+      color: 'hot pink',
+    },
+    ONITRI: {
+      type: 35,
+      text: 'triangle onigiri',
+      picpath: onigiritriangle,
+      color: 'hot pink',
+    },
+    ONIFLAT: {
+      type: 36,
+      text: 'flat onigiri',
+      picpath: onigiriflat,
+      color: 'hot pink',
+    },
+    PUDDING: { type: 37, text: 'pudding', picpath: pudding, color: 'pink' },
+    GTIC: {
+      type: 38,
+      text: 'green tea ice cream',
+      picpath: greenteaicecream,
+      color: 'blue',
+    },
+    FRUITDUBWAT: {
+      type: 39,
+      text: 'two watermelons',
+      picpath: fruitdoublewatermelon,
+      color: 'peach',
+    },
+    FRUITDUBPINE: {
+      type: 40,
+      text: 'two pineapples',
+      picpath: fruitdoublepineapple,
+      color: 'peach',
+    },
+    FRUITDUBO: {
+      type: 41,
+      text: 'two oranges',
+      picpath: fruitdoubleorange,
+      color: 'peach',
+    },
+    FRUITWATERO: {
+      type: 42,
+      text: 'one watermelon and one orange',
+      picpath: fruitwatermelonorange,
+      color: 'peach',
+    },
+    FRUITPINEO: {
+      type: 43,
+      text: 'one pineapple and one orange',
+      picpath: fruitpineappleorange,
+      color: 'peach',
+    },
+    FRUITWATERPINE: {
+      type: 44,
+      text: 'one watermlon and one pineapple',
+      picpath: fruitwatermelonpineapple,
+      color: 'peach',
+    },
+    TOC: {
+      type: 45,
+      text: 'turned over card',
+      picpath: turnedovercard,
+      color: 'gamewright',
+    },
   })
 
   let order = {
@@ -469,208 +625,70 @@ const PlayPage = () => {
 
   const GameScreen = () => {
     let player = {
-      cards: [1, 2, 3],
+      name: 'Joey',
+      cards: [cards.EGG, cards.TEA, cards.WASABI],
       score: 0,
       dessert: 0,
     }
 
-    const Hand = ({ cardTypes }) => {
-      const Card = ({ type }) => {
-        let picpath
-        let text
-        switch (type) {
-          case types.EGG:
-            picpath = eggnigiri
-            text = 'egg nigiri'
-            break
-          case types.SALMON:
-            picpath = salmonnigiri
-            text = 'salmon nigiri'
-            break
-          case types.SQUID:
-            picpath = squidnigiri
-            text = 'squid nigiri'
-            break
-          case types.MAKIONE:
-            picpath = maki1
-            text = 'one maki roll'
-            break
-          case types.MAKITWO:
-            picpath = maki2
-            text = 'two maki rolls'
-            break
-          case types.MAKITHREE:
-            picpath = maki3
-            text = 'three maki rolls'
-            break
-          case types.TEMAKI:
-            picpath = temaki
-            text = 'temaki'
-            break
-          case types.URAMAKITHREE:
-            picpath = uramaki3
-            text = 'three uramaki rolls'
-            break
-          case types.URAMAKIFOUR:
-            picpath = uramaki4
-            text = 'four uramaki rolls'
-            break
-          case types.URAMAKIFIVE:
-            picpath = uramaki5
-            text = 'five uramaki rolls'
-            break
-          case types.CHOPSTICKSONE:
-            picpath = chopsticks1
-            text = 'chopsticks'
-            break
-          case types.CHOPSTICKSTWO:
-            picpath = chopsticks2
-            text = 'chopsticks'
-            break
-          case types.CHOPSTICKSTHREE:
-            picpath = chopsticks3
-            text = 'chopsticks'
-            break
-          case types.SPOONFOUR:
-            picpath = spoon4
-            text = 'spoon'
-            break
-          case types.SPOONFIVE:
-            picpath = spoon5
-            text = 'spoon'
-            break
-          case types.SPOONSIX:
-            picpath = spoon6
-            text = 'spoon'
-            break
-          case types.MENUSEVEN:
-            picpath = menu7
-            text = 'menu'
-            break
-          case types.MENUEIGHT:
-            picpath = menu8
-            text = 'menu'
-            break
-          case types.MENUNINE:
-            picpath = menu9
-            text = 'menu'
-            break
-          case types.TAKEOUTTEN:
-            picpath = takeoutbox10
-            text = 'takeout box'
-            break
-          case types.TAKEOUTELEVEN:
-            picpath = takeoutbox11
-            text = 'takeout box'
-            break
-          case types.TAKEOUTTWELVE:
-            picpath = takeoutbox12
-            text = 'takeout box'
-            break
-          case types.TEA:
-            picpath = tea
-            text = 'tea'
-            break
-          case types.WASABI:
-            picpath = wasabi
-            text = 'wasabi'
-            break
-          case types.SOYSAUCE:
-            picpath = soysauce
-            text = 'soysauce'
-            break
-          case types.SPECIALO:
-            picpath = specialorder
-            text = 'special order'
-            break
-          case types.DUMPLING:
-            picpath = dumpling
-            text = 'dumpling'
-            break
-          case types.TEMPURA:
-            picpath = tempura
-            text = 'tempura'
-            break
-          case types.SASHIMI:
-            picpath = sashimi
-            text = 'sashimi'
-            break
-          case types.MISO:
-            picpath = misosoup
-            text = 'miso soup'
-            break
-          case types.EDAMAME:
-            picpath = edamame
-            text = 'edamame'
-            break
-          case types.EEL:
-            picpath = eel
-            text = 'eel'
-            break
-          case types.TOFU:
-            picpath = tofu
-            text = 'tofu'
-            break
-          case types.ONICIRCLE:
-            picpath = onigiricircle
-            text = 'circle onigiri'
-            break
-          case types.ONISQUARE:
-            picpath = onigirisquare
-            text = 'square onigiri'
-            break
-          case types.ONITRI:
-            picpath = onigiritriangle
-            text = 'triangle onigiri'
-            break
-          case types.ONIFLAT:
-            picpath = onigiriflat
-            text = 'flat onigiri'
-            break
-          case types.PUDDING:
-            picpath = pudding
-            text = 'pudding'
-            break
-          case types.GTIC:
-            picpath = greenteaicecream
-            text = 'green tea ice cream'
-            break
-          case types.FRUITDUBWAT:
-            picpath = fruitdoublewatermelon
-            text = 'two watermelons'
-            break
-          case types.FRUITDUBPINE:
-            picpath = fruitdoublepineapple
-            text = 'two pineapples'
-            break
-          case types.FRUITDUBO:
-            picpath = fruitdoubleorange
-            text = 'two oranges'
-            break
-          case types.FRUITWATERO:
-            picpath = fruitwatermelonorange
-            text = 'one watermelon and one orange'
-            break
-          case types.FRUITPINEO:
-            picpath = fruitpineappleorange
-            text = 'one pineapple and one orange'
-            break
-          case types.FRUITWATERPINE:
-            picpath = fruitwatermelonpineapple
-            text = 'one watermlon and one pineapple'
-            break
-          case types.TOC:
-            picpath = turnedovercard
-            text = 'turned over card'
-        }
+    let cpuOne = {
+      name: 'cpu one',
+      cards: [cards.ONIFLAT, cards.ONISQUARE, cards.EEL],
+      score: 0,
+      dessert: 0,
+    }
 
-        return <img src={picpath} alt={text} className="h-36 w-24" />
+    let cpuTwo = {
+      name: 'cpu two',
+      cards: [cards.DUMPLING, cards.TEMPURA, cards.SASHIMI],
+      score: 0,
+      dessert: 0,
+    }
+
+    let cpuThree = {
+      name: 'cpu three',
+      cards: [cards.MISO, cards.SPOONSIX, cards.MISO],
+      score: 0,
+      dessert: 0,
+    }
+
+    const Card = ({ info }) => {
+      return <img src={info.picpath} alt={info.text} className="h-36 w-24" />
+    }
+
+    const Hand = ({ cards }) => {
+      return (
+        <div className="flex flex-row justify-center">
+          {cards.map((card, i) => {
+            return <Card key={i} info={card} />
+          })}
+        </div>
+      )
+    }
+
+    const Stash = ({ cards }) => {
+      let columnColors = []
+      let cardColumns = []
+
+      // Group the cards by color for display
+      for (let i = 0; i < cards.length; i++) {
+        if (columnColors.indexOf(cards[i].color) == -1) {
+          columnColors.push(cards[i].color)
+          cardColumns.push([cards[i]])
+        } else
+          cardColumns[columnColors.indexOf(cards[i].color)].unshift(cards[i])
       }
 
       return (
-        <div className="flex basis-1/2 flex-row items-center justify-center">
-          {cardTypes.map((cardType, i) => {
-            return <Card key={i} type={cardType} />
+        <div className="flex flex-row">
+          {cardColumns.map((cardColumn, i) => {
+            return (
+              <div key={i} className="absolute bottom-0 flex flex-col">
+                {cardColumn.map((card, j) => {
+                  return <Card key={j} info={card} />
+                })}
+              </div>
+            )
           })}
         </div>
       )
@@ -679,23 +697,46 @@ const PlayPage = () => {
     return (
       <>
         <div className="flex h-screen flex-col">
-          <div className="flex basis-1/4 flex-row">
-            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              Score: {player.score}
-            </p>
-            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              Score: {player.score}
-            </p>
+          <div className="relative basis-2/5">
+            <div className="flex flex-row">
+              <div className="basis-1/2">
+                <Stash cards={cpuThree.cards} />
+              </div>
+              <div className="basis-1/2">
+                <Stash cards={cpuTwo.cards} />
+              </div>
+            </div>
           </div>
-          <div className="flex basis-1/4 flex-row">
-            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              Dessert: {player.dessert}
-            </p>
-            <p className="w-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              Dessert: {player.dessert}
-            </p>
+          <div className="basis-1/5">
+            <div className="flex flex-row">
+              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                {cpuThree.name}: Score: {cpuThree.score}, Dessert:{' '}
+                {cpuThree.dessert}
+              </div>
+              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                {cpuTwo.name}: Score: {cpuTwo.score}, Dessert: {cpuTwo.dessert}
+              </div>
+            </div>
+            <Hand cards={player.cards} />
+            <div className="flex flex-row">
+              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                {player.name}: Score: {player.score}, Dessert: {player.dessert}
+              </div>
+              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                {cpuOne.name}: Score: {cpuOne.score}, Dessert: {cpuOne.dessert}
+              </div>
+            </div>
           </div>
-          <Hand cardTypes={player.cards} />
+          <div className="basis-2/5">
+            <div className="flex flex-row">
+              <div className="basis-1/2">
+                <Stash cards={player.cards} />
+              </div>
+              <div className="basis-1/2">
+                <Stash cards={cpuOne.cards} />
+              </div>
+            </div>
+          </div>
         </div>
       </>
     )

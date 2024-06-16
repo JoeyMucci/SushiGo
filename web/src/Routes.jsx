@@ -20,10 +20,10 @@ const Routes = () => {
       <Route path="/signup" page={SignupPage} name="signup" />
       <Route path="/forgot-password" page={ForgotPasswordPage} name="forgotPassword" />
       <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
+      <Route path="/play" page={PlayPage} name="play" />
 
       <Set wrap={RollLayout}>
         <Route path="/" page={HomePage} name="home" />
-        <Route path="/play" page={PlayPage} name="play" />
         <Route path="/instructions" page={InstructionsPage} name="instructions" />
         <Route path="/achievements" page={AchievementsPage} name="achievements" />
         <Route path="/leaderboard" page={LeaderboardPage} name="leaderboard" />
