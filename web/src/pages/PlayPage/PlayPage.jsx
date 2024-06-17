@@ -76,11 +76,11 @@ const PlayPage = () => {
   })
 
   let order = {
-    roll: [],
-    spec: [],
-    app: [],
-    dess: [],
-    diff: [],
+    roll: ['maki'],
+    spec: ['chopsticks', 'wasabi'],
+    app: ['dumpling', 'tempura', 'sashimi'],
+    dess: ['pudding'],
+    diff: ['normal'],
   }
 
   const SelectionScreen = () => {
@@ -736,125 +736,132 @@ const PlayPage = () => {
     }
 
     const addNigiri = () => {
-      for (let i = 0; i < cards.EGG.count; i++) deck.pile.push(cards.EGG)
-      for (let i = 0; i < cards.SALMON.count; i++) deck.pile.push(cards.SALMON)
-      for (let i = 0; i < cards.SQUID.count; i++) deck.pile.push(cards.SQUID)
+      for (let i = 0; i < cards.EGG.count; i++)
+        deck.pile = [...deck.pile, cards.EGG]
+      for (let i = 0; i < cards.SALMON.count; i++)
+        deck.pile = [...deck.pile, cards.SALMON]
+      for (let i = 0; i < cards.SQUID.count; i++)
+        deck.pile = [...deck.pile, cards.SQUID]
     }
 
     const addRolls = (rollName) => {
       if (rollName == 'maki') {
         for (let i = 0; i < cards.MAKIONE.count; i++)
-          deck.pile.push(cards.MAKIONE)
+          deck.pile = [...deck.pile, cards.MAKIONE]
         for (let i = 0; i < cards.MAKITWO.count; i++)
-          deck.pile.push(cards.MAKITWO)
+          deck.pile = [...deck.pile, cards.MAKITWO]
         for (let i = 0; i < cards.MAKITHREE.count; i++)
-          deck.pile.push(cards.MAKITHREE)
+          deck.pile = [...deck.pile, cards.MAKITHREE]
       } else if (rollName == 'temaki')
         for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.pile.push(cards.TEMAKI)
+          deck.pile = [...deck.pile, cards.TEMAKI]
       else {
         for (let i = 0; i < cards.URAMAKITHREE.count; i++)
-          deck.pile.push(cards.URAMAKITHREE)
+          deck.pile = [...deck.pile, cards.URAMAKITHREE]
         for (let i = 0; i < cards.URAMAKIFOUR.count; i++)
-          deck.pile.push(cards.URAMAKIFOUR)
+          deck.pile = [...deck.pile, cards.URAMAKIFOUR]
         for (let i = 0; i < cards.URAMAKIFIVE.count; i++)
-          deck.pile.push(cards.URAMAKIFIVE)
+          deck.pile = [...deck.pile, cards.URAMAKIFIVE]
       }
     }
 
     const addSpecials = (specialName) => {
       if (specialName == 'chopsticks') {
-        for (let i = 0; i < cards.CHOPSTICKONE.count; i++)
-          deck.pile.push(cards.CHOPSTICKONE)
-        for (let i = 0; i < cards.CHOPSTICKTWO.count; i++)
-          deck.pile.push(cards.CHOPSTICKTWO)
-        for (let i = 0; i < cards.CHOPSTICKTHREE.count; i++)
-          deck.pile.push(cards.CHOPSTICKTHREE)
+        for (let i = 0; i < cards.CHOPSTICKSONE.count; i++)
+          deck.pile = [...deck.pile, cards.CHOPSTICKSONE]
+        for (let i = 0; i < cards.CHOPSTICKSTWO.count; i++)
+          deck.pile = [...deck.pile, cards.CHOPSTICKSTWO]
+        for (let i = 0; i < cards.CHOPSTICKSTHREE.count; i++)
+          deck.pile = [...deck.pile, cards.CHOPSTICKSTHREE]
       } else if (specialName == 'spoon') {
         for (let i = 0; i < cards.SPOONFOUR.count; i++)
-          deck.pile.push(cards.SPOONFOUR)
+          deck.pile = [...deck.pile, cards.SPOONFOUR]
         for (let i = 0; i < cards.SPOONFIVE.count; i++)
-          deck.pile.push(cards.SPOONFIVE)
+          deck.pile = [...deck.pile, cards.SPOONFIVE]
         for (let i = 0; i < cards.SPOONSIX.count; i++)
-          deck.pile.push(cards.SPOONSIX)
+          deck.pile = [...deck.pile, cards.SPOONSIX]
       } else if (specialName == 'menu') {
         for (let i = 0; i < cards.MENUSEVEN.count; i++)
-          deck.pile.push(cards.MENUSEVEN)
+          deck.pile = [...deck.pile, cards.MENUSEVEN]
         for (let i = 0; i < cards.MENUEIGHT.count; i++)
-          deck.pile.push(cards.MENUEIGHT)
+          deck.pile = [...deck.pile, cards.MENUEIGHT]
         for (let i = 0; i < cards.MENUNINE.count; i++)
-          deck.pile.push(cards.MENUNINE)
+          deck.pile = [...deck.pile, cards.MENUNINE]
       } else if (specialName == 'takeoutbox') {
         for (let i = 0; i < cards.TAKEOUTTEN.count; i++)
-          deck.pile.push(cards.TAKEOUTTEN)
+          deck.pile = [...deck.pile, cards.TAKEOUTTEN]
         for (let i = 0; i < cards.TAKEOUTELEVEN.count; i++)
-          deck.pile.push(cards.TAKEOUTELEVEN)
+          deck.pile = [...deck.pile, cards.TAKEOUTELEVEN]
         for (let i = 0; i < cards.TAKEOUTTWELVE.count; i++)
-          deck.pile.push(cards.TAKEOUTTWELVE)
+          deck.pile = [...deck.pile, cards.TAKEOUTTWELVE]
       } else if (specialName == 'tea')
-        for (let i = 0; i < cards.TEA.count; i++) deck.pile.push(cards.TEA)
+        for (let i = 0; i < cards.TEA.count; i++)
+          deck.pile = [...deck.pile, cards.TEA]
       else if (specialName == 'wasabi')
         for (let i = 0; i < cards.WASABI.count; i++)
-          deck.pile.push(cards.WASABI)
+          deck.pile = [...deck.pile, cards.WASABI]
       else if (specialName == 'soysauce')
         for (let i = 0; i < cards.SOYSAUCE.count; i++)
-          deck.pile.push(cards.SOYSAUCE)
+          deck.pile = [...deck.pile, cards.SOYSAUCE]
       else
         for (let i = 0; i < cards.SPECIALO.count; i++)
-          deck.pile.push(cards.SPECIALO)
+          deck.pile = [...deck.pile, cards.SPECIALO]
     }
 
     const addApps = (appName) => {
       if (appName == 'dumpling')
         for (let i = 0; i < cards.DUMPLING.count; i++)
-          deck.pile.push(cards.DUMPLING)
+          deck.pile = [...deck.pile, cards.DUMPLING]
       else if (appName == 'tempura')
         for (let i = 0; i < cards.TEMPURA.count; i++)
-          deck.pile.push(cards.TEMPURA)
+          deck.pile = [...deck.pile, cards.TEMPURA]
       else if (appName == 'sashimi')
         for (let i = 0; i < cards.SASHIMI.count; i++)
-          deck.pile.push(cards.SASHIMI)
+          deck.pile = [...deck.pile, cards.SASHIMI]
       else if (appName == 'misosoup')
-        for (let i = 0; i < cards.MISO.count; i++) deck.pile.push(cards.MISO)
+        for (let i = 0; i < cards.MISO.count; i++)
+          deck.pile = [...deck.pile, cards.MISO]
       else if (appName == 'edamame')
         for (let i = 0; i < cards.EDAMAME.count; i++)
-          deck.pile.push(cards.EDAMAME)
+          deck.pile = [...deck.pile, cards.EDAMAME]
       else if (appName == 'eel')
-        for (let i = 0; i < cards.EEL.count; i++) deck.pile.push(cards.EEL)
+        for (let i = 0; i < cards.EEL.count; i++)
+          deck.pile = [...deck.pile, cards.EEL]
       else if (appName == 'tofu')
-        for (let i = 0; i < cards.TOFU.count; i++) deck.pile.push(cards.TOFU)
+        for (let i = 0; i < cards.TOFU.count; i++)
+          deck.pile = [...deck.pile, cards.TOFU]
       else {
         for (let i = 0; i < cards.ONICIRCLE.count; i++)
-          deck.pile.push(cards.ONICIRCLE)
+          deck.pile = [...deck.pile, cards.ONICIRCLE]
         for (let i = 0; i < cards.ONISQUARE.count; i++)
-          deck.pile.push(cards.ONISQUARE)
+          deck.pile = [...deck.pile, cards.ONISQUARE]
         for (let i = 0; i < cards.ONITRI.count; i++)
-          deck.pile.push(cards.ONITRI)
+          deck.pile = [...deck.pile, cards.ONITRI]
         for (let i = 0; i < cards.ONIFLAT.count; i++)
-          deck.pile.push(cards.ONIFLAT)
+          deck.pile = [...deck.pile, cards.ONIFLAT]
       }
     }
 
     const fillDessertPile = (dessertName) => {
       if (dessertName == 'pudding')
         for (let i = 0; i < cards.PUDDING.count; i++)
-          deck.pile.push(cards.PUDDING)
+          deck.pile = [...deck.pile, cards.PUDDING]
       else if (dessertName == 'greenteaicecream')
         for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.pile.push(cards.TEMAKI)
+          deck.pile = [...deck.pile, cards.TEMAKI]
       else {
         for (let i = 0; i < cards.FRUITDUBWAT.count; i++)
-          deck.pile.push(cards.FRUITDUBWAT)
+          deck.pile = [...deck.pile, cards.FRUITDUBWAT]
         for (let i = 0; i < cards.FRUITDUBPINE.count; i++)
-          deck.pile.push(cards.FRUITDUBPINE)
+          deck.pile = [...deck.pile, cards.FRUITDUBPINE]
         for (let i = 0; i < cards.FRUITDUBO.count; i++)
-          deck.pile.push(cards.FRUITDUBO)
+          deck.pile = [...deck.pile, cards.FRUITDUBO]
         for (let i = 0; i < cards.FRUITWATERO.count; i++)
-          deck.pile.push(cards.FRUITWATERO)
+          deck.pile = [...deck.pile, cards.FRUITWATERO]
         for (let i = 0; i < cards.FRUITPINEO.count; i++)
-          deck.pile.push(cards.FRUITPINEO)
+          deck.pile = [...deck.pile, cards.FRUITPINEO]
         for (let i = 0; i < cards.FRUITWATERPINE.count; i++)
-          deck.pile.push(cards.FRUITDUBO)
+          deck.pile = [...deck.pile, cards.FRUITDUBO]
       }
     }
 
@@ -873,10 +880,13 @@ const PlayPage = () => {
     for (let i = 0; i < order.app.length; i++) addApps(order.app[i])
     for (let i = 0; i < order.dess.length; i++) fillDessertPile(order.dess[i])
 
+    console.log('deck.pile')
+    console.log(deck.pile)
+
     shuffle(deck.dessertPile)
 
     for (let i = 0; i < DESSERTCOUNTONE; i++)
-      deck.pile.push(deck.dessertPile.pop())
+      deck.pile = [...deck.pile, deck.dessertPile.pop()]
 
     shuffle(deck.pile)
 
