@@ -1,3 +1,5 @@
+import React, { useState } from 'react'
+
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
 import chopsticks2 from 'web/public/chopsticks(2).jpg'
 import chopsticks3 from 'web/public/chopsticks(3).jpg'
@@ -75,13 +77,12 @@ const PlayPage = () => {
     GAME: 2,
   })
 
-  let order = {
-    roll: ['maki'],
-    spec: ['chopsticks', 'wasabi'],
-    app: ['dumpling', 'tempura', 'sashimi'],
-    dess: ['pudding'],
-    diff: ['normal'],
-  }
+  const [screenNum, setScreenNum] = useState(screens.SELECTION)
+  const [roll, setRoll] = useState([])
+  const [spec, setSpec] = useState([])
+  const [app, setApp] = useState([])
+  const [dess, setDess] = useState([])
+  const [diff, setDiff] = useState([])
 
   const SelectionScreen = () => {
     const ROLLCAP = 1
@@ -95,58 +96,85 @@ const PlayPage = () => {
 
     let allowSelection = false
 
-    const changeSelectionToGame = () => {
-      if (allowSelection) {
-        document.getElementsByName(screens.SELECTION.toString())[0].className =
-          'hidden'
-        document.getElementsByName(screens.GAME.toString())[0].className = ''
-      }
+    const updateScreen = () => {
+      if (allowSelection) setScreenNum(screens.GAME)
     }
 
-    // Populates order, which tracks what cards are being used in the game
-    // Also limits the user from entering too many of a particular card type
-    // Finally, updates the opacity variable and allows submission if everything is full
-    const registerSelection = (e) => {
-      let orderList = []
-      let cap = 0
-
-      if (e.target.name == 'roll') {
-        orderList = order.roll
-        cap = ROLLCAP
-      } else if (e.target.name == 'spec') {
-        orderList = order.spec
-        cap = SPECCAP
-      } else if (e.target.name == 'app') {
-        orderList = order.app
-        cap = APPCAP
-      } else if (e.target.name == 'dess') {
-        orderList = order.dess
-        cap = DESSCAP
-      } else {
-        orderList = order.diff
-        cap = DIFFCAP
-      }
-
-      if (orderList.includes(e.target.id))
-        orderList.splice(orderList.indexOf(e.target.id), 1)
-      else if (orderList.length < cap) orderList.push(e.target.id)
+    const clickRoll = (e) => {
+      let mockList = roll
+      let cap = ROLLCAP
+      if (mockList.includes(e.target.id))
+        mockList.splice(mockList.indexOf(e.target.id), 1)
+      else if (mockList.length < cap) mockList.push(e.target.id)
       else e.target.checked = false
 
-      // Show the difficulty button fully if it is selected
-      if (e.target.name == 'diff')
-        if (e.target.checked)
-          document.getElementsByName(e.target.id)[0].className = BUTTONCLASS
-        else
-          document.getElementsByName(e.target.id)[0].className =
-            BUTTONCLASS + ' opacity-50'
+      setRoll(mockList)
+      updateAfterClick()
+    }
 
-      // If all the info is selected, show START button fully and allow submission
+    const clickSpec = (e) => {
+      let mockList = spec
+      let cap = SPECCAP
+      if (mockList.includes(e.target.id))
+        mockList.splice(mockList.indexOf(e.target.id), 1)
+      else if (mockList.length < cap) mockList.push(e.target.id)
+      else e.target.checked = false
+
+      setSpec(mockList)
+      updateAfterClick()
+    }
+
+    const clickApp = (e) => {
+      let mockList = app
+      let cap = APPCAP
+      if (mockList.includes(e.target.id))
+        mockList.splice(mockList.indexOf(e.target.id), 1)
+      else if (mockList.length < cap) mockList.push(e.target.id)
+      else e.target.checked = false
+
+      setApp(mockList)
+      updateAfterClick()
+    }
+
+    const clickDess = (e) => {
+      let mockList = dess
+      let cap = DESSCAP
+      if (mockList.includes(e.target.id))
+        mockList.splice(mockList.indexOf(e.target.id), 1)
+      else if (mockList.length < cap) mockList.push(e.target.id)
+      else e.target.checked = false
+
+      setDess(mockList)
+      updateAfterClick()
+    }
+
+    const clickDiff = (e) => {
+      let mockList = diff
+      let cap = DIFFCAP
+      if (mockList.includes(e.target.id))
+        mockList.splice(mockList.indexOf(e.target.id), 1)
+      else if (mockList.length < cap) mockList.push(e.target.id)
+      else e.target.checked = false
+
+      setDiff(mockList)
+
+      // Change opacity according to new selection status
+      if (e.target.checked)
+        document.getElementsByName(e.target.id)[0].className = BUTTONCLASS
+      else
+        document.getElementsByName(e.target.id)[0].className =
+          BUTTONCLASS + ' opacity-50'
+
+      updateAfterClick()
+    }
+
+    const updateAfterClick = () => {
       if (
-        order.roll.length == ROLLCAP &&
-        order.spec.length == SPECCAP &&
-        order.app.length == APPCAP &&
-        order.dess.length == DESSCAP &&
-        order.diff.length == DIFFCAP
+        roll.length == ROLLCAP &&
+        spec.length == SPECCAP &&
+        app.length == APPCAP &&
+        dess.length == DESSCAP &&
+        diff.length == DIFFCAP
       ) {
         document.getElementsByName('START')[0].className = BUTTONCLASS
         allowSelection = true
@@ -166,23 +194,15 @@ const PlayPage = () => {
           {ROLLCAP} roll, {SPECCAP} specials, {APPCAP} appetizers, {DESSCAP}{' '}
           dessert
         </p>
-        <Form onSubmit={changeSelectionToGame}>
+        <Form onSubmit={updateScreen}>
           <div className="flex flex-col items-center">
             <div className="flex flex-row">
               <Label className="m-2">
-                <CheckboxField
-                  id="maki"
-                  name="roll"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="maki" name="roll" onChange={clickRoll} />
                 <img src={maki} alt="maki roll" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="temaki"
-                  name="roll"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="temaki" name="roll" onChange={clickRoll} />
                 <img
                   src={temakiguide}
                   alt="temaki roll"
@@ -190,11 +210,7 @@ const PlayPage = () => {
                 />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="uramaki"
-                  name="roll"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="uramaki" name="roll" onChange={clickRoll} />
                 <img src={uramaki} alt="uramaki roll" className="h-48 w-36" />
               </Label>
             </div>
@@ -203,63 +219,43 @@ const PlayPage = () => {
                 <CheckboxField
                   id="chopsticks"
                   name="spec"
-                  onChange={registerSelection}
+                  onChange={clickSpec}
                 />
                 <img src={chopsticks} alt="chopsticks" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="spoon"
-                  name="spec"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="spoon" name="spec" onChange={clickSpec} />
                 <img src={spoon} alt="spoon" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="menu"
-                  name="spec"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="menu" name="spec" onChange={clickSpec} />
                 <img src={menu} alt="menu" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
                   id="takeoutbox"
                   name="spec"
-                  onChange={registerSelection}
+                  onChange={clickSpec}
                 />
                 <img src={takeoutbox} alt="takeout box" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="tea"
-                  name="spec"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="tea" name="spec" onChange={clickSpec} />
                 <img src={teaguide} alt="tea" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="wasabi"
-                  name="spec"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="wasabi" name="spec" onChange={clickSpec} />
                 <img src={wasabiguide} alt="wasabi" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="soysauce"
-                  name="spec"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="soysauce" name="spec" onChange={clickSpec} />
                 <img src={soysauceguide} alt="soysauce" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
                   id="specialorder"
                   name="spec"
-                  onChange={registerSelection}
+                  onChange={clickSpec}
                 />
                 <img
                   src={specialguide}
@@ -270,84 +266,48 @@ const PlayPage = () => {
             </div>
             <div className="flex flex-row">
               <Label className="m-2">
-                <CheckboxField
-                  id="dumpling"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="dumpling" name="app" onChange={clickApp} />
                 <img src={dumplingguide} alt="dumpling" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="tempura"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="tempura" name="app" onChange={clickApp} />
                 <img src={tempuraguide} alt="tempura" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="sashimi"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="sashimi" name="app" onChange={clickApp} />
                 <img src={sashimiguide} alt="sashimi" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="misosoup"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="misosoup" name="app" onChange={clickApp} />
                 <img src={misoguide} alt="miso soup" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="edamame"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="edamame" name="app" onChange={clickApp} />
                 <img src={edamameguide} alt="edamame" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="eel"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="eel" name="app" onChange={clickApp} />
                 <img src={eelguide} alt="eel" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="tofu"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="tofu" name="app" onChange={clickApp} />
                 <img src={tofuguide} alt="tofu" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="onigiri"
-                  name="app"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="onigiri" name="app" onChange={clickApp} />
                 <img src={onigiri} alt="onigiri" className="h-48 w-36" />
               </Label>
             </div>
             <div className="flex flex-row">
               <Label className="m-2">
-                <CheckboxField
-                  id="pudding"
-                  name="dess"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="pudding" name="dess" onChange={clickDess} />
                 <img src={puddingguide} alt="pudding" className="h-48 w-36" />
               </Label>
               <Label className="m-2">
                 <CheckboxField
                   id="greenteaicecream"
                   name="dess"
-                  onChange={registerSelection}
+                  onChange={clickDess}
                 />
                 <img
                   src={gticguide}
@@ -356,21 +316,13 @@ const PlayPage = () => {
                 />
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="fruit"
-                  name="dess"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="fruit" name="dess" onChange={clickDess} />
                 <img src={fruit} alt="fruit" className="h-48 w-36" />
               </Label>
             </div>
             <div className="flex flex-row">
               <Label className="m-2">
-                <CheckboxField
-                  id="easy"
-                  name="diff"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="easy" name="diff" onChange={clickDiff} />
                 <p
                   name="easy"
                   className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
@@ -379,11 +331,7 @@ const PlayPage = () => {
                 </p>
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="normal"
-                  name="diff"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="normal" name="diff" onChange={clickDiff} />
                 <p
                   name="normal"
                   className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
@@ -392,11 +340,7 @@ const PlayPage = () => {
                 </p>
               </Label>
               <Label className="m-2">
-                <CheckboxField
-                  id="hard"
-                  name="diff"
-                  onChange={registerSelection}
-                />
+                <CheckboxField id="hard" name="diff" onChange={clickDiff} />
                 <p
                   name="hard"
                   className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
@@ -845,23 +789,23 @@ const PlayPage = () => {
     const fillDessertPile = (dessertName) => {
       if (dessertName == 'pudding')
         for (let i = 0; i < cards.PUDDING.count; i++)
-          deck.pile = [...deck.pile, cards.PUDDING]
+          deck.dessertPile = [...deck.dessertPile, cards.PUDDING]
       else if (dessertName == 'greenteaicecream')
         for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.pile = [...deck.pile, cards.TEMAKI]
+          deck.dessertPile = [...deck.dessertPile, cards.TEMAKI]
       else {
         for (let i = 0; i < cards.FRUITDUBWAT.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITDUBWAT]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBWAT]
         for (let i = 0; i < cards.FRUITDUBPINE.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITDUBPINE]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBPINE]
         for (let i = 0; i < cards.FRUITDUBO.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITDUBO]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBO]
         for (let i = 0; i < cards.FRUITWATERO.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITWATERO]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITWATERO]
         for (let i = 0; i < cards.FRUITPINEO.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITPINEO]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITPINEO]
         for (let i = 0; i < cards.FRUITWATERPINE.count; i++)
-          deck.pile = [...deck.pile, cards.FRUITDUBO]
+          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBO]
       }
     }
 
@@ -874,25 +818,27 @@ const PlayPage = () => {
       }
     }
 
+    // Add all necessary cards
     addNigiri()
-    for (let i = 0; i < order.roll.length; i++) addRolls(order.roll[i])
-    for (let i = 0; i < order.spec.length; i++) addSpecials(order.spec[i])
-    for (let i = 0; i < order.app.length; i++) addApps(order.app[i])
-    for (let i = 0; i < order.dess.length; i++) fillDessertPile(order.dess[i])
+    for (let i = 0; i < roll.length; i++) addRolls(roll[i])
+    for (let i = 0; i < spec.length; i++) addSpecials(spec[i])
+    for (let i = 0; i < app.length; i++) addApps(app[i])
+    for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
 
-    console.log('deck.pile')
-    console.log(deck.pile)
+    // Fruit is the only dessert card that is different, so its the only one that needs to be shuffled
+    if (dess[0] == 'fruit') shuffle(deck.dessertPile)
 
-    shuffle(deck.dessertPile)
-
+    // Add dessert cards for first round
     for (let i = 0; i < DESSERTCOUNTONE; i++)
       deck.pile = [...deck.pile, deck.dessertPile.pop()]
 
+    // Shuffle full deck
     shuffle(deck.pile)
 
     // PLAYER INITIALIZATION
     const STARTCARDS = 9
 
+    // players[0] is the user
     let players = [
       {
         name: 'Joey',
@@ -924,19 +870,41 @@ const PlayPage = () => {
       },
     ]
 
+    // Deal cards to players
     for (let i = 0; i < STARTCARDS; i++)
       for (let j = 0; j < players.length; j++)
         players[j].hand.push(deck.pile.pop())
 
-    const Card = ({ info }) => {
-      return <img src={info.picpath} alt={info.text} className="h-36 w-24" />
+    const Card = ({ info, action }) => {
+      return (
+        // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+        <img
+          src={info.picpath}
+          alt={info.text}
+          onClick={action}
+          onKeyDown={action}
+          className="h-36 w-24"
+        />
+      )
     }
 
-    const Hand = ({ cards }) => {
+    const Hand = () => {
+      let [cards, setCards] = useState(players[0].hand)
+
+      const handlePlayerSelection = () => {
+        let tempCards = players[0].hand
+        for (let i = 0; i < players.length - 1; i++)
+          players[i].hand = players[i + 1].hand
+        players[players.length - 1].hand = tempCards
+        setCards(players[0].hand)
+        console.log(players[0].hand)
+      }
+
       return (
         <div className="flex flex-row justify-center">
           {cards.map((card, i) => {
-            return <Card key={i} info={card} />
+            return <Card key={i} info={card} action={handlePlayerSelection} />
           })}
         </div>
       )
@@ -994,7 +962,7 @@ const PlayPage = () => {
                 {players[2].dessert}
               </div>
             </div>
-            <Hand cards={players[0].hand} />
+            <Hand />
             <div className="flex flex-row">
               <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
                 {players[0].name}: Score: {players[0].score}, Dessert:{' '}
@@ -1021,16 +989,8 @@ const PlayPage = () => {
     )
   }
 
-  return (
-    <>
-      <div name={screens.SELECTION} className="hidden">
-        <SelectionScreen />
-      </div>
-      <div name={screens.GAME} className="">
-        <GameScreen />
-      </div>
-    </>
-  )
+  if (screenNum == screens.SELECTION) return <SelectionScreen />
+  else return <GameScreen />
 }
 
 export default PlayPage
