@@ -680,132 +680,125 @@ const PlayPage = () => {
     }
 
     const addNigiri = () => {
-      for (let i = 0; i < cards.EGG.count; i++)
-        deck.pile = [...deck.pile, cards.EGG]
-      for (let i = 0; i < cards.SALMON.count; i++)
-        deck.pile = [...deck.pile, cards.SALMON]
-      for (let i = 0; i < cards.SQUID.count; i++)
-        deck.pile = [...deck.pile, cards.SQUID]
+      for (let i = 0; i < cards.EGG.count; i++) deck.pile.push(cards.EGG)
+      for (let i = 0; i < cards.SALMON.count; i++) deck.pile.push(cards.SALMON)
+      for (let i = 0; i < cards.SQUID.count; i++) deck.pile.push(cards.SQUID)
     }
 
     const addRolls = (rollName) => {
       if (rollName == 'maki') {
         for (let i = 0; i < cards.MAKIONE.count; i++)
-          deck.pile = [...deck.pile, cards.MAKIONE]
+          deck.pile.push(cards.MAKIONE)
         for (let i = 0; i < cards.MAKITWO.count; i++)
-          deck.pile = [...deck.pile, cards.MAKITWO]
+          deck.pile.push(cards.MAKITWO)
         for (let i = 0; i < cards.MAKITHREE.count; i++)
-          deck.pile = [...deck.pile, cards.MAKITHREE]
+          deck.pile.push(cards.MAKITHREE)
       } else if (rollName == 'temaki')
         for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.pile = [...deck.pile, cards.TEMAKI]
+          deck.pile.push(cards.TEMAKI)
       else {
         for (let i = 0; i < cards.URAMAKITHREE.count; i++)
-          deck.pile = [...deck.pile, cards.URAMAKITHREE]
+          deck.pile.push(cards.URAMAKITHREE)
         for (let i = 0; i < cards.URAMAKIFOUR.count; i++)
-          deck.pile = [...deck.pile, cards.URAMAKIFOUR]
+          deck.pile.push(cards.URAMAKIFOUR)
         for (let i = 0; i < cards.URAMAKIFIVE.count; i++)
-          deck.pile = [...deck.pile, cards.URAMAKIFIVE]
+          deck.pile.push(cards.URAMAKIFIVE)
       }
     }
 
     const addSpecials = (specialName) => {
       if (specialName == 'chopsticks') {
         for (let i = 0; i < cards.CHOPSTICKSONE.count; i++)
-          deck.pile = [...deck.pile, cards.CHOPSTICKSONE]
+          deck.pile.push(cards.CHOPSTICKSONE)
         for (let i = 0; i < cards.CHOPSTICKSTWO.count; i++)
-          deck.pile = [...deck.pile, cards.CHOPSTICKSTWO]
+          deck.pile.push(cards.CHOPSTICKSTWO)
         for (let i = 0; i < cards.CHOPSTICKSTHREE.count; i++)
-          deck.pile = [...deck.pile, cards.CHOPSTICKSTHREE]
+          deck.pile.push(cards.CHOPSTICKSTHREE)
       } else if (specialName == 'spoon') {
         for (let i = 0; i < cards.SPOONFOUR.count; i++)
-          deck.pile = [...deck.pile, cards.SPOONFOUR]
+          deck.pile.push(cards.SPOONFOUR)
         for (let i = 0; i < cards.SPOONFIVE.count; i++)
-          deck.pile = [...deck.pile, cards.SPOONFIVE]
+          deck.pile.push(cards.SPOONFIVE)
         for (let i = 0; i < cards.SPOONSIX.count; i++)
-          deck.pile = [...deck.pile, cards.SPOONSIX]
+          deck.pile.push(cards.SPOONSIX)
       } else if (specialName == 'menu') {
         for (let i = 0; i < cards.MENUSEVEN.count; i++)
-          deck.pile = [...deck.pile, cards.MENUSEVEN]
+          deck.pile.push(cards.MENUSEVEN)
         for (let i = 0; i < cards.MENUEIGHT.count; i++)
-          deck.pile = [...deck.pile, cards.MENUEIGHT]
+          deck.pile.push(cards.MENUEIGHT)
         for (let i = 0; i < cards.MENUNINE.count; i++)
-          deck.pile = [...deck.pile, cards.MENUNINE]
+          deck.pile.push(cards.MENUNINE)
       } else if (specialName == 'takeoutbox') {
         for (let i = 0; i < cards.TAKEOUTTEN.count; i++)
-          deck.pile = [...deck.pile, cards.TAKEOUTTEN]
+          deck.pile.push(cards.TAKEOUTTEN)
         for (let i = 0; i < cards.TAKEOUTELEVEN.count; i++)
-          deck.pile = [...deck.pile, cards.TAKEOUTELEVEN]
+          deck.pile.push(cards.TAKEOUTELEVEN)
         for (let i = 0; i < cards.TAKEOUTTWELVE.count; i++)
-          deck.pile = [...deck.pile, cards.TAKEOUTTWELVE]
+          deck.pile.push(cards.TAKEOUTTWELVE)
       } else if (specialName == 'tea')
-        for (let i = 0; i < cards.TEA.count; i++)
-          deck.pile = [...deck.pile, cards.TEA]
+        for (let i = 0; i < cards.TEA.count; i++) deck.pile.push(cards.TEA)
       else if (specialName == 'wasabi')
         for (let i = 0; i < cards.WASABI.count; i++)
-          deck.pile = [...deck.pile, cards.WASABI]
+          deck.pile.push(cards.WASABI)
       else if (specialName == 'soysauce')
         for (let i = 0; i < cards.SOYSAUCE.count; i++)
-          deck.pile = [...deck.pile, cards.SOYSAUCE]
+          deck.pile.push(cards.SOYSAUCE)
       else
         for (let i = 0; i < cards.SPECIALO.count; i++)
-          deck.pile = [...deck.pile, cards.SPECIALO]
+          deck.pile.push(cards.SPECIALO)
     }
 
     const addApps = (appName) => {
       if (appName == 'dumpling')
         for (let i = 0; i < cards.DUMPLING.count; i++)
-          deck.pile = [...deck.pile, cards.DUMPLING]
+          deck.pile.push(cards.DUMPLING)
       else if (appName == 'tempura')
         for (let i = 0; i < cards.TEMPURA.count; i++)
-          deck.pile = [...deck.pile, cards.TEMPURA]
+          deck.pile.push(cards.TEMPURA)
       else if (appName == 'sashimi')
         for (let i = 0; i < cards.SASHIMI.count; i++)
-          deck.pile = [...deck.pile, cards.SASHIMI]
+          deck.pile.push(cards.SASHIMI)
       else if (appName == 'misosoup')
-        for (let i = 0; i < cards.MISO.count; i++)
-          deck.pile = [...deck.pile, cards.MISO]
+        for (let i = 0; i < cards.MISO.count; i++) deck.pile.push(cards.MISO)
       else if (appName == 'edamame')
         for (let i = 0; i < cards.EDAMAME.count; i++)
-          deck.pile = [...deck.pile, cards.EDAMAME]
+          deck.pile.push(cards.EDAMAME)
       else if (appName == 'eel')
-        for (let i = 0; i < cards.EEL.count; i++)
-          deck.pile = [...deck.pile, cards.EEL]
+        for (let i = 0; i < cards.EEL.count; i++) deck.pile.push(cards.EEL)
       else if (appName == 'tofu')
-        for (let i = 0; i < cards.TOFU.count; i++)
-          deck.pile = [...deck.pile, cards.TOFU]
+        for (let i = 0; i < cards.TOFU.count; i++) deck.pile.push(cards.TOFU)
       else {
         for (let i = 0; i < cards.ONICIRCLE.count; i++)
-          deck.pile = [...deck.pile, cards.ONICIRCLE]
+          deck.pile.push(cards.ONICIRCLE)
         for (let i = 0; i < cards.ONISQUARE.count; i++)
-          deck.pile = [...deck.pile, cards.ONISQUARE]
+          deck.pile.push(cards.ONISQUARE)
         for (let i = 0; i < cards.ONITRI.count; i++)
-          deck.pile = [...deck.pile, cards.ONITRI]
+          deck.pile.push(cards.ONITRI)
         for (let i = 0; i < cards.ONIFLAT.count; i++)
-          deck.pile = [...deck.pile, cards.ONIFLAT]
+          deck.pile.push(cards.ONIFLAT)
       }
     }
 
     const fillDessertPile = (dessertName) => {
       if (dessertName == 'pudding')
         for (let i = 0; i < cards.PUDDING.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.PUDDING]
+          deck.dessertPile.push(cards.PUDDING)
       else if (dessertName == 'greenteaicecream')
         for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.TEMAKI]
+          deck.dessertPile.push(cards.TEMAKI)
       else {
         for (let i = 0; i < cards.FRUITDUBWAT.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBWAT]
+          deck.dessertPile.push(cards.FRUITDUBWAT)
         for (let i = 0; i < cards.FRUITDUBPINE.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBPINE]
+          deck.dessertPile.push(cards.FRUITDUBPINE)
         for (let i = 0; i < cards.FRUITDUBO.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBO]
+          deck.dessertPile.push(cards.FRUITDUBO)
         for (let i = 0; i < cards.FRUITWATERO.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITWATERO]
+          deck.dessertPile.push(cards.FRUITWATERO)
         for (let i = 0; i < cards.FRUITPINEO.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITPINEO]
+          deck.dessertPile.push(cards.FRUITPINEO)
         for (let i = 0; i < cards.FRUITWATERPINE.count; i++)
-          deck.dessertPile = [...deck.dessertPile, cards.FRUITDUBO]
+          deck.dessertPile.push(cards.FRUITDUBO)
       }
     }
 
@@ -830,7 +823,7 @@ const PlayPage = () => {
 
     // Add dessert cards for first round
     for (let i = 0; i < DESSERTCOUNTONE; i++)
-      deck.pile = [...deck.pile, deck.dessertPile.pop()]
+      deck.pile.push(deck.dessertPile.pop())
 
     // Shuffle full deck
     shuffle(deck.pile)
@@ -875,118 +868,146 @@ const PlayPage = () => {
       for (let j = 0; j < players.length; j++)
         players[j].hand.push(deck.pile.pop())
 
-    const Card = ({ info, action }) => {
-      return (
-        // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-        <img
-          src={info.picpath}
-          alt={info.text}
-          onClick={action}
-          onKeyDown={action}
-          className="h-36 w-24"
-        />
-      )
-    }
+    const CardDisplay = () => {
+      let [playerHand, setPlayerHand] = useState(players[0].hand)
+      let [playerStash, setPlayerStash] = useState(players[0].stash)
+      let [cpuOneStash, setCpuOneStash] = useState(players[1].stash)
+      let [cpuTwoStash, setCpuTwoStash] = useState(players[2].stash)
+      let [cpuThreeStash, setCpuThreeStash] = useState(players[3].stash)
 
-    const Hand = () => {
-      let [cards, setCards] = useState(players[0].hand)
-
-      const handlePlayerSelection = () => {
-        let tempCards = players[0].hand
-        for (let i = 0; i < players.length - 1; i++)
-          players[i].hand = players[i + 1].hand
-        players[players.length - 1].hand = tempCards
-        setCards(players[0].hand)
-        console.log(players[0].hand)
+      const Card = ({ info, action }) => {
+        return (
+          // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <img
+            src={info.picpath}
+            alt={info.text}
+            onClick={action}
+            onKeyDown={action}
+            className="h-36 w-24"
+          />
+        )
       }
 
-      return (
-        <div className="flex flex-row justify-center">
-          {cards.map((card, i) => {
-            return <Card key={i} info={card} action={handlePlayerSelection} />
-          })}
-        </div>
-      )
-    }
+      const Hand = ({ cards }) => {
+        const swapCards = () => {
+          let tempCards = players[0].hand
+          for (let i = 0; i < players.length - 1; i++)
+            players[i].hand = players[i + 1].hand
+          players[players.length - 1].hand = tempCards
+        }
 
-    const Stash = ({ cards }) => {
-      let columnColors = []
-      let cardColumns = []
+        const updateState = () => {
+          setPlayerHand(players[0].hand)
+          setPlayerStash(players[0].stash)
+          setCpuOneStash(players[1].stash)
+          setCpuTwoStash(players[2].stash)
+          setCpuThreeStash(players[3].stash)
+        }
 
-      // Group the cards by color for display
-      for (let i = 0; i < cards.length; i++) {
-        if (columnColors.indexOf(cards[i].color) == -1) {
-          columnColors.push(cards[i].color)
-          cardColumns.push([cards[i]])
-        } else
-          cardColumns[columnColors.indexOf(cards[i].color)].unshift(cards[i])
+        const handlePlayerSelection = (e) => {
+          for (let i = 0; i < players[0].hand.length; i++)
+            if (e.target.alt == players[0].hand[i].text) {
+              let temp = players[0].hand[players[0].hand.length - 1]
+              players[0].hand[players[0].hand.length - 1] = players[0].hand[i]
+              players[0].hand[i] = temp
+              players[0].stash.push(players[0].hand.pop())
+            }
+          players[1].stash.push(players[1].hand.pop())
+          players[2].stash.push(players[2].hand.pop())
+          players[3].stash.push(players[3].hand.pop())
+          swapCards()
+          updateState()
+        }
+
+        return (
+          <div className="flex flex-row justify-center">
+            {cards.map((card, i) => {
+              return <Card key={i} info={card} action={handlePlayerSelection} />
+            })}
+          </div>
+        )
       }
 
+      const Stash = ({ cards }) => {
+        let columnColors = []
+        let cardColumns = []
+
+        // Group the cards by color for display
+        for (let i = 0; i < cards.length; i++) {
+          if (columnColors.indexOf(cards[i].color) == -1) {
+            columnColors.push(cards[i].color)
+            cardColumns.push([cards[i]])
+          } else
+            cardColumns[columnColors.indexOf(cards[i].color)].unshift(cards[i])
+        }
+
+        return (
+          <div className="flex flex-row">
+            {cardColumns.map((cardColumn, i) => {
+              return (
+                <div key={i}>
+                  {cardColumn.map((card, j) => {
+                    return <Card key={j} info={card} />
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        )
+      }
       return (
-        <div className="flex flex-row">
-          {cardColumns.map((cardColumn, i) => {
-            return (
-              <div key={i}>
-                {cardColumn.map((card, j) => {
-                  return <Card key={j} info={card} />
-                })}
+        <>
+          <div className="flex h-screen flex-col">
+            <div className="basis-2/5">
+              <div className="flex flex-row">
+                <div className="basis-1/2">
+                  <Stash cards={cpuThreeStash} />
+                </div>
+                <div className="basis-1/2">
+                  <Stash cards={cpuTwoStash} />
+                </div>
               </div>
-            )
-          })}
-        </div>
+            </div>
+            <div className="basis-1/5">
+              <div className="flex flex-row">
+                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                  {players[3].name}: Score: {players[3].score}, Dessert:{' '}
+                  {players[3].dessert}
+                </div>
+                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                  {players[2].name}: Score: {players[2].score}, Dessert:{' '}
+                  {players[2].dessert}
+                </div>
+              </div>
+              <Hand cards={playerHand} />
+              <div className="flex flex-row">
+                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                  {players[0].name}: Score: {players[0].score}, Dessert:{' '}
+                  {players[0].dessert}
+                </div>
+                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+                  {players[1].name}: Score: {players[1].score}, Dessert:{' '}
+                  {players[1].dessert}
+                </div>
+              </div>
+            </div>
+            <div className="basis-2/5">
+              <div className="flex flex-row">
+                <div className="basis-1/2">
+                  <Stash cards={playerStash} />
+                </div>
+                <div className="basis-1/2">
+                  <Stash cards={cpuOneStash} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )
     }
 
-    return (
-      <>
-        <div className="flex h-screen flex-col">
-          <div className="basis-2/5">
-            <div className="flex flex-row">
-              <div className="basis-1/2">
-                <Stash cards={players[3].stash} />
-              </div>
-              <div className="basis-1/2">
-                <Stash cards={players[2].stash} />
-              </div>
-            </div>
-          </div>
-          <div className="basis-1/5">
-            <div className="flex flex-row">
-              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {players[3].name}: Score: {players[3].score}, Dessert:{' '}
-                {players[3].dessert}
-              </div>
-              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {players[2].name}: Score: {players[2].score}, Dessert:{' '}
-                {players[2].dessert}
-              </div>
-            </div>
-            <Hand />
-            <div className="flex flex-row">
-              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {players[0].name}: Score: {players[0].score}, Dessert:{' '}
-                {players[0].dessert}
-              </div>
-              <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                {players[1].name}: Score: {players[1].score}, Dessert:{' '}
-                {players[1].dessert}
-              </div>
-            </div>
-          </div>
-          <div className="basis-2/5">
-            <div className="flex flex-row">
-              <div className="basis-1/2">
-                <Stash cards={players[0].stash} />
-              </div>
-              <div className="basis-1/2">
-                <Stash cards={players[1].stash} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    )
+    return <CardDisplay />
   }
 
   if (screenNum == screens.SELECTION) return <SelectionScreen />
