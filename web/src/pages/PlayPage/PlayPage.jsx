@@ -673,7 +673,11 @@ const PlayPage = () => {
 
     // DECK PREPERATION
     const DESSERTCOUNTONE = 5
+    const DESSERTCOUNTTWO = 3
+    const DESSERTCOUNTTHREE = 2
 
+    let round = 1
+    let uramakiPoints = 8
     let deck = {
       pile: [],
       dessertPile: [],
@@ -818,7 +822,7 @@ const PlayPage = () => {
     for (let i = 0; i < app.length; i++) addApps(app[i])
     for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
 
-    // Fruit is the only dessert card that is different, so its the only one that needs to be shuffled
+    // Fruit is the only dessert card that is heterogeneous, so its the only one that needs to be shuffled
     if (dess[0] == 'fruit') shuffle(deck.dessertPile)
 
     // Add dessert cards for first round
@@ -837,43 +841,58 @@ const PlayPage = () => {
         name: 'Joey',
         hand: [],
         stash: [],
-        score: 0,
         dessert: 0,
+        uramakiScored: false,
       },
       {
         name: 'cpu one',
         hand: [],
         stash: [],
-        score: 0,
         dessert: 0,
+        uramakiScored: false,
       },
       {
         name: 'cpu two',
         hand: [],
         stash: [],
-        score: 0,
         dessert: 0,
+        uramakiScored: false,
       },
       {
         name: 'cpu three',
         hand: [],
         stash: [],
-        score: 0,
         dessert: 0,
+        uramakiScored: false,
       },
     ]
 
-    // Deal cards to players
-    for (let i = 0; i < STARTCARDS; i++)
-      for (let j = 0; j < players.length; j++)
-        players[j].hand.push(deck.pile.pop())
+    const dealToPlayers = () => {
+      for (let i = 0; i < STARTCARDS; i++)
+        for (let j = 0; j < players.length; j++)
+          players[j].hand.push(deck.pile.pop())
+    }
+
+    dealToPlayers()
 
     const CardDisplay = () => {
-      let [playerHand, setPlayerHand] = useState(players[0].hand)
-      let [playerStash, setPlayerStash] = useState(players[0].stash)
+      let [userHand, setUserHand] = useState(players[0].hand)
+      let [userStash, setUserStash] = useState(players[0].stash)
       let [cpuOneStash, setCpuOneStash] = useState(players[1].stash)
       let [cpuTwoStash, setCpuTwoStash] = useState(players[2].stash)
       let [cpuThreeStash, setCpuThreeStash] = useState(players[3].stash)
+      let [userScore, setUserScore] = useState(0)
+      let [cpuOneScore, setCpuOneScore] = useState(0)
+      let [cpuTwoScore, setCpuTwoScore] = useState(0)
+      let [cpuThreeScore, setCpuThreeScore] = useState(0)
+
+      // Fruit is stored as a 3 undigit base-11 number (watermelon is most significant, orange is least significant)
+      // This is possible because for each fruit type the max icons is 10: 15 fruit cards * 2 icons/card / 3 icon types = 10
+      // e.g. 2 watermelon, 1 pineapple, 3 orange is represented as 2 * 11 * 11 + 1 * 11 + 3 = 256
+      let [userDessert, setUserDessert] = useState(players[0].dessert)
+      let [cpuOneDessert, setCpuOneDessert] = useState(players[1].dessert)
+      let [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
+      let [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
 
       const Card = ({ info, action }) => {
         return (
@@ -889,7 +908,7 @@ const PlayPage = () => {
         )
       }
 
-      const Hand = ({ cards }) => {
+      const Hand = ({ selection }) => {
         const swapCards = () => {
           let tempCards = players[0].hand
           for (let i = 0; i < players.length - 1; i++)
@@ -897,9 +916,143 @@ const PlayPage = () => {
           players[players.length - 1].hand = tempCards
         }
 
+        // returns how many occurences of card are in cards
+        const countCard = (cards, card) => {
+          let count = 0
+          for (let i = 0; i < cards.length; i++)
+            if (cards[i].type == card.type) count++
+          return count
+        }
+
+        const scoreMaki = (playerCards, oppsCards) => {
+          let makiCount =
+            countCard(playerCards, cards.MAKIONE) +
+            2 * countCard(playerCards, cards.MAKITWO) +
+            3 * countCard(playerCards, cards.MAKITHREE)
+
+          if (makiCount == 0) return 0
+
+          let points = 6
+
+          let oppMakiCounts = []
+
+          for (let oppCards of oppsCards) {
+            let oppMakiCount =
+              countCard(oppCards, cards.MAKIONE) +
+              2 * countCard(oppCards, cards.MAKITWO) +
+              3 * countCard(oppCards, cards.MAKITHREE)
+            if (!oppMakiCounts.includes(oppMakiCount))
+              oppMakiCounts.push(oppMakiCount)
+          }
+
+          for (let oppMakiCount of oppMakiCounts)
+            if (makiCount < oppMakiCount) points -= 3
+
+          return Math.max(points, 0)
+        }
+
+        const scoreTemaki = (playerCards, oppsCards) => {
+          let points = 0
+          let flagMost = false
+          let flagLeast = true
+          let temakiCount = countCard(playerCards, cards.TEMAKI)
+          for (let oppCards of oppsCards) {
+            if (!flagMost && temakiCount < countCard(oppCards, cards.TEMAKI)) {
+              points -= 4
+              flagMost = true
+            }
+            if (!flagLeast && temakiCount > countCard(oppCards, cards.TEMAKI)) {
+              points += 4
+              flagLeast = true
+            }
+          }
+          return points
+        }
+
+        const scoreUramakiDuring = () => {
+          // Check from 14 to 10 for scoring uramaki since ten is the minimum to score and
+          // 5 is the max that can be played in a round, so the max unscored amount is 10 - 1 + 5 = 14
+          for (let goal = 14; goal >= 10; goal--) {
+            if (uramakiPoints < 2) break
+            let decrease = 0
+            for (let i = 0; i < players.length; i++) {
+              let uramakiCount =
+                3 * countCard(players[i].hand, cards.URAMAKITHREE) +
+                4 * countCard(players[i].hand, cards.URAMAKIFOUR) +
+                5 * countCard(players[i].hand, cards.URAMAKIFIVE)
+
+              // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
+              // However, it is possible to score uramaki again at the end of the round
+              if (uramakiCount == goal && !players[i].uramakiScored) {
+                if (i == 0) setUserScore(userScore + uramakiPoints)
+                else if (i == 1) setCpuOneScore(cpuOneScore + uramakiPoints)
+                else if (i == 2) setCpuOneScore(cpuTwoScore + uramakiPoints)
+                else if (i == 3) setCpuOneScore(cpuThreeScore + uramakiPoints)
+                players[i].uramakiScored = false
+                decrease += 3 // Do not decrease right away so tied players receive the same points
+              }
+            }
+            uramakiPoints -= decrease
+          }
+        }
+
+        const scoreUramakiEnd = () => {}
+
+        const replenishDeck = (moreDes) => {
+          let usedCards = []
+
+          for (let i = 0; i < players.length; i++)
+            for (let j = players[i].stash.length - 1; j >= 0; j--) {
+              let removedCard = players[i].stash.pop()
+              if (
+                removedCard.type == cards.PUDDING.type ||
+                removedCard.type == cards.GTIC.type
+              )
+                players[i].dessert++
+              // Fruit count is stored as an undecimal number (watermelon is most significant, orange is least significant)
+              else if (removedCard.type == cards.FRUITDUBWAT.type)
+                players[i].dessert += 2 * 11 * 11
+              else if (removedCard.type == cards.FRUITDUBPINE.type)
+                players[i].dessert += 2 * 11
+              else if (removedCard.type == cards.FRUITDUBO.type)
+                players[i].dessert += 2
+              else if (removedCard.type == cards.FRUITWATERO.type) {
+                players[i].dessert += 11 * 11
+                players[i].dessert++
+              } else if (removedCard.type == cards.FRUITPINEO.type) {
+                players[i].dessert += 11
+                players[i].dessert++
+              } else if (removedCard.type == cards.FRUITWATERPINE.type) {
+                players[i].dessert += 11 * 11
+                players[i].dessert += 11
+              } else usedCards.push(removedCard)
+            }
+
+          for (let usedCard of usedCards) deck.pile.push(usedCard)
+
+          for (let i = 0; i < moreDes; i++)
+            deck.pile.push(deck.dessertPile.pop())
+
+          shuffle(deck.pile)
+        }
+
+        const scorePlayer = (playerCards, oppCards) => {
+          let runningScore = 0
+          // ROLLS
+          if (roll[0] == 'maki')
+            runningScore += scoreMaki(playerCards, oppCards)
+          else if (roll[0] == 'temaki')
+            runningScore += scoreTemaki(playerCards, oppCards)
+          else runningScore += scoreUramakiEnd(playerCards, oppCards)
+          // else if (roll[0] == 'temaki') scoreTemaki()
+          // else scoreUramaki()
+
+          return runningScore
+        }
+
         const updateState = () => {
-          setPlayerHand(players[0].hand)
-          setPlayerStash(players[0].stash)
+          setUserHand(players[0].hand)
+          setUserStash(players[0].stash)
           setCpuOneStash(players[1].stash)
           setCpuTwoStash(players[2].stash)
           setCpuThreeStash(players[3].stash)
@@ -912,34 +1065,80 @@ const PlayPage = () => {
               players[0].hand[players[0].hand.length - 1] = players[0].hand[i]
               players[0].hand[i] = temp
               players[0].stash.push(players[0].hand.pop())
+              break
             }
           players[1].stash.push(players[1].hand.pop())
           players[2].stash.push(players[2].hand.pop())
           players[3].stash.push(players[3].hand.pop())
-          swapCards()
+
+          scoreUramakiDuring()
+
+          if (players[0].hand.length == 0) {
+            setUserScore(
+              scorePlayer(players[0].stash, [
+                players[1].stash,
+                players[2].stash,
+                players[3].stash,
+              ])
+            )
+            setCpuOneScore(
+              scorePlayer(players[1].stash, [
+                players[0].stash,
+                players[2].stash,
+                players[3].stash,
+              ])
+            )
+            setCpuTwoScore(
+              scorePlayer(players[2].stash, [
+                players[1].stash,
+                players[0].stash,
+                players[3].stash,
+              ])
+            )
+            setCpuThreeScore(
+              scorePlayer(players[3].stash, [
+                players[1].stash,
+                players[2].stash,
+                players[0].stash,
+              ])
+            )
+
+            if (round == 1) replenishDeck(DESSERTCOUNTTWO)
+            else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
+
+            setUserDessert(players[0].dessert)
+            setCpuOneDessert(players[1].dessert)
+            setCpuTwoDessert(players[2].dessert)
+            setCpuThreeDessert(players[3].dessert)
+
+            dealToPlayers()
+            round++
+          } else swapCards()
           updateState()
         }
 
         return (
           <div className="flex flex-row justify-center">
-            {cards.map((card, i) => {
+            {selection.map((card, i) => {
               return <Card key={i} info={card} action={handlePlayerSelection} />
             })}
           </div>
         )
       }
 
-      const Stash = ({ cards }) => {
+      const Stash = ({ platter }) => {
         let columnColors = []
         let cardColumns = []
 
         // Group the cards by color for display
-        for (let i = 0; i < cards.length; i++) {
-          if (columnColors.indexOf(cards[i].color) == -1) {
-            columnColors.push(cards[i].color)
-            cardColumns.push([cards[i]])
+        for (let i = 0; i < platter.length; i++) {
+          if (columnColors.indexOf(platter[i].color) == -1) {
+            columnColors.push(platter[i].color)
+            cardColumns.push([platter[i]])
           } else
-            cardColumns[columnColors.indexOf(cards[i].color)].unshift(cards[i])
+            cardColumns[columnColors.indexOf(platter[i].color)].unshift(
+              platter[i]
+            )
         }
 
         return (
@@ -956,49 +1155,82 @@ const PlayPage = () => {
           </div>
         )
       }
+
+      const Scoreline = ({ name, score, dessert }) => {
+        if (dess[0] == 'pudding')
+          return (
+            <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              {name}: Score: {score}, Pudding: {dessert}
+            </div>
+          )
+        else if (dess[0] == 'green tea ice cream')
+          return (
+            <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              {name}: Score: {score}, Green Tea Ice Cream: {dessert}
+            </div>
+          )
+        else {
+          // Parse undenary representation of fruit counts (watermelon is most significant, orange is least significant)
+          let watermelon = Math.floor(dessert / 11 / 11)
+          let dessertLeft = dessert - watermelon * 11 * 11
+          let pineapple = Math.floor(dessert / 11)
+          let orange = dessertLeft - pineapple * 11
+          return (
+            <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
+              {name}: Score: {score}; Watermelon: {watermelon}, Pineapple:{' '}
+              {pineapple}, Orange: {orange}
+            </div>
+          )
+        }
+      }
+
       return (
         <>
           <div className="flex h-screen flex-col">
             <div className="basis-2/5">
               <div className="flex flex-row">
                 <div className="basis-1/2">
-                  <Stash cards={cpuThreeStash} />
+                  <Stash platter={cpuThreeStash} />
                 </div>
                 <div className="basis-1/2">
-                  <Stash cards={cpuTwoStash} />
+                  <Stash platter={cpuTwoStash} />
                 </div>
               </div>
             </div>
             <div className="basis-1/5">
               <div className="flex flex-row">
-                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                  {players[3].name}: Score: {players[3].score}, Dessert:{' '}
-                  {players[3].dessert}
-                </div>
-                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                  {players[2].name}: Score: {players[2].score}, Dessert:{' '}
-                  {players[2].dessert}
-                </div>
+                <Scoreline
+                  name={players[3].name}
+                  score={cpuThreeScore}
+                  dessert={cpuThreeDessert}
+                />
+                <Scoreline
+                  name={players[2].name}
+                  score={cpuTwoScore}
+                  dessert={cpuTwoDessert}
+                />
               </div>
-              <Hand cards={playerHand} />
+              <Hand selection={userHand} />
               <div className="flex flex-row">
-                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                  {players[0].name}: Score: {players[0].score}, Dessert:{' '}
-                  {players[0].dessert}
-                </div>
-                <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-                  {players[1].name}: Score: {players[1].score}, Dessert:{' '}
-                  {players[1].dessert}
-                </div>
+                <Scoreline
+                  name={players[0].name}
+                  score={userScore}
+                  dessert={userDessert}
+                />
+                <Scoreline
+                  name={players[1].name}
+                  score={cpuOneScore}
+                  dessert={cpuOneDessert}
+                />
               </div>
             </div>
             <div className="basis-2/5">
               <div className="flex flex-row">
                 <div className="basis-1/2">
-                  <Stash cards={playerStash} />
+                  <Stash platter={userStash} />
                 </div>
                 <div className="basis-1/2">
-                  <Stash cards={cpuOneStash} />
+                  <Stash platter={cpuOneStash} />
                 </div>
               </div>
             </div>
