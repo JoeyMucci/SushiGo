@@ -72,19 +72,14 @@ import wasabiguide from 'web/public/wasabiguide.jpg'
 import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
 
 const PlayPage = () => {
-  const screens = Object.freeze({
-    SELECTION: 1,
-    GAME: 2,
-  })
-
-  const [screenNum, setScreenNum] = useState(screens.SELECTION)
+  const [showGame, setShowGame] = useState(false)
   const [roll, setRoll] = useState([])
   const [spec, setSpec] = useState([])
   const [app, setApp] = useState([])
   const [dess, setDess] = useState([])
   const [diff, setDiff] = useState([])
 
-  const SelectionScreen = () => {
+  const OrderScreen = () => {
     const ROLLCAP = 1
     const SPECCAP = 2
     const APPCAP = 3
@@ -94,10 +89,10 @@ const PlayPage = () => {
     const BUTTONCLASS =
       'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
 
-    let allowSelection = false
+    let allowOrder = false
 
     const updateScreen = () => {
-      if (allowSelection) setScreenNum(screens.GAME)
+      if (allowOrder) setShowGame(true)
     }
 
     const clickRoll = (e) => {
@@ -177,11 +172,11 @@ const PlayPage = () => {
         diff.length == DIFFCAP
       ) {
         document.getElementsByName('START')[0].className = BUTTONCLASS
-        allowSelection = true
+        allowOrder = true
       } else {
         document.getElementsByName('START')[0].className =
           BUTTONCLASS + ' opacity-50'
-        allowSelection = false
+          allowOrder = false
       }
     }
 
@@ -788,8 +783,8 @@ const PlayPage = () => {
         for (let i = 0; i < cards.PUDDING.count; i++)
           deck.dessertPile.push(cards.PUDDING)
       else if (dessertName == 'greenteaicecream')
-        for (let i = 0; i < cards.TEMAKI.count; i++)
-          deck.dessertPile.push(cards.TEMAKI)
+        for (let i = 0; i < cards.GTIC.count; i++)
+          deck.dessertPile.push(cards.GTIC)
       else {
         for (let i = 0; i < cards.FRUITDUBWAT.count; i++)
           deck.dessertPile.push(cards.FRUITDUBWAT)
@@ -814,23 +809,6 @@ const PlayPage = () => {
         neatPile[j] = temp
       }
     }
-
-    // Add all necessary cards
-    addNigiri()
-    for (let i = 0; i < roll.length; i++) addRolls(roll[i])
-    for (let i = 0; i < spec.length; i++) addSpecials(spec[i])
-    for (let i = 0; i < app.length; i++) addApps(app[i])
-    for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
-
-    // Fruit is the only dessert card that is heterogeneous, so its the only one that needs to be shuffled
-    if (dess[0] == 'fruit') shuffle(deck.dessertPile)
-
-    // Add dessert cards for first round
-    for (let i = 0; i < DESSERTCOUNTONE; i++)
-      deck.pile.push(deck.dessertPile.pop())
-
-    // Shuffle full deck
-    shuffle(deck.pile)
 
     // PLAYER INITIALIZATION
     const STARTCARDS = 9
@@ -867,32 +845,85 @@ const PlayPage = () => {
       },
     ]
 
+    // Fruit count is stored as an undecimal number (watermelon is most significant, orange is least significant)
+    // Since fruit is stored weirdly adding these methods for abstraction
+
+    // Return counts in the following order: watermelon, pineapple, orange
+    const parseFruit = (fruitNumber) => {
+      let watermelon = Math.floor(fruitNumber / 11 / 11)
+      let dessertLeft = fruitNumber - watermelon * 11 * 11
+      let pineapple = Math.floor(dessertLeft / 11)
+      let orange = dessertLeft - pineapple * 11
+      return [watermelon, pineapple, orange]
+    }
+
+    // PRECONDITION: fruitCard.color == 'peach'
+    const addFruit = (fruitCard, player) => {
+      if (fruitCard.type == cards.FRUITDUBWAT.type)
+        player.dessert += 2 * 11 * 11
+      else if (fruitCard.type == cards.FRUITDUBPINE.type)
+        player.dessert += 2 * 11
+      else if (fruitCard.type == cards.FRUITDUBO.type) player.dessert += 2
+      else if (fruitCard.type == cards.FRUITWATERO.type) {
+        player.dessert += 11 * 11
+        player.dessert++
+      } else if (fruitCard.type == cards.FRUITPINEO.type) {
+        player.dessert += 11
+        player.dessert++
+      } else if (fruitCard.type == cards.FRUITWATERPINE.type) {
+        player.dessert += 11 * 11
+        player.dessert += 11
+      }
+    }
+
+
+    const buildDeck = () => {
+      // Add all necessary cards
+      addNigiri()
+      for (let i = 0; i < roll.length; i++) addRolls(roll[i])
+      for (let i = 0; i < spec.length; i++) addSpecials(spec[i])
+      for (let i = 0; i < app.length; i++) addApps(app[i])
+      for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
+
+      // Fruit is the only dessert card that is heterogeneous, so its the only one that needs to be shuffled
+      if (dess[0] == 'fruit') shuffle(deck.dessertPile)
+
+      // Add dessert cards for first round
+      for (let i = 0; i < DESSERTCOUNTONE; i++)
+        deck.pile.push(deck.dessertPile.pop())
+
+      // Shuffle full deck
+      shuffle(deck.pile)
+    }
+
     const dealToPlayers = () => {
       for (let i = 0; i < STARTCARDS; i++)
         for (let j = 0; j < players.length; j++)
           players[j].hand.push(deck.pile.pop())
     }
 
+    buildDeck()
     dealToPlayers()
 
     const CardDisplay = () => {
-      let [userHand, setUserHand] = useState(players[0].hand)
-      let [userStash, setUserStash] = useState(players[0].stash)
-      let [cpuOneStash, setCpuOneStash] = useState(players[1].stash)
-      let [cpuTwoStash, setCpuTwoStash] = useState(players[2].stash)
-      let [cpuThreeStash, setCpuThreeStash] = useState(players[3].stash)
-      let [userScore, setUserScore] = useState(0)
-      let [cpuOneScore, setCpuOneScore] = useState(0)
-      let [cpuTwoScore, setCpuTwoScore] = useState(0)
-      let [cpuThreeScore, setCpuThreeScore] = useState(0)
+      const [showResults, setShowResults] = useState(false)
+      const [userHand, setUserHand] = useState(players[0].hand)
+      const [userStash, setUserStash] = useState(players[0].stash)
+      const [cpuOneStash, setCpuOneStash] = useState(players[1].stash)
+      const [cpuTwoStash, setCpuTwoStash] = useState(players[2].stash)
+      const [cpuThreeStash, setCpuThreeStash] = useState(players[3].stash)
+      const [userScore, setUserScore] = useState(0)
+      const [cpuOneScore, setCpuOneScore] = useState(0)
+      const [cpuTwoScore, setCpuTwoScore] = useState(0)
+      const [cpuThreeScore, setCpuThreeScore] = useState(0)
 
       // Fruit is stored as a 3 undigit base-11 number (watermelon is most significant, orange is least significant)
       // This is possible because for each fruit type the max icons is 10: 15 fruit cards * 2 icons/card / 3 icon types = 10
       // e.g. 2 watermelon, 1 pineapple, 3 orange is represented as 2 * 11 * 11 + 1 * 11 + 3 = 256
-      let [userDessert, setUserDessert] = useState(players[0].dessert)
-      let [cpuOneDessert, setCpuOneDessert] = useState(players[1].dessert)
-      let [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
-      let [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
+      const [userDessert, setUserDessert] = useState(players[0].dessert)
+      const [cpuOneDessert, setCpuOneDessert] = useState(players[1].dessert)
+      const [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
+      const [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
 
       const Card = ({ info, action }) => {
         return (
@@ -909,6 +940,7 @@ const PlayPage = () => {
       }
 
       const Hand = ({ selection }) => {
+        // A cornerstone of SushiGO gameplay is that players swap hands after playing cards, this is done here
         const swapCards = () => {
           let tempCards = players[0].hand
           for (let i = 0; i < players.length - 1; i++)
@@ -1149,7 +1181,7 @@ const PlayPage = () => {
             countCard(playerCards, cards.ONIFLAT),
           ]
 
-          let score = 0
+          let points = 0
 
           while (Math.max(onigiriCounts) > 0) {
             let count = 0
@@ -1159,44 +1191,84 @@ const PlayPage = () => {
                 onigiriCounts[i]--
               }
 
-            if (count == 1) score += 1
-            else if (count == 2) score += 4
-            else if (count == 3) score += 9
-            else score += 16
+            if (count == 1) points += 1
+            else if (count == 2) points += 4
+            else if (count == 3) points += 9
+            else points += 16
           }
 
-          return score
+          return points
         }
 
+        const scorePudding = (playerDessert, oppsDessert) => {
+          let points = 0
+          let flagMost = false
+          let flagLeast = true
+          for (let oppDessert of oppsDessert) {
+            if (
+              !flagMost &&
+              playerDessert < oppDessert
+            ) {
+              points -= 6
+              flagMost = true
+            }
+            if (
+              !flagLeast &&
+              playerDessert > oppDessert
+            ) {
+              points += 6
+              flagLeast = true
+            }
+          }
+          return points
+        }
+
+        const scoreGTIC = (playerDessert) => {
+          return 12 * Math.floor(countCard(playerDessert, cards.GTIC) / 4)
+        }
+
+        const scoreFruit = (fruitNumber) => {
+          let fruitCounts = parseFruit(fruitNumber)
+          let points = 0
+
+          for (let fruitCount of fruitCounts) {
+            if(fruitCount == 0)
+              points -= 2
+            else if(fruitCount == 1)
+              continue // points += 0
+            else if(fruitCount == 2)
+              points += 1
+            else if(fruitCount == 3)
+              points += 3
+            else if(fruitCount == 4)
+              points += 6
+            else points += 10
+          }
+
+          return points
+        }
+
+        const setAsideDessert = () => {
+          for (let i = 0; i < players.length; i++)
+            for (let j = players[i].stash.length - 1; j >= 0; j--)
+              // i.e. If this is a dessert card
+              if(['pink', 'blue', 'peach'].includes(players[i].stash[j].color)) {
+                let removedCard = players[i].stash.pop()
+                if (removedCard.color == 'peach')
+                  addFruit(removedCard, players[i])
+                else players[i].dessert++
+              }
+        }
+
+        // Rebuilds the deck by grabbing all the played cards (excluding dessert)
+        // The dessert count for each player is updated here as well
         const replenishDeck = (moreDes) => {
+          setAsideDessert()
           let usedCards = []
 
           for (let i = 0; i < players.length; i++)
-            for (let j = players[i].stash.length - 1; j >= 0; j--) {
-              let removedCard = players[i].stash.pop()
-              if (
-                removedCard.type == cards.PUDDING.type ||
-                removedCard.type == cards.GTIC.type
-              )
-                players[i].dessert++
-              // Fruit count is stored as an undecimal number (watermelon is most significant, orange is least significant)
-              else if (removedCard.type == cards.FRUITDUBWAT.type)
-                players[i].dessert += 2 * 11 * 11
-              else if (removedCard.type == cards.FRUITDUBPINE.type)
-                players[i].dessert += 2 * 11
-              else if (removedCard.type == cards.FRUITDUBO.type)
-                players[i].dessert += 2
-              else if (removedCard.type == cards.FRUITWATERO.type) {
-                players[i].dessert += 11 * 11
-                players[i].dessert++
-              } else if (removedCard.type == cards.FRUITPINEO.type) {
-                players[i].dessert += 11
-                players[i].dessert++
-              } else if (removedCard.type == cards.FRUITWATERPINE.type) {
-                players[i].dessert += 11 * 11
-                players[i].dessert += 11
-              } else usedCards.push(removedCard)
-            }
+            for (let j = players[i].stash.length - 1; j >= 0; j--)
+              usedCards.push(players[i].stash.pop())
 
           for (let usedCard of usedCards) deck.pile.push(usedCard)
 
@@ -1206,6 +1278,7 @@ const PlayPage = () => {
           shuffle(deck.pile)
         }
 
+        // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
         const scorePlayer = (playerCards, oppsCards) => {
           let runningScore = 0
 
@@ -1214,9 +1287,9 @@ const PlayPage = () => {
 
           // ROLLS
           for (let i = 0; i < roll.length; i++)
-            if (roll[0] == 'maki')
+            if (roll[i] == 'maki')
               runningScore += scoreMaki(playerCards, oppsCards)
-            else if (roll[0] == 'temaki')
+            else if (roll[i] == 'temaki')
               runningScore += scoreTemaki(playerCards, oppsCards)
             else runningScore += scoreUramakiEnd(playerCards, oppsCards)
 
@@ -1235,7 +1308,7 @@ const PlayPage = () => {
               runningScore += scoreTempura(playerCards)
             else if (app[i] == 'sashimi')
               runningScore += scoreSashimi(playerCards)
-            else if (app[i] == 'miso soup')
+            else if (app[i] == 'misosoup')
               runningScore += scoreMiso(playerCards)
             else if (app[i] == 'edamame')
               runningScore += scoreEdamame(playerCards, oppsCards)
@@ -1246,7 +1319,82 @@ const PlayPage = () => {
           return runningScore
         }
 
-        const updateState = () => {
+        const scorePlayerDessert = (playerDessert, oppsDessert) => {
+          for (let i = 0; i < dess.length; i++)
+            if (dess[i] == 'pudding')
+              return scorePudding(playerDessert, oppsDessert)
+            else if (dess[i] == 'greenteaicecream')
+              return scoreGTIC(playerDessert)
+            else return scoreFruit(playerDessert)
+        }
+
+        const updateScores = () => {
+          setUserScore(
+            scorePlayer(players[0].stash, [
+              players[1].stash,
+              players[2].stash,
+              players[3].stash,
+            ]) + userScore
+          )
+          setCpuOneScore(
+            scorePlayer(players[1].stash, [
+              players[0].stash,
+              players[2].stash,
+              players[3].stash,
+            ]) + cpuOneScore
+          )
+          setCpuTwoScore(
+            scorePlayer(players[2].stash, [
+              players[1].stash,
+              players[0].stash,
+              players[3].stash,
+            ]) + cpuTwoScore
+          )
+          setCpuThreeScore(
+            scorePlayer(players[3].stash, [
+              players[1].stash,
+              players[2].stash,
+              players[0].stash,
+            ]) + cpuThreeScore
+          )
+        }
+
+        const updateScoresDessert = () => {
+          setUserScore(
+            scorePlayer(players[0].stash, [players[1].stash, players[2].stash, players[3].stash]) +
+            scorePlayerDessert(players[0].dessert, [
+              players[1].dessert,
+              players[2].dessert,
+              players[3].dessert,
+            ]) + userScore
+          )
+          setCpuOneScore(
+            scorePlayer(players[1].stash, [players[0].stash, players[2].stash, players[3].stash]) +
+            scorePlayerDessert(players[1].dessert, [
+              players[0].dessert,
+              players[2].dessert,
+              players[3].dessert,
+            ]) + cpuOneScore
+          )
+          setCpuTwoScore(
+            scorePlayer(players[2].stash, [players[1].stash, players[0].stash, players[3].stash]) +
+            scorePlayerDessert(players[2].dessert, [
+              players[1].dessert,
+              players[0].dessert,
+              players[3].dessert,
+            ]) + cpuTwoScore
+          )
+          setCpuThreeScore(
+            scorePlayer(players[3].stash, [players[1].stash, players[2].stash, players[0].stash]) +
+            scorePlayerDessert(players[3].dessert, [
+              players[1].dessert,
+              players[2].dessert,
+              players[0].dessert,
+            ]) + cpuThreeScore
+          )
+        }
+
+        const updateCardDisplay = () => {
           setUserHand(players[0].hand)
           setUserStash(players[0].stash)
           setCpuOneStash(players[1].stash)
@@ -1270,47 +1418,27 @@ const PlayPage = () => {
           if (roll[0] == 'uramaki') scoreUramakiDuring()
 
           if (players[0].hand.length == 0) {
-            setUserScore(
-              scorePlayer(players[0].stash, [
-                players[1].stash,
-                players[2].stash,
-                players[3].stash,
-              ]) + userScore
-            )
-            setCpuOneScore(
-              scorePlayer(players[1].stash, [
-                players[0].stash,
-                players[2].stash,
-                players[3].stash,
-              ]) + cpuOneScore
-            )
-            setCpuTwoScore(
-              scorePlayer(players[2].stash, [
-                players[1].stash,
-                players[0].stash,
-                players[3].stash,
-              ]) + cpuTwoScore
-            )
-            setCpuThreeScore(
-              scorePlayer(players[3].stash, [
-                players[1].stash,
-                players[2].stash,
-                players[0].stash,
-              ]) + cpuThreeScore
-            )
+            if(round < 3)
+              updateScores()
 
             if (round == 1) replenishDeck(DESSERTCOUNTTWO)
             else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
+            else setAsideDessert()
 
             setUserDessert(players[0].dessert)
             setCpuOneDessert(players[1].dessert)
             setCpuTwoDessert(players[2].dessert)
             setCpuThreeDessert(players[3].dessert)
 
-            dealToPlayers()
-            round++
+            if(round == 3)
+              updateScoresDessert()
+            else {
+              dealToPlayers()
+              round++
+            }
+
           } else swapCards()
-          updateState()
+          updateCardDisplay()
         }
 
         return (
@@ -1359,18 +1487,15 @@ const PlayPage = () => {
               {name}: Score: {score}; Pudding: {dessert}
             </div>
           )
-        else if (dess[0] == 'green tea ice cream')
+        else if (dess[0] == 'greenteaicecream')
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Green Tea Ice Cream: {dessert}
             </div>
           )
         else {
-          // Parse undenary representation of fruit counts (watermelon is most significant, orange is least significant)
-          let watermelon = Math.floor(dessert / 11 / 11)
-          let dessertLeft = dessert - watermelon * 11 * 11
-          let pineapple = Math.floor(dessertLeft / 11)
-          let orange = dessertLeft - pineapple * 11
+          let [watermelon, pineapple, orange] = parseFruit(dessert)
+
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Watermelon: {watermelon}, Pineapple:{' '}
@@ -1380,7 +1505,8 @@ const PlayPage = () => {
         }
       }
 
-      return (
+      if(!showResults)
+        return (
         <>
           <div className="flex h-screen flex-col">
             <div className="basis-2/5">
@@ -1433,12 +1559,15 @@ const PlayPage = () => {
           </div>
         </>
       )
+      else return (
+        <p>{userScore}</p>
+      )
     }
 
     return <CardDisplay />
   }
 
-  if (screenNum == screens.SELECTION) return <SelectionScreen />
+  if (!showGame) return <OrderScreen />
   else return <GameScreen />
 }
 
