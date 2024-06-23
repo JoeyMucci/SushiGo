@@ -576,7 +576,7 @@ const PlayPage = () => {
         color: 'purple',
         count: 8,
       },
-      EEL: { type: 31, text: 'eel', picpath: eel, color: 'yellow', count: 8 },
+      EEL: { type: 31, text: 'eel', picpath: eel, color: 'poison', count: 8 },
       TOFU: { type: 32, text: 'tofu', picpath: tofu, color: 'green', count: 8 },
       ONICIRCLE: {
         type: 33,
@@ -666,7 +666,7 @@ const PlayPage = () => {
         type: 45,
         text: 'turned over card',
         picpath: turnedovercard,
-        color: 'gamewright',
+        color: null,
         count: 0,
       },
     })
@@ -924,6 +924,14 @@ const PlayPage = () => {
           return count
         }
 
+        const scoreNigiri = (playerCards) => {
+          return (
+            countCard(playerCards, cards.EGG) +
+            2 * countCard(playerCards, cards.SALMON) +
+            3 * countCard(playerCards, cards.SQUID)
+          )
+        }
+
         const scoreMaki = (playerCards, oppsCards) => {
           let makiCount =
             countCard(playerCards, cards.MAKIONE) +
@@ -996,7 +1004,169 @@ const PlayPage = () => {
           }
         }
 
-        const scoreUramakiEnd = () => {}
+        const scoreUramakiEnd = (playerCards, oppsCards) => {
+          if (uramakiPoints < 2) return
+          let uramakiCount =
+            3 * countCard(playerCards, cards.URAMAKITHREE) +
+            4 * countCard(playerCards, cards.URAMAKIFOUR) +
+            5 * countCard(playerCards, cards.URAMAKIFIVE)
+
+          for (let oppCards of oppsCards) {
+            if (
+              uramakiCount <
+              3 * countCard(oppCards, cards.URAMAKITHREE) +
+                4 * countCard(oppCards, cards.URAMAKIFOUR) +
+                5 * countCard(oppCards, cards.URAMAKIFIVE)
+            )
+              return 0
+          }
+          return uramakiPoints
+        }
+
+        const scoreLeftovers = (playerCards) => {
+          return 2 * countCard(playerCards, cards.TOC)
+        }
+
+        const scoreTea = (playerCards) => {
+          let columnColors = []
+          let cardColumns = []
+          let mostCommonColorCount = 1
+
+          for (let i = 0; i < playerCards.length; i++) {
+            // Turned over cards do not count towards tea scoring
+            if (playerCards[i].type == cards.TOC.type) break
+
+            if (columnColors.indexOf(playerCards[i].color) == -1) {
+              columnColors.push(playerCards[i].color)
+              cardColumns.push([playerCards[i]])
+            } else
+              cardColumns[columnColors.indexOf(playerCards[i].color)].unshift(
+                playerCards[i]
+              )
+          }
+
+          for (let cardColumn of cardColumns)
+            mostCommonColorCount = Math.max(
+              mostCommonColorCount,
+              cardColumn.length
+            )
+
+          return mostCommonColorCount * countCard(playerCards, cards.TEA)
+        }
+
+        const scoreSoysauce = (playerCards, oppsCards) => {
+          let columnColors = []
+
+          for (let i = 0; i < playerCards.length; i++) {
+            // Turned over cards do not count towards soysauce scoring
+            if (playerCards[i].type == cards.TOC.type) break
+
+            if (columnColors.indexOf(playerCards[i].color) == -1)
+              columnColors.push(playerCards[i].color)
+          }
+
+          for (let oppCards of oppsCards) {
+            let oppColumnColors = []
+
+            for (let i = 0; i < oppCards.length; i++) {
+              // Turned over cards do not count towards soysauce scoring
+              if (oppCards[i].type == cards.TOC.type) break
+
+              if (oppColumnColors.indexOf(oppCards[i].color) == -1)
+                oppColumnColors.push(oppCards[i].color)
+            }
+
+            if (columnColors.length < oppColumnColors.length) return 0
+            else return 4 * countCard(playerCards, cards.SOYSAUCE)
+          }
+        }
+
+        const scoreDumpling = (playerCards) => {
+          switch (countCard(playerCards, cards.DUMPLING)) {
+            case 0:
+              return 0
+            case 1:
+              return 1
+            case 2:
+              return 3
+            case 3:
+              return 6
+            case 4:
+              return 10
+            default:
+              return 15
+          }
+        }
+
+        const scoreTempura = (playerCards) => {
+          return Math.floor(countCard(playerCards, cards.TEMPURA) / 2) * 5
+        }
+
+        const scoreSashimi = (playerCards) => {
+          return Math.floor(countCard(playerCards, cards.SASHIMI) / 3) * 10
+        }
+
+        const scoreMiso = (playerCards) => {
+          return 3 * countCard(playerCards, cards.MISO)
+        }
+
+        const scoreEdamame = (playerCards, oppsCards) => {
+          let oppWithEdamame = 0
+
+          for (let oppCards of oppsCards)
+            if (countCard(oppCards, cards.EDAMAME) > 0) oppWithEdamame++
+
+          return oppWithEdamame * countCard(playerCards, cards.EDAMAME)
+        }
+
+        const scoreEel = (playerCards) => {
+          switch (countCard(playerCards, cards.EEL)) {
+            case 0:
+              return 0
+            case 1:
+              return -3
+            default:
+              return 7
+          }
+        }
+
+        const scoreTofu = (playerCards) => {
+          switch (countCard(playerCards, cards.TOFU)) {
+            case 1:
+              return 2
+            case 2:
+              return 6
+            default:
+              return 0
+          }
+        }
+
+        const scoreOnigiri = (playerCards) => {
+          let onigiriCounts = [
+            countCard(playerCards, cards.ONICIRCLE),
+            countCard(playerCards, cards.ONISQUARE),
+            countCard(playerCards, cards.ONITRI),
+            countCard(playerCards, cards.ONIFLAT),
+          ]
+
+          let score = 0
+
+          while (Math.max(onigiriCounts) > 0) {
+            let count = 0
+            for (let i = 0; i < onigiriCounts.length; i++)
+              if (onigiriCounts[i] > 0) {
+                count++
+                onigiriCounts[i]--
+              }
+
+            if (count == 1) score += 1
+            else if (count == 2) score += 4
+            else if (count == 3) score += 9
+            else score += 16
+          }
+
+          return score
+        }
 
         const replenishDeck = (moreDes) => {
           let usedCards = []
@@ -1036,16 +1206,42 @@ const PlayPage = () => {
           shuffle(deck.pile)
         }
 
-        const scorePlayer = (playerCards, oppCards) => {
+        const scorePlayer = (playerCards, oppsCards) => {
           let runningScore = 0
+
+          // NIGIRI
+          runningScore += scoreNigiri(playerCards)
+
           // ROLLS
-          if (roll[0] == 'maki')
-            runningScore += scoreMaki(playerCards, oppCards)
-          else if (roll[0] == 'temaki')
-            runningScore += scoreTemaki(playerCards, oppCards)
-          else runningScore += scoreUramakiEnd(playerCards, oppCards)
-          // else if (roll[0] == 'temaki') scoreTemaki()
-          // else scoreUramaki()
+          for (let i = 0; i < roll.length; i++)
+            if (roll[0] == 'maki')
+              runningScore += scoreMaki(playerCards, oppsCards)
+            else if (roll[0] == 'temaki')
+              runningScore += scoreTemaki(playerCards, oppsCards)
+            else runningScore += scoreUramakiEnd(playerCards, oppsCards)
+
+          // SPECIALS
+          for (let i = 0; i < spec.length; i++)
+            if (spec[i] == 'takeout box')
+              runningScore += scoreLeftovers(playerCards)
+            else if (spec[i] == 'tea') runningScore += scoreTea(playerCards)
+            else if (spec[i] == 'soysauce')
+              runningScore += scoreSoysauce(playerCards, oppsCards)
+
+          // APPETIZERS
+          for (let i = 0; i < app.length; i++)
+            if (app[i] == 'dumpling') runningScore += scoreDumpling(playerCards)
+            else if (app[i] == 'tempura')
+              runningScore += scoreTempura(playerCards)
+            else if (app[i] == 'sashimi')
+              runningScore += scoreSashimi(playerCards)
+            else if (app[i] == 'miso soup')
+              runningScore += scoreMiso(playerCards)
+            else if (app[i] == 'edamame')
+              runningScore += scoreEdamame(playerCards, oppsCards)
+            else if (app[i] == 'eel') runningScore += scoreEel(playerCards)
+            else if (app[i] == 'tofu') runningScore += scoreTofu(playerCards)
+            else runningScore += scoreOnigiri(playerCards)
 
           return runningScore
         }
@@ -1071,7 +1267,7 @@ const PlayPage = () => {
           players[2].stash.push(players[2].hand.pop())
           players[3].stash.push(players[3].hand.pop())
 
-          scoreUramakiDuring()
+          if (roll[0] == 'uramaki') scoreUramakiDuring()
 
           if (players[0].hand.length == 0) {
             setUserScore(
@@ -1079,28 +1275,28 @@ const PlayPage = () => {
                 players[1].stash,
                 players[2].stash,
                 players[3].stash,
-              ])
+              ]) + userScore
             )
             setCpuOneScore(
               scorePlayer(players[1].stash, [
                 players[0].stash,
                 players[2].stash,
                 players[3].stash,
-              ])
+              ]) + cpuOneScore
             )
             setCpuTwoScore(
               scorePlayer(players[2].stash, [
                 players[1].stash,
                 players[0].stash,
                 players[3].stash,
-              ])
+              ]) + cpuTwoScore
             )
             setCpuThreeScore(
               scorePlayer(players[3].stash, [
                 players[1].stash,
                 players[2].stash,
                 players[0].stash,
-              ])
+              ]) + cpuThreeScore
             )
 
             if (round == 1) replenishDeck(DESSERTCOUNTTWO)
@@ -1160,20 +1356,20 @@ const PlayPage = () => {
         if (dess[0] == 'pudding')
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              {name}: Score: {score}, Pudding: {dessert}
+              {name}: Score: {score}; Pudding: {dessert}
             </div>
           )
         else if (dess[0] == 'green tea ice cream')
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
-              {name}: Score: {score}, Green Tea Ice Cream: {dessert}
+              {name}: Score: {score}; Green Tea Ice Cream: {dessert}
             </div>
           )
         else {
           // Parse undenary representation of fruit counts (watermelon is most significant, orange is least significant)
           let watermelon = Math.floor(dessert / 11 / 11)
           let dessertLeft = dessert - watermelon * 11 * 11
-          let pineapple = Math.floor(dessert / 11)
+          let pineapple = Math.floor(dessertLeft / 11)
           let orange = dessertLeft - pineapple * 11
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
