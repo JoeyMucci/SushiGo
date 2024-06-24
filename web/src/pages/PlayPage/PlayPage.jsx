@@ -1224,7 +1224,7 @@ const PlayPage = () => {
         }
 
         const scoreGTIC = (playerDessert) => {
-          return 12 * Math.floor(countCard(playerDessert, cards.GTIC) / 4)
+          return 12 * Math.floor(playerDessert / 4)
         }
 
         const scoreFruit = (fruitNumber) => {
@@ -1250,14 +1250,15 @@ const PlayPage = () => {
 
         const setAsideDessert = () => {
           for (let i = 0; i < players.length; i++)
-            for (let j = players[i].stash.length - 1; j >= 0; j--)
+            for (let j = players[i].stash.length - 1; j >= 0; j--) {
               // i.e. If this is a dessert card
-              if(['pink', 'blue', 'peach'].includes(players[i].stash[j].color)) {
-                let removedCard = players[i].stash.pop()
-                if (removedCard.color == 'peach')
+              let removedCard = players[i].stash.pop()
+              if (['pink', 'blue', 'peach'].includes(removedCard.color))
+                if(removedCard.color == 'peach')
                   addFruit(removedCard, players[i])
                 else players[i].dessert++
-              }
+              else players[i].stash.unshift(removedCard)
+            }
         }
 
         // Rebuilds the deck by grabbing all the played cards (excluding dessert)
@@ -1430,8 +1431,10 @@ const PlayPage = () => {
             setCpuTwoDessert(players[2].dessert)
             setCpuThreeDessert(players[3].dessert)
 
-            if(round == 3)
+            if(round == 3) {
               updateScoresDessert()
+              setShowResults(true)
+            }
             else {
               dealToPlayers()
               round++
