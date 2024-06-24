@@ -1433,6 +1433,7 @@ const PlayPage = () => {
 
             if(round == 3) {
               updateScoresDessert()
+
               setShowResults(true)
             }
             else {
@@ -1562,9 +1563,61 @@ const PlayPage = () => {
           </div>
         </>
       )
-      else return (
-        <p>{userScore}</p>
-      )
+      else  {
+
+        const comparePlayers = (a, b) => {
+          if(a.score != b.score)
+            return a.score - b.score
+          if(a.dessert != b.dessert)
+            return a.dessert - b.dessert
+          return a.tiebreak - b.tiebreaker
+        }
+
+        let userDessertCount = userDessert
+        let cpuOneDessertCount = cpuOneDessert
+        let cpuTwoDessertCount = cpuTwoDessert
+        let cpuThreeDessertCount = cpuThreeDessert
+
+        // Change dessertCount to number of cards played for fruit
+        if(dess[0] == 'fruit') {
+          let userFruitCounts = parseFruit(userDessert)
+          userDessertCount = (userFruitCounts[0] + userFruitCounts[1] + userFruitCounts[2]) / 2
+          let cpuOneFruitCounts = parseFruit(cpuOneDessert)
+          cpuOneDessertCount = (cpuOneFruitCounts[0] + cpuOneFruitCounts[1] + cpuOneFruitCounts[2]) / 2
+          let cpuTwoFruitCounts = parseFruit(cpuTwoDessert)
+          cpuTwoDessertCount = (cpuTwoFruitCounts[0] + cpuTwoFruitCounts[1] + cpuTwoFruitCounts[2]) / 2
+          let cpuThreeFruitCounts = parseFruit(cpuThreeDessert)
+          cpuThreeDessertCount = (cpuThreeFruitCounts[0] + cpuThreeFruitCounts[1] + cpuThreeFruitCounts[2]) / 2
+        }
+
+        // Tiebreak is cpuTwo > cpuThree > cpuOne > user
+        let displayInfo = [{name: players[0].name, score: userScore, dessert: userDessertCount, tiebreak: 0},
+          {name: players[1].name, score: cpuOneScore, dessert: cpuOneDessertCount, tiebreak: 1},
+          {name: players[2].name, score: cpuTwoScore, dessert: cpuTwoDessertCount, tiebreak: 3},
+          {name: players[3].name, score: cpuThreeScore, dessert: cpuThreeDessertCount, tiebreak: 2},]
+
+        displayInfo.sort(comparePlayers)
+
+        return (
+          <>
+            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            {displayInfo[3].name}: {displayInfo[3].score} ({displayInfo[3].dessert})
+            </p>
+            <br></br>
+            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            {displayInfo[2].name}: {displayInfo[2].score} ({displayInfo[2].dessert})
+            </p>
+            <br></br>
+            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            {displayInfo[1].name}: {displayInfo[1].score} ({displayInfo[1].dessert})
+            </p>
+            <br></br>
+            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            {displayInfo[0].name}: {displayInfo[0].score} ({displayInfo[0].dessert})
+            </p>
+          </>
+        )
+      }
     }
 
     return <CardDisplay />
