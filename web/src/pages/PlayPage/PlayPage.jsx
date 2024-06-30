@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import nextround from 'web/public/nextround.jpg'
+import finalscore from 'web/public/finalscore.jpg'
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
 import chopsticks2 from 'web/public/chopsticks(2).jpg'
 import chopsticks3 from 'web/public/chopsticks(3).jpg'
@@ -183,12 +185,6 @@ const PlayPage = () => {
 
     return (
       <>
-        <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
-          NEXT
-        </p>
-        <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
-          ROUND
-        </p>
         <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
           Choose Your Meal
         </p>
@@ -675,9 +671,16 @@ const PlayPage = () => {
         type: 46,
         text: 'next round',
         picpath: nextround,
-        color: null,
+        color: 'transparent',
         count: 0,
-      }
+      },
+      FINAL: {
+        type: 47,
+        text: 'final score',
+        picpath: finalscore,
+        color: 'transparent',
+        count: 0,
+      },
     })
 
     // DECK PREPERATION
@@ -690,6 +693,7 @@ const PlayPage = () => {
     let deck = {
       pile: [],
       dessertPile: [],
+      discardPile: [],
     }
 
     const addNigiri = () => {
@@ -1024,6 +1028,18 @@ const PlayPage = () => {
         }
 
         const scoreUramakiDuring = () => {
+
+          // Remove uramaki by removing every card, and putting it in discard
+          // pile if it's a uramaki or putting it back if it's not
+          const cleanUramaki = (playerCards) => {
+            for(let i = playerCards.length - 1; i >= 0; i--) {
+              let removedCard = playerCards.pop()
+              if (removedCard.color == 'lime') // Uramaki is lime colored
+                deck.discardPile.push(removedCard)
+              else playerCards.unshift(removedCard)
+            }
+          }
+
           // Check from 14 to 10 for scoring uramaki since ten is the minimum to score and
           // 5 is the max that can be played in a round, so the max unscored amount is 10 - 1 + 5 = 14
           for (let goal = 14; goal >= 10; goal--) {
@@ -1031,18 +1047,46 @@ const PlayPage = () => {
             let decrease = 0
             for (let i = 0; i < players.length; i++) {
               let uramakiCount =
-                3 * countCard(players[i].hand, cards.URAMAKITHREE) +
-                4 * countCard(players[i].hand, cards.URAMAKIFOUR) +
-                5 * countCard(players[i].hand, cards.URAMAKIFIVE)
+                3 * countCard(players[i].stash, cards.URAMAKITHREE) +
+                4 * countCard(players[i].stash, cards.URAMAKIFOUR) +
+                5 * countCard(players[i].stash, cards.URAMAKIFIVE)
 
               // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
               // However, it is possible to score uramaki again at the end of the round
               if (uramakiCount == goal && !players[i].uramakiScored) {
-                if (i == 0) setUserScore(userScore + uramakiPoints)
-                else if (i == 1) setCpuOneScore(cpuOneScore + uramakiPoints)
-                else if (i == 2) setCpuOneScore(cpuTwoScore + uramakiPoints)
-                else if (i == 3) setCpuOneScore(cpuThreeScore + uramakiPoints)
-                players[i].uramakiScored = false
+                if (i == 0)  {
+                  setUserScore(userScore + uramakiPoints)
+                  cleanUramaki(players[0].stash)
+                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                    icon: '😋',
+                    position: 'bottom-left',
+                  })
+                }
+                else if (i == 1) {
+                  setCpuOneScore(cpuOneScore + uramakiPoints)
+                  cleanUramaki(players[1].stash)
+                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                    icon: '😋',
+                    position: 'bottom-right',
+                  })
+                }
+                else if (i == 2) {
+                  setCpuOneScore(cpuTwoScore + uramakiPoints)
+                  cleanUramaki(players[2].stash)
+                  toast(players[2].name + " ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                    icon: '😋',
+                    position: 'top-right',
+                  })
+                }
+                else if (i == 3) {
+                  setCpuOneScore(cpuThreeScore + uramakiPoints)
+                  cleanUramaki(players[3].stash)
+                  toast(players[3].name + " ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                    icon: '😋',
+                    position: 'top-left',
+                  })
+                }
+                players[i].uramakiScored = true
                 decrease += 3 // Do not decrease right away so tied players receive the same points
               }
             }
@@ -1197,7 +1241,7 @@ const PlayPage = () => {
 
           let points = 0
 
-          while (Math.max(onigiriCounts) > 0) {
+          while (Math.max(...onigiriCounts) > 0) {
             let count = 0
             for (let i = 0; i < onigiriCounts.length; i++)
               if (onigiriCounts[i] > 0) {
@@ -1276,16 +1320,16 @@ const PlayPage = () => {
         }
 
         // Rebuilds the deck by grabbing all the played cards (excluding dessert)
-        // The dessert count for each player is updated here as well
+        // Also grabs discarded cards (e.g. uramaki, miso)
         const replenishDeck = (moreDes) => {
           setAsideDessert()
-          let usedCards = []
 
           for (let i = 0; i < players.length; i++)
             for (let j = players[i].stash.length - 1; j >= 0; j--)
-              usedCards.push(players[i].stash.pop())
+              deck.pile.push(players[i].stash.pop())
 
-          for (let usedCard of usedCards) deck.pile.push(usedCard)
+          for(let i = deck.discardPile.length - 1; i >= 0; i--)
+            deck.pile.push(deck.discardPile.pop())
 
           for (let i = 0; i < moreDes; i++)
             deck.pile.push(deck.dessertPile.pop())
@@ -1417,9 +1461,54 @@ const PlayPage = () => {
           setCpuThreeStash(players[3].stash)
         }
 
-        const handlePlayerSelection = async (e) => {
+        const handlePlayerSelection = (e) => {
+          const advanceRound = () => {
+            // Reset uramaki
+            uramakiPoints = 8
+            for(let i = 0; i < players.length; i++)
+              players[i].uramakiScored = false
+
+            round++
+          }
+
+          // If more than one miso soup is played all are removed
+          const handleMiso = () => {
+            let misoCount = 0
+            for(let i = 0; i < players.length; i++)
+              if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type)
+                misoCount++
+
+            if(misoCount > 1) {
+              for(let i = 0; i < players.length; i++) {
+                if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type) {
+                  deck.discardPile.push(players[i].stash.pop())
+                  if(i == 0)
+                    toast("Gave up non-unique miso soup", {
+                      icon: '🥣',
+                      position: 'bottom-left',
+                    })
+                  else if(i == 1)
+                    toast("Gave up non-unique miso soup", {
+                      icon: '🥣',
+                      position: 'bottom-right',
+                    })
+                  else if(i == 2)
+                    toast("Gave up non-unique miso soup", {
+                      icon: '🥣',
+                      position: 'top-right',
+                    })
+                  else
+                    toast("Gave up non-unique miso soup", {
+                      icon: '🥣',
+                      position: 'top-left',
+                    })
+                }
+              }
+            }
+          }
+
           // If the user is actually playing a card
-          if(players[0].hand[0].type != cards.NEXT.type) {
+          if(players[0].hand[0].color != 'transparent') {
             for (let i = 0; i < players[0].hand.length; i++)
               if (e.target.alt == players[0].hand[i].text) {
                 let temp = players[0].hand[players[0].hand.length - 1]
@@ -1432,10 +1521,14 @@ const PlayPage = () => {
             players[2].stash.push(players[2].hand.pop())
             players[3].stash.push(players[3].hand.pop())
 
+            handleMiso()
+
             if (roll[0] == 'uramaki') scoreUramakiDuring()
 
             if (players[0].hand.length == 0)
-              players[1].hand.push(cards.NEXT)
+              if(round < 3)
+                players[1].hand.push(cards.NEXT)
+              else players[1].hand.push(cards.FINAL)
 
             swapCards()
             updateCardDisplay()
@@ -1461,7 +1554,7 @@ const PlayPage = () => {
             else {
               dealToPlayers()
               updateCardDisplay()
-              round++
+              advanceRound()
             }
           }
         }
@@ -1644,8 +1737,18 @@ const PlayPage = () => {
     return <CardDisplay />
   }
 
-  if (!showGame) return <OrderScreen />
-  else return <GameScreen />
+  if (!showGame) return  (
+    <>
+      <OrderScreen />
+      <Toaster />
+    </>
+  )
+  else return (
+    <>
+      <GameScreen />
+      <Toaster />
+    </>
+  )
 }
 
 export default PlayPage
