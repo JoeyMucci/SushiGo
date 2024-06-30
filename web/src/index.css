@@ -16,6 +16,10 @@
     --color-oak: rgb(198, 162, 126);
     --color-nature: rgb(48, 69, 41);
 
+    --color-gold: rgb(245, 191, 3);
+    --color-silver: rgb(192, 192, 192);
+    --color-bronze: rgb(205, 127, 50);
+
     @font-face {
       font-family: 'Caveat';
       src: url("web/public/Caveat-SemiBold.ttf");
@@ -47,4 +51,6 @@ img {
 /* OUTLINE*/
 [type=checkbox]:checked + img {
   outline: 5px solid rgb(48, 69, 41);
+  position: relative;
+  z-index: 1000;
 }

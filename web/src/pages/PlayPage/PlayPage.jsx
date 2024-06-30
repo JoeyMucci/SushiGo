@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import nextround from 'web/public/nextround.jpg'
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
 import chopsticks2 from 'web/public/chopsticks(2).jpg'
 import chopsticks3 from 'web/public/chopsticks(3).jpg'
@@ -183,6 +184,12 @@ const PlayPage = () => {
     return (
       <>
         <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
+          NEXT
+        </p>
+        <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
+          ROUND
+        </p>
+        <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
           Choose Your Meal
         </p>
         <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
@@ -192,61 +199,61 @@ const PlayPage = () => {
         <Form onSubmit={updateScreen}>
           <div className="flex flex-col items-center">
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="maki" name="roll" onChange={clickRoll} />
-                <img src={maki} alt="maki roll" className="h-48 w-36" />
+                <img src={maki} alt="maki roll" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="temaki" name="roll" onChange={clickRoll} />
                 <img
                   src={temakiguide}
                   alt="temaki roll"
-                  className="h-48 w-36"
+                  className="h-36 w-24"
                 />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="uramaki" name="roll" onChange={clickRoll} />
-                <img src={uramaki} alt="uramaki roll" className="h-48 w-36" />
+                <img src={uramaki} alt="uramaki roll" className="h-36 w-24" />
               </Label>
             </div>
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label>
                 <CheckboxField
                   id="chopsticks"
                   name="spec"
                   onChange={clickSpec}
                 />
-                <img src={chopsticks} alt="chopsticks" className="h-48 w-36" />
+                <img src={chopsticks} alt="chopsticks" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="spoon" name="spec" onChange={clickSpec} />
-                <img src={spoon} alt="spoon" className="h-48 w-36" />
+                <img src={spoon} alt="spoon" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="menu" name="spec" onChange={clickSpec} />
-                <img src={menu} alt="menu" className="h-48 w-36" />
+                <img src={menu} alt="menu" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField
                   id="takeoutbox"
                   name="spec"
                   onChange={clickSpec}
                 />
-                <img src={takeoutbox} alt="takeout box" className="h-48 w-36" />
+                <img src={takeoutbox} alt="takeout box" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="tea" name="spec" onChange={clickSpec} />
-                <img src={teaguide} alt="tea" className="h-48 w-36" />
+                <img src={teaguide} alt="tea" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="wasabi" name="spec" onChange={clickSpec} />
-                <img src={wasabiguide} alt="wasabi" className="h-48 w-36" />
+                <img src={wasabiguide} alt="wasabi" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="soysauce" name="spec" onChange={clickSpec} />
-                <img src={soysauceguide} alt="soysauce" className="h-48 w-36" />
+                <img src={soysauceguide} alt="soysauce" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField
                   id="specialorder"
                   name="spec"
@@ -255,50 +262,50 @@ const PlayPage = () => {
                 <img
                   src={specialguide}
                   alt="special order"
-                  className="h-48 w-36"
+                  className="h-36 w-24"
                 />
               </Label>
             </div>
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="dumpling" name="app" onChange={clickApp} />
-                <img src={dumplingguide} alt="dumpling" className="h-48 w-36" />
+                <img src={dumplingguide} alt="dumpling" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="tempura" name="app" onChange={clickApp} />
-                <img src={tempuraguide} alt="tempura" className="h-48 w-36" />
+                <img src={tempuraguide} alt="tempura" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="sashimi" name="app" onChange={clickApp} />
-                <img src={sashimiguide} alt="sashimi" className="h-48 w-36" />
+                <img src={sashimiguide} alt="sashimi" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="misosoup" name="app" onChange={clickApp} />
-                <img src={misoguide} alt="miso soup" className="h-48 w-36" />
+                <img src={misoguide} alt="miso soup" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="edamame" name="app" onChange={clickApp} />
-                <img src={edamameguide} alt="edamame" className="h-48 w-36" />
+                <img src={edamameguide} alt="edamame" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="eel" name="app" onChange={clickApp} />
-                <img src={eelguide} alt="eel" className="h-48 w-36" />
+                <img src={eelguide} alt="eel" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="tofu" name="app" onChange={clickApp} />
-                <img src={tofuguide} alt="tofu" className="h-48 w-36" />
+                <img src={tofuguide} alt="tofu" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="onigiri" name="app" onChange={clickApp} />
-                <img src={onigiri} alt="onigiri" className="h-48 w-36" />
+                <img src={onigiri} alt="onigiri" className="h-36 w-24" />
               </Label>
             </div>
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="pudding" name="dess" onChange={clickDess} />
-                <img src={puddingguide} alt="pudding" className="h-48 w-36" />
+                <img src={puddingguide} alt="pudding" className="h-36 w-24" />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField
                   id="greenteaicecream"
                   name="dess"
@@ -307,12 +314,12 @@ const PlayPage = () => {
                 <img
                   src={gticguide}
                   alt="green tea ice cream"
-                  className="h-48 w-36"
+                  className="h-36 w-24"
                 />
               </Label>
-              <Label className="m-2">
+              <Label>
                 <CheckboxField id="fruit" name="dess" onChange={clickDess} />
-                <img src={fruit} alt="fruit" className="h-48 w-36" />
+                <img src={fruit} alt="fruit" className="h-36 w-24" />
               </Label>
             </div>
             <div className="flex flex-row">
@@ -664,6 +671,13 @@ const PlayPage = () => {
         color: null,
         count: 0,
       },
+      NEXT: {
+        type: 46,
+        text: 'next round',
+        picpath: nextround,
+        color: null,
+        count: 0,
+      }
     })
 
     // DECK PREPERATION
@@ -994,7 +1008,7 @@ const PlayPage = () => {
         const scoreTemaki = (playerCards, oppsCards) => {
           let points = 0
           let flagMost = false
-          let flagLeast = true
+          let flagLeast = false
           let temakiCount = countCard(playerCards, cards.TEMAKI)
           for (let oppCards of oppsCards) {
             if (!flagMost && temakiCount < countCard(oppCards, cards.TEMAKI)) {
@@ -1203,7 +1217,7 @@ const PlayPage = () => {
         const scorePudding = (playerDessert, oppsDessert) => {
           let points = 0
           let flagMost = false
-          let flagLeast = true
+          let flagLeast = false
           for (let oppDessert of oppsDessert) {
             if (
               !flagMost &&
@@ -1403,22 +1417,31 @@ const PlayPage = () => {
           setCpuThreeStash(players[3].stash)
         }
 
-        const handlePlayerSelection = (e) => {
-          for (let i = 0; i < players[0].hand.length; i++)
-            if (e.target.alt == players[0].hand[i].text) {
-              let temp = players[0].hand[players[0].hand.length - 1]
-              players[0].hand[players[0].hand.length - 1] = players[0].hand[i]
-              players[0].hand[i] = temp
-              players[0].stash.push(players[0].hand.pop())
-              break
-            }
-          players[1].stash.push(players[1].hand.pop())
-          players[2].stash.push(players[2].hand.pop())
-          players[3].stash.push(players[3].hand.pop())
+        const handlePlayerSelection = async (e) => {
+          // If the user is actually playing a card
+          if(players[0].hand[0].type != cards.NEXT.type) {
+            for (let i = 0; i < players[0].hand.length; i++)
+              if (e.target.alt == players[0].hand[i].text) {
+                let temp = players[0].hand[players[0].hand.length - 1]
+                players[0].hand[players[0].hand.length - 1] = players[0].hand[i]
+                players[0].hand[i] = temp
+                players[0].stash.push(players[0].hand.pop())
+                break
+              }
+            players[1].stash.push(players[1].hand.pop())
+            players[2].stash.push(players[2].hand.pop())
+            players[3].stash.push(players[3].hand.pop())
 
-          if (roll[0] == 'uramaki') scoreUramakiDuring()
+            if (roll[0] == 'uramaki') scoreUramakiDuring()
 
-          if (players[0].hand.length == 0) {
+            if (players[0].hand.length == 0)
+              players[1].hand.push(cards.NEXT)
+
+            swapCards()
+            updateCardDisplay()
+          }
+          else {
+            players[0].hand = []
             if(round < 3)
               updateScores()
 
@@ -1433,16 +1456,14 @@ const PlayPage = () => {
 
             if(round == 3) {
               updateScoresDessert()
-
               setShowResults(true)
             }
             else {
               dealToPlayers()
+              updateCardDisplay()
               round++
             }
-
-          } else swapCards()
-          updateCardDisplay()
+          }
         }
 
         return (
@@ -1599,23 +1620,23 @@ const PlayPage = () => {
         displayInfo.sort(comparePlayers)
 
         return (
-          <>
-            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+          <div className="flex h-screen flex-col justify-center">
+            <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
             {displayInfo[3].name}: {displayInfo[3].score} ({displayInfo[3].dessert})
             </p>
             <br></br>
-            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            <p className="text-center font-cal text-6xl text-[color:var(--color-silver)]">
             {displayInfo[2].name}: {displayInfo[2].score} ({displayInfo[2].dessert})
             </p>
             <br></br>
-            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            <p className="text-center font-cal text-6xl text-[color:var(--color-bronze)]">
             {displayInfo[1].name}: {displayInfo[1].score} ({displayInfo[1].dessert})
             </p>
             <br></br>
-            <p className="text-center font-cal text-2xl text-[color:var(--color-nature)]">
+            <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
             {displayInfo[0].name}: {displayInfo[0].score} ({displayInfo[0].dessert})
             </p>
-          </>
+          </div>
         )
       }
     }
