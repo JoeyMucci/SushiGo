@@ -975,11 +975,29 @@ const PlayPage = () => {
         }
 
         const scoreNigiri = (playerCards) => {
-          return (
-            countCard(playerCards, cards.EGG) +
-            2 * countCard(playerCards, cards.SALMON) +
-            3 * countCard(playerCards, cards.SQUID)
-          )
+          let points = 0
+          let wasabiActive = false
+
+          for(let i = 0; i < playerCards.length; i++) {
+            let marginalPoints = 0
+            if(playerCards[i].type == cards.WASABI.type)
+              wasabiActive = true
+            else if(playerCards[i].type == cards.EGG.type)
+              marginalPoints = 1
+            else if(playerCards[i].type == cards.SALMON.type)
+              marginalPoints = 2
+            else if(playerCards[i].type == cards.SQUID.type)
+              marginalPoints = 3
+
+            if(wasabiActive && marginalPoints > 0) {
+              marginalPoints *= 3
+              wasabiActive = false
+            }
+
+            points += marginalPoints
+          }
+
+          return points
         }
 
         const scoreMaki = (playerCards, oppsCards) => {
@@ -1056,7 +1074,7 @@ const PlayPage = () => {
               if (uramakiCount == goal && !players[i].uramakiScored) {
                 if (i == 0)  {
                   setUserScore(userScore + uramakiPoints)
-                  cleanUramaki(players[0].stash)
+                  cleanUramaki(players[i].stash)
                   toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
                     icon: '😋',
                     position: 'bottom-left',
@@ -1064,24 +1082,24 @@ const PlayPage = () => {
                 }
                 else if (i == 1) {
                   setCpuOneScore(cpuOneScore + uramakiPoints)
-                  cleanUramaki(players[1].stash)
+                  cleanUramaki(players[i].stash)
                   toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
                     icon: '😋',
                     position: 'bottom-right',
                   })
                 }
                 else if (i == 2) {
-                  setCpuOneScore(cpuTwoScore + uramakiPoints)
-                  cleanUramaki(players[2].stash)
-                  toast(players[2].name + " ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                  setCpuTwoScore(cpuTwoScore + uramakiPoints)
+                  cleanUramaki(players[i].stash)
+                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
                     icon: '😋',
                     position: 'top-right',
                   })
                 }
-                else if (i == 3) {
-                  setCpuOneScore(cpuThreeScore + uramakiPoints)
-                  cleanUramaki(players[3].stash)
-                  toast(players[3].name + " ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                else {
+                  setCpuThreeScore(cpuThreeScore + uramakiPoints)
+                  cleanUramaki(players[i].stash)
+                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
                     icon: '😋',
                     position: 'top-left',
                   })
@@ -1484,26 +1502,64 @@ const PlayPage = () => {
                   deck.discardPile.push(players[i].stash.pop())
                   if(i == 0)
                     toast("Gave up non-unique miso soup", {
-                      icon: '🥣',
+                      icon: '😩',
                       position: 'bottom-left',
                     })
                   else if(i == 1)
                     toast("Gave up non-unique miso soup", {
-                      icon: '🥣',
+                      icon: '😩',
                       position: 'bottom-right',
                     })
                   else if(i == 2)
                     toast("Gave up non-unique miso soup", {
-                      icon: '🥣',
+                      icon: '😩',
                       position: 'top-right',
                     })
                   else
                     toast("Gave up non-unique miso soup", {
-                      icon: '🥣',
+                      icon: '😩',
                       position: 'top-left',
                     })
                 }
               }
+            }
+          }
+
+          // Display message for successful usage and swap for display
+          const handleWasabi = () => {
+            for(let i = 0; i < players.length; i++) {
+              // Move on in if nigiri is not most recently played
+              if(![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[players[i].stash.length - 1].type))
+                continue
+
+              let wasabiLoc
+
+              // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
+              for(wasabiLoc = 0; wasabiLoc < players[i].stash.length - 1; wasabiLoc++)
+                if(players[i].stash[wasabiLoc].type == cards.WASABI.type && (wasabiLoc == players[i].stash.length - 2 ||
+                ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[wasabiLoc + 1].type))) {
+                  players[i].stash.splice(wasabiLoc + 1, 0, players[i].stash.pop())
+                  if (i == 0)
+                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                      icon: '💥',
+                      position: 'bottom-left',
+                    })
+                  else if (i == 1)
+                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                      icon: '💥',
+                      position: 'bottom-right',
+                    })
+                  else if (i == 2)
+                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                      icon: '💥',
+                      position: 'top-right',
+                    })
+                  else
+                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                      icon: '💥',
+                      position: 'top-left',
+                    })
+                }
             }
           }
 
@@ -1521,9 +1577,13 @@ const PlayPage = () => {
             players[2].stash.push(players[2].hand.pop())
             players[3].stash.push(players[3].hand.pop())
 
-            handleMiso()
+            if(spec.includes('wasabi'))
+              handleWasabi()
 
-            if (roll[0] == 'uramaki') scoreUramakiDuring()
+            if(app.includes('miso'))
+              handleMiso()
+
+            if (roll.includes('uramaki')) scoreUramakiDuring()
 
             if (players[0].hand.length == 0)
               if(round < 3)
@@ -1568,7 +1628,7 @@ const PlayPage = () => {
         )
       }
 
-      const Stash = ({ platter }) => {
+      const Stash = ({ platter, alignLeft }) => {
         let columnColors = []
         let cardColumns = []
 
@@ -1583,19 +1643,27 @@ const PlayPage = () => {
             )
         }
 
-        return (
-          <div className="flex flex-row">
-            {cardColumns.map((cardColumn, i) => {
-              return (
-                <div key={i}>
-                  {cardColumn.map((card, j) => {
-                    return <Card key={j} info={card} />
-                  })}
-                </div>
-              )
-            })}
-          </div>
-        )
+
+        if(alignLeft)
+          return (
+            <div className="absolute bottom-0 left-0">
+              {platter.map((card, i) => {
+                if(alignLeft)
+                  return <Card key={i} info={card} />
+                else return <Card key={i} info={card} />
+              })}
+            </div>
+          )
+        else
+          return (
+            <div className="absolute bottom-0 right-0">
+              {platter.map((card, i) => {
+                if(alignLeft)
+                  return <Card key={i} info={card} />
+                else return <Card key={i} info={card} />
+              })}
+            </div>
+          )
       }
 
       const Scoreline = ({ name, score, dessert }) => {
@@ -1627,15 +1695,9 @@ const PlayPage = () => {
         return (
         <>
           <div className="flex h-screen flex-col">
-            <div className="basis-2/5">
-              <div className="flex flex-row">
-                <div className="basis-1/2">
-                  <Stash platter={cpuThreeStash} />
-                </div>
-                <div className="basis-1/2">
-                  <Stash platter={cpuTwoStash} />
-                </div>
-              </div>
+            <div className="relative basis-2/5">
+              <Stash platter={cpuThreeStash} alignLeft={true}/>
+              <Stash platter={cpuTwoStash} alignLeft={false}/>
             </div>
             <div className="basis-1/5">
               <div className="flex flex-row">
@@ -1665,14 +1727,8 @@ const PlayPage = () => {
               </div>
             </div>
             <div className="basis-2/5">
-              <div className="flex flex-row">
-                <div className="basis-1/2">
-                  <Stash platter={userStash} />
-                </div>
-                <div className="basis-1/2">
-                  <Stash platter={cpuOneStash} />
-                </div>
-              </div>
+              <Stash platter={userStash} alignLeft={true}/>
+              <Stash platter={cpuOneStash} alignLeft={false}/>
             </div>
           </div>
         </>
