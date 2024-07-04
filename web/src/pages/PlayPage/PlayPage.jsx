@@ -690,6 +690,9 @@ const PlayPage = () => {
 
     let round = 1
     let uramakiPoints = 8
+    let takeoutBoxFreeze = false
+    let takeoutCount = 0
+    let takeoutCards = []
     let specialOrderFreeze = false
     let deck = {
       pile: [],
@@ -1323,6 +1326,30 @@ const PlayPage = () => {
           }
       }
 
+      // Changes turned over cards back into their original
+      const takeoutBoxReplace = () => {
+        for(let i = 0; i < deck.pile.length; i++)
+          if(deck.pile[i].type == cards.TOC.type)
+            deck.pile[i] = takeoutCards.pop()
+      }
+
+      // Changes special order cards that were transformed back
+      const specialOrderReplace = () => {
+        let specialOrderCount = countCard(deck.pile, cards.SPECIALO)
+
+        if(specialOrderCount == cards.SPECIALO.count)
+          return
+
+        for(let i = 0; i < deck.pile; i++)
+          if(countCard(deck.pile, deck.pile[i]) > deck.pile[i].count) {
+            deck.pile[i] = cards.SPECIALO
+            specialOrderCount++
+            if(specialOrderCount == cards.SPECIALO.count)
+              return
+          }
+
+      }
+
       // Rebuilds the deck by grabbing all the played cards (excluding dessert)
       // Also grabs discarded cards (e.g. uramaki, miso)
       const replenishDeck = (moreDes) => {
@@ -1338,7 +1365,25 @@ const PlayPage = () => {
         for (let i = 0; i < moreDes; i++)
           deck.pile.push(deck.dessertPile.pop())
 
+        if(spec.includes('takeoutbox'))
+          takeoutBoxReplace()
+
+        if(spec.includes('specialorder'))
+          specialOrderReplace()
+
         shuffle(deck.pile)
+
+        if(dess.includes('fruit')) {
+          let allFruitCounts = [parseFruit(players[0].dessert), parseFruit(players[1].dessert), parseFruit(players[2].dessert), parseFruit(players[3].dessert)]
+          let sum = 0
+          for(let i = 0; i < allFruitCounts.length; i++)
+            for(let j = 0; j < allFruitCounts[i].length; j++)
+                sum += allFruitCounts[i][j]
+          console.log(deck.pile.length + deck.dessertPile.length + sum)
+        }
+        else console.log(deck.pile.length + deck.dessertPile.length + players[0].dessert + players[1].dessert + players[2].dessert + players[3].dessert)
+
+        console.log(deck.pile)
       }
 
       // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
@@ -1349,35 +1394,32 @@ const PlayPage = () => {
         runningScore += scoreNigiri(playerCards)
 
         // ROLLS
-        for (let i = 0; i < roll.length; i++)
-          if (roll[i] == 'maki')
-            runningScore += scoreMaki(playerCards, oppsCards)
-          else if (roll[i] == 'temaki')
-            runningScore += scoreTemaki(playerCards, oppsCards)
-          else runningScore += scoreUramakiEnd(playerCards, oppsCards)
+        if(roll.includes('maki'))
+          runningScore += scoreMaki(playerCards, oppsCards)
+        else if(roll.includes('temaki'))
+          runningScore += scoreTemaki(playerCards, oppsCards)
+        else runningScore += scoreUramakiEnd(playerCards, oppsCards)
 
         // SPECIALS
-        for (let i = 0; i < spec.length; i++)
-          if (spec[i] == 'takeout box')
-            runningScore += scoreLeftovers(playerCards)
-          else if (spec[i] == 'tea') runningScore += scoreTea(playerCards)
-          else if (spec[i] == 'soysauce')
-            runningScore += scoreSoysauce(playerCards, oppsCards)
+        if (spec.includes('takeoutbox'))
+          runningScore += scoreLeftovers(playerCards)
+        else if (spec.includes('tea')) runningScore += scoreTea(playerCards)
+        else if (spec.includes('soysauce'))
+          runningScore += scoreSoysauce(playerCards, oppsCards)
 
         // APPETIZERS
-        for (let i = 0; i < app.length; i++)
-          if (app[i] == 'dumpling') runningScore += scoreDumpling(playerCards)
-          else if (app[i] == 'tempura')
-            runningScore += scoreTempura(playerCards)
-          else if (app[i] == 'sashimi')
-            runningScore += scoreSashimi(playerCards)
-          else if (app[i] == 'misosoup')
-            runningScore += scoreMiso(playerCards)
-          else if (app[i] == 'edamame')
-            runningScore += scoreEdamame(playerCards, oppsCards)
-          else if (app[i] == 'eel') runningScore += scoreEel(playerCards)
-          else if (app[i] == 'tofu') runningScore += scoreTofu(playerCards)
-          else runningScore += scoreOnigiri(playerCards)
+        if (app.includes('dumpling')) runningScore += scoreDumpling(playerCards)
+        else if (app.includes('tempura'))
+          runningScore += scoreTempura(playerCards)
+        else if (app.includes('sashimi'))
+          runningScore += scoreSashimi(playerCards)
+        else if (app.includes('misosoup'))
+          runningScore += scoreMiso(playerCards)
+        else if (app.includes('edamame'))
+          runningScore += scoreEdamame(playerCards, oppsCards)
+        else if (app.includes('eel')) runningScore += scoreEel(playerCards)
+        else if (app.includes('tofu')) runningScore += scoreTofu(playerCards)
+        else runningScore += scoreOnigiri(playerCards)
 
         return runningScore
       }
@@ -1572,7 +1614,7 @@ const PlayPage = () => {
       }
 
       const handlePlayerSelection = async (e) => {
-        if(specialOrderFreeze)
+        if(specialOrderFreeze || takeoutBoxFreeze)
           return
 
         // If the user is actually playing a card
@@ -1583,7 +1625,7 @@ const PlayPage = () => {
               players[0].stash.push(played)
               if (e.target.alt == 'special order')
                 if(players[0].stash.length == 1) {
-                  toast("You have no cards to copy with special order", {
+                  toast("Played special order without copying", {
                     icon: '🌈',
                     position: 'bottom-left',
                   })
@@ -1591,6 +1633,19 @@ const PlayPage = () => {
                 }
                 else {
                   specialOrderFreeze = true
+                  setUserStash([...userStash]) // couldn't tell you why this works but is does
+                  return
+                }
+              else if(e.target.alt == 'takeout box')
+                if(players[0].stash.length == 1) {
+                  toast("Took out 0 items with takeout box", {
+                    icon: '🥡',
+                    position: 'bottom-left',
+                  })
+                  deck.discardPile.push(players[0].stash.pop())
+                }
+                else {
+                  takeoutBoxFreeze = true
                   setUserStash([...userStash]) // couldn't tell you why this works but is does
                   return
                 }
@@ -1626,8 +1681,48 @@ const PlayPage = () => {
 
       /* Can mean a lot of things */
       const handleClick = (e) => {
-        if(specialOrderFreeze) {
+        // Ends the selection process
+        const takeoutPressed = () => {
+          deck.discardPile.push(players[0].stash.pop()) // Move takeout box to discard pile
+          let itemString = takeoutCount == 1 ? " item" : " items"
+          toast("Took out " + takeoutCount + itemString + " with takeout box", {
+            icon: '🥡',
+            position: 'bottom-left',
+          })
+          takeoutCount = 0
+          takeoutBoxFreeze = false
+          handlePostPlayerActions()
+        }
+
+        if(takeoutBoxFreeze) {
+          if(e.target.alt == 'takeout box')
+            takeoutPressed()
+          else /* turning over a card */ {
+            for (let i = 0; i < players[0].stash.length; i++)
+              if (e.target.alt == players[0].stash[i].text && e.target.alt != "turned over card") {
+                takeoutCards.push(players[0].stash[i])
+                players[0].stash[i] = cards.TOC
+                setUserStash(userStash.toSpliced(i, 1, cards.TOC))
+                takeoutCount++
+                // If there are no more cards to turn over automatically end selection
+                if(players[0].stash.length == takeoutCount + 1)
+                  takeoutPressed()
+                break
+              }
+          }
+        }
+        else if(specialOrderFreeze) {
           players[0].stash.pop() // Pop the special order that is pushed for visuals
+          if(e.target.alt == 'special order') {
+            toast("Played special order without copying", {
+              icon: '🌈',
+              position: 'bottom-left',
+            })
+            deck.discardPile.push(cards.SPECIALO)
+            specialOrderFreeze = false
+            handlePostPlayerActions()
+            return
+          }
           for (let i = 0; i < players[0].stash.length; i++)
             if (e.target.alt == players[0].stash[i].text) {
               players[0].stash.push(players[0].stash[i])
@@ -1642,19 +1737,32 @@ const PlayPage = () => {
         }
       }
 
-      const Card = ({ info, action, fullDisplay }) => {
+      const Card = ({ info, action, opacityOn, fullDisplay }) => {
         if(fullDisplay)
-          return (
-            // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
-            // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-            <img
-              src={info.picpath}
-              alt={info.text}
-              onClick={action}
-              onKeyDown={action}
-              className="h-36 w-24"
-            />
-          )
+          if(opacityOn)
+            return (
+              // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+              <img
+                src={info.picpath}
+                alt={info.text}
+                onClick={action}
+                onKeyDown={action}
+                className="h-36 w-24"
+              />
+            )
+          else
+            return (
+              // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+              <img
+                src={info.picpath}
+                alt={info.text}
+                onClick={action}
+                onKeyDown={action}
+                className="h-36 w-24 opacity-50"
+              />
+            )
         return (
           // leaving clickableness for now
           <img
@@ -1671,7 +1779,9 @@ const PlayPage = () => {
         return (
           <div className="flex flex-row justify-center">
             {selection.map((card, i) => {
-              return <Card key={i} info={card} action={handlePlayerSelection} fullDisplay={true}/>
+              if(specialOrderFreeze || takeoutBoxFreeze)
+                return <Card key={i} info={card} action={handlePlayerSelection} opacityOn={false} fullDisplay={true}/>
+              else return <Card key={i} info={card} action={handlePlayerSelection} opacityOn={true} fullDisplay={true}/>
             })}
           </div>
         )
@@ -1738,13 +1848,13 @@ const PlayPage = () => {
       }
 
       const Scoreline = ({ name, score, dessert }) => {
-        if (dess[0] == 'pudding')
+        if (dess.includes('pudding'))
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Pudding: {dessert}
             </div>
           )
-        else if (dess[0] == 'greenteaicecream')
+        else if (dess.includes('greenteaicecream'))
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Green Tea Ice Cream: {dessert}
