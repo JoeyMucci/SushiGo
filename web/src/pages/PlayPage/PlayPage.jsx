@@ -690,6 +690,7 @@ const PlayPage = () => {
 
     let round = 1
     let uramakiPoints = 8
+    let specialOrderFreeze = false
     let deck = {
       pile: [],
       dessertPile: [],
@@ -943,694 +944,752 @@ const PlayPage = () => {
       const [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
       const [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
 
-      const Card = ({ info, action }) => {
+      // A cornerstone of SushiGO gameplay is that players swap hands after playing cards, this is done here
+      const swapCards = () => {
+        let tempCards = players[0].hand
+        for (let i = 0; i < players.length - 1; i++)
+          players[i].hand = players[i + 1].hand
+        players[players.length - 1].hand = tempCards
+      }
+
+       // returns how many occurences of card are in cards
+       const countCard = (cards, card) => {
+        let count = 0
+        for (let i = 0; i < cards.length; i++)
+          if (cards[i].type == card.type) count++
+        return count
+      }
+
+      const scoreNigiri = (playerCards) => {
+        let points = 0
+        let wasabiActive = false
+
+        for(let i = 0; i < playerCards.length; i++) {
+          let marginalPoints = 0
+          if(playerCards[i].type == cards.WASABI.type)
+            wasabiActive = true
+          else if(playerCards[i].type == cards.EGG.type)
+            marginalPoints = 1
+          else if(playerCards[i].type == cards.SALMON.type)
+            marginalPoints = 2
+          else if(playerCards[i].type == cards.SQUID.type)
+            marginalPoints = 3
+
+          if(wasabiActive && marginalPoints > 0) {
+            marginalPoints *= 3
+            wasabiActive = false
+          }
+
+          points += marginalPoints
+        }
+
+        return points
+      }
+
+      const scoreMaki = (playerCards, oppsCards) => {
+        let makiCount =
+          countCard(playerCards, cards.MAKIONE) +
+          2 * countCard(playerCards, cards.MAKITWO) +
+          3 * countCard(playerCards, cards.MAKITHREE)
+
+        if (makiCount == 0) return 0
+
+        let points = 6
+
+        let oppMakiCounts = []
+
+        for (let oppCards of oppsCards) {
+          let oppMakiCount =
+            countCard(oppCards, cards.MAKIONE) +
+            2 * countCard(oppCards, cards.MAKITWO) +
+            3 * countCard(oppCards, cards.MAKITHREE)
+          if (!oppMakiCounts.includes(oppMakiCount))
+            oppMakiCounts.push(oppMakiCount)
+        }
+
+        for (let oppMakiCount of oppMakiCounts)
+          if (makiCount < oppMakiCount) points -= 3
+
+        return Math.max(points, 0)
+      }
+
+      const scoreTemaki = (playerCards, oppsCards) => {
+        let points = 0
+        let flagMost = false
+        let flagLeast = false
+        let temakiCount = countCard(playerCards, cards.TEMAKI)
+        for (let oppCards of oppsCards) {
+          if (!flagMost && temakiCount < countCard(oppCards, cards.TEMAKI)) {
+            points -= 4
+            flagMost = true
+          }
+          if (!flagLeast && temakiCount > countCard(oppCards, cards.TEMAKI)) {
+            points += 4
+            flagLeast = true
+          }
+        }
+        return points
+      }
+
+      const scoreUramakiDuring = () => {
+
+        // Remove uramaki by removing every card, and putting it in discard
+        // pile if it's a uramaki or putting it back if it's not
+        const cleanUramaki = (playerCards) => {
+          for(let i = playerCards.length - 1; i >= 0; i--) {
+            let removedCard = playerCards.pop()
+            if (removedCard.color == 'lime') // Uramaki is lime colored
+              deck.discardPile.push(removedCard)
+            else playerCards.unshift(removedCard)
+          }
+        }
+
+        // Check from 14 to 10 for scoring uramaki since ten is the minimum to score and
+        // 5 is the max that can be played in a round, so the max unscored amount is 10 - 1 + 5 = 14
+        for (let goal = 14; goal >= 10; goal--) {
+          if (uramakiPoints < 2) break
+          let decrease = 0
+          for (let i = 0; i < players.length; i++) {
+            let uramakiCount =
+              3 * countCard(players[i].stash, cards.URAMAKITHREE) +
+              4 * countCard(players[i].stash, cards.URAMAKIFOUR) +
+              5 * countCard(players[i].stash, cards.URAMAKIFIVE)
+
+            // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
+            // However, it is possible to score uramaki again at the end of the round
+            if (uramakiCount == goal && !players[i].uramakiScored) {
+              if (i == 0)  {
+                setUserScore(userScore + uramakiPoints)
+                cleanUramaki(players[i].stash)
+                toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                  icon: '😋',
+                  position: 'bottom-left',
+                })
+              }
+              else if (i == 1) {
+                setCpuOneScore(cpuOneScore + uramakiPoints)
+                cleanUramaki(players[i].stash)
+                toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                  icon: '😋',
+                  position: 'bottom-right',
+                })
+              }
+              else if (i == 2) {
+                setCpuTwoScore(cpuTwoScore + uramakiPoints)
+                cleanUramaki(players[i].stash)
+                toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                  icon: '😋',
+                  position: 'top-right',
+                })
+              }
+              else {
+                setCpuThreeScore(cpuThreeScore + uramakiPoints)
+                cleanUramaki(players[i].stash)
+                toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
+                  icon: '😋',
+                  position: 'top-left',
+                })
+              }
+              players[i].uramakiScored = true
+              decrease += 3 // Do not decrease right away so tied players receive the same points
+            }
+          }
+          uramakiPoints -= decrease
+        }
+      }
+
+      const scoreUramakiEnd = (playerCards, oppsCards) => {
+        if (uramakiPoints < 2) return
+        let uramakiCount =
+          3 * countCard(playerCards, cards.URAMAKITHREE) +
+          4 * countCard(playerCards, cards.URAMAKIFOUR) +
+          5 * countCard(playerCards, cards.URAMAKIFIVE)
+
+        for (let oppCards of oppsCards) {
+          if (
+            uramakiCount <
+            3 * countCard(oppCards, cards.URAMAKITHREE) +
+              4 * countCard(oppCards, cards.URAMAKIFOUR) +
+              5 * countCard(oppCards, cards.URAMAKIFIVE)
+          )
+            return 0
+        }
+        return uramakiPoints
+      }
+
+      const scoreLeftovers = (playerCards) => {
+        return 2 * countCard(playerCards, cards.TOC)
+      }
+
+      const scoreTea = (playerCards) => {
+        let columnColors = []
+        let cardColumns = []
+        let mostCommonColorCount = 1
+
+        for (let i = 0; i < playerCards.length; i++) {
+          // Turned over cards do not count towards tea scoring
+          if (playerCards[i].type == cards.TOC.type) break
+
+          if (columnColors.indexOf(playerCards[i].color) == -1) {
+            columnColors.push(playerCards[i].color)
+            cardColumns.push([playerCards[i]])
+          } else
+            cardColumns[columnColors.indexOf(playerCards[i].color)].unshift(
+              playerCards[i]
+            )
+        }
+
+        for (let cardColumn of cardColumns)
+          mostCommonColorCount = Math.max(
+            mostCommonColorCount,
+            cardColumn.length
+          )
+
+        return mostCommonColorCount * countCard(playerCards, cards.TEA)
+      }
+
+      const scoreSoysauce = (playerCards, oppsCards) => {
+        let columnColors = []
+
+        for (let i = 0; i < playerCards.length; i++) {
+          // Turned over cards do not count towards soysauce scoring
+          if (playerCards[i].type == cards.TOC.type) break
+
+          if (columnColors.indexOf(playerCards[i].color) == -1)
+            columnColors.push(playerCards[i].color)
+        }
+
+        for (let oppCards of oppsCards) {
+          let oppColumnColors = []
+
+          for (let i = 0; i < oppCards.length; i++) {
+            // Turned over cards do not count towards soysauce scoring
+            if (oppCards[i].type == cards.TOC.type) break
+
+            if (oppColumnColors.indexOf(oppCards[i].color) == -1)
+              oppColumnColors.push(oppCards[i].color)
+          }
+
+          if (columnColors.length < oppColumnColors.length) return 0
+          else return 4 * countCard(playerCards, cards.SOYSAUCE)
+        }
+      }
+
+      const scoreDumpling = (playerCards) => {
+        switch (countCard(playerCards, cards.DUMPLING)) {
+          case 0:
+            return 0
+          case 1:
+            return 1
+          case 2:
+            return 3
+          case 3:
+            return 6
+          case 4:
+            return 10
+          default:
+            return 15
+        }
+      }
+
+      const scoreTempura = (playerCards) => {
+        return Math.floor(countCard(playerCards, cards.TEMPURA) / 2) * 5
+      }
+
+      const scoreSashimi = (playerCards) => {
+        return Math.floor(countCard(playerCards, cards.SASHIMI) / 3) * 10
+      }
+
+      const scoreMiso = (playerCards) => {
+        return 3 * countCard(playerCards, cards.MISO)
+      }
+
+      const scoreEdamame = (playerCards, oppsCards) => {
+        let oppWithEdamame = 0
+
+        for (let oppCards of oppsCards)
+          if (countCard(oppCards, cards.EDAMAME) > 0) oppWithEdamame++
+
+        return oppWithEdamame * countCard(playerCards, cards.EDAMAME)
+      }
+
+      const scoreEel = (playerCards) => {
+        switch (countCard(playerCards, cards.EEL)) {
+          case 0:
+            return 0
+          case 1:
+            return -3
+          default:
+            return 7
+        }
+      }
+
+      const scoreTofu = (playerCards) => {
+        switch (countCard(playerCards, cards.TOFU)) {
+          case 1:
+            return 2
+          case 2:
+            return 6
+          default:
+            return 0
+        }
+      }
+
+      const scoreOnigiri = (playerCards) => {
+        let onigiriCounts = [
+          countCard(playerCards, cards.ONICIRCLE),
+          countCard(playerCards, cards.ONISQUARE),
+          countCard(playerCards, cards.ONITRI),
+          countCard(playerCards, cards.ONIFLAT),
+        ]
+
+        let points = 0
+
+        while (Math.max(...onigiriCounts) > 0) {
+          let count = 0
+          for (let i = 0; i < onigiriCounts.length; i++)
+            if (onigiriCounts[i] > 0) {
+              count++
+              onigiriCounts[i]--
+            }
+
+          if (count == 1) points += 1
+          else if (count == 2) points += 4
+          else if (count == 3) points += 9
+          else points += 16
+        }
+
+        return points
+      }
+
+      const scorePudding = (playerDessert, oppsDessert) => {
+        let points = 0
+        let flagMost = false
+        let flagLeast = false
+        for (let oppDessert of oppsDessert) {
+          if (
+            !flagMost &&
+            playerDessert < oppDessert
+          ) {
+            points -= 6
+            flagMost = true
+          }
+          if (
+            !flagLeast &&
+            playerDessert > oppDessert
+          ) {
+            points += 6
+            flagLeast = true
+          }
+        }
+        return points
+      }
+
+      const scoreGTIC = (playerDessert) => {
+        return 12 * Math.floor(playerDessert / 4)
+      }
+
+      const scoreFruit = (fruitNumber) => {
+        let fruitCounts = parseFruit(fruitNumber)
+        let points = 0
+
+        for (let fruitCount of fruitCounts) {
+          if(fruitCount == 0)
+            points -= 2
+          else if(fruitCount == 1)
+            continue // points += 0
+          else if(fruitCount == 2)
+            points += 1
+          else if(fruitCount == 3)
+            points += 3
+          else if(fruitCount == 4)
+            points += 6
+          else points += 10
+        }
+
+        return points
+      }
+
+      const setAsideDessert = () => {
+        for (let i = 0; i < players.length; i++)
+          for (let j = players[i].stash.length - 1; j >= 0; j--) {
+            // i.e. If this is a dessert card
+            let removedCard = players[i].stash.pop()
+            if (['pink', 'blue', 'peach'].includes(removedCard.color))
+              if(removedCard.color == 'peach')
+                addFruit(removedCard, players[i])
+              else players[i].dessert++
+            else players[i].stash.unshift(removedCard)
+          }
+      }
+
+      // Rebuilds the deck by grabbing all the played cards (excluding dessert)
+      // Also grabs discarded cards (e.g. uramaki, miso)
+      const replenishDeck = (moreDes) => {
+        setAsideDessert()
+
+        for (let i = 0; i < players.length; i++)
+          for (let j = players[i].stash.length - 1; j >= 0; j--)
+            deck.pile.push(players[i].stash.pop())
+
+        for(let i = deck.discardPile.length - 1; i >= 0; i--)
+          deck.pile.push(deck.discardPile.pop())
+
+        for (let i = 0; i < moreDes; i++)
+          deck.pile.push(deck.dessertPile.pop())
+
+        shuffle(deck.pile)
+      }
+
+      // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
+      const scorePlayer = (playerCards, oppsCards) => {
+        let runningScore = 0
+
+        // NIGIRI
+        runningScore += scoreNigiri(playerCards)
+
+        // ROLLS
+        for (let i = 0; i < roll.length; i++)
+          if (roll[i] == 'maki')
+            runningScore += scoreMaki(playerCards, oppsCards)
+          else if (roll[i] == 'temaki')
+            runningScore += scoreTemaki(playerCards, oppsCards)
+          else runningScore += scoreUramakiEnd(playerCards, oppsCards)
+
+        // SPECIALS
+        for (let i = 0; i < spec.length; i++)
+          if (spec[i] == 'takeout box')
+            runningScore += scoreLeftovers(playerCards)
+          else if (spec[i] == 'tea') runningScore += scoreTea(playerCards)
+          else if (spec[i] == 'soysauce')
+            runningScore += scoreSoysauce(playerCards, oppsCards)
+
+        // APPETIZERS
+        for (let i = 0; i < app.length; i++)
+          if (app[i] == 'dumpling') runningScore += scoreDumpling(playerCards)
+          else if (app[i] == 'tempura')
+            runningScore += scoreTempura(playerCards)
+          else if (app[i] == 'sashimi')
+            runningScore += scoreSashimi(playerCards)
+          else if (app[i] == 'misosoup')
+            runningScore += scoreMiso(playerCards)
+          else if (app[i] == 'edamame')
+            runningScore += scoreEdamame(playerCards, oppsCards)
+          else if (app[i] == 'eel') runningScore += scoreEel(playerCards)
+          else if (app[i] == 'tofu') runningScore += scoreTofu(playerCards)
+          else runningScore += scoreOnigiri(playerCards)
+
+        return runningScore
+      }
+
+      const scorePlayerDessert = (playerDessert, oppsDessert) => {
+        for (let i = 0; i < dess.length; i++)
+          if (dess[i] == 'pudding')
+            return scorePudding(playerDessert, oppsDessert)
+          else if (dess[i] == 'greenteaicecream')
+            return scoreGTIC(playerDessert)
+          else return scoreFruit(playerDessert)
+      }
+
+      const updateScores = () => {
+        setUserScore(
+          scorePlayer(players[0].stash, [
+            players[1].stash,
+            players[2].stash,
+            players[3].stash,
+          ]) + userScore
+        )
+        setCpuOneScore(
+          scorePlayer(players[1].stash, [
+            players[0].stash,
+            players[2].stash,
+            players[3].stash,
+          ]) + cpuOneScore
+        )
+        setCpuTwoScore(
+          scorePlayer(players[2].stash, [
+            players[1].stash,
+            players[0].stash,
+            players[3].stash,
+          ]) + cpuTwoScore
+        )
+        setCpuThreeScore(
+          scorePlayer(players[3].stash, [
+            players[1].stash,
+            players[2].stash,
+            players[0].stash,
+          ]) + cpuThreeScore
+        )
+      }
+
+      const updateScoresDessert = () => {
+        setUserScore(
+          scorePlayer(players[0].stash, [players[1].stash, players[2].stash, players[3].stash]) +
+          scorePlayerDessert(players[0].dessert, [
+            players[1].dessert,
+            players[2].dessert,
+            players[3].dessert,
+          ]) + userScore
+        )
+        setCpuOneScore(
+          scorePlayer(players[1].stash, [players[0].stash, players[2].stash, players[3].stash]) +
+          scorePlayerDessert(players[1].dessert, [
+            players[0].dessert,
+            players[2].dessert,
+            players[3].dessert,
+          ]) + cpuOneScore
+        )
+        setCpuTwoScore(
+          scorePlayer(players[2].stash, [players[1].stash, players[0].stash, players[3].stash]) +
+          scorePlayerDessert(players[2].dessert, [
+            players[1].dessert,
+            players[0].dessert,
+            players[3].dessert,
+          ]) + cpuTwoScore
+        )
+        setCpuThreeScore(
+          scorePlayer(players[3].stash, [players[1].stash, players[2].stash, players[0].stash]) +
+          scorePlayerDessert(players[3].dessert, [
+            players[1].dessert,
+            players[2].dessert,
+            players[0].dessert,
+          ]) + cpuThreeScore
+        )
+      }
+
+      const updateCardDisplay = () => {
+        setUserHand(players[0].hand)
+        setUserStash(players[0].stash)
+        setCpuOneStash(players[1].stash)
+        setCpuTwoStash(players[2].stash)
+        setCpuThreeStash(players[3].stash)
+      }
+
+      const advanceRound = () => {
+        // Reset uramaki
+        uramakiPoints = 8
+        for(let i = 0; i < players.length; i++)
+          players[i].uramakiScored = false
+
+        round++
+      }
+
+      // If more than one miso soup is played all are removed
+      const handleMiso = () => {
+        let misoCount = 0
+        for(let i = 0; i < players.length; i++)
+          if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type)
+            misoCount++
+
+        if(misoCount > 1) {
+          for(let i = 0; i < players.length; i++) {
+            if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type) {
+              deck.discardPile.push(players[i].stash.pop())
+              if(i == 0)
+                toast("Gave up non-unique miso soup", {
+                  icon: '😩',
+                  position: 'bottom-left',
+                })
+              else if(i == 1)
+                toast("Gave up non-unique miso soup", {
+                  icon: '😩',
+                  position: 'bottom-right',
+                })
+              else if(i == 2)
+                toast("Gave up non-unique miso soup", {
+                  icon: '😩',
+                  position: 'top-right',
+                })
+              else
+                toast("Gave up non-unique miso soup", {
+                  icon: '😩',
+                  position: 'top-left',
+                })
+            }
+          }
+        }
+      }
+
+      // Display message for successful usage and swap for display
+      const handleWasabi = () => {
+        for(let i = 0; i < players.length; i++) {
+          // Move on in if nigiri is not most recently played
+          if(![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[players[i].stash.length - 1].type))
+            continue
+
+          let wasabiLoc
+
+          // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
+          for(wasabiLoc = 0; wasabiLoc < players[i].stash.length - 1; wasabiLoc++)
+            if(players[i].stash[wasabiLoc].type == cards.WASABI.type && (wasabiLoc == players[i].stash.length - 2 ||
+            ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[wasabiLoc + 1].type))) {
+              players[i].stash.splice(wasabiLoc + 1, 0, players[i].stash.pop())
+              if (i == 0)
+                toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                  icon: '💥',
+                  position: 'bottom-left',
+                })
+              else if (i == 1)
+                toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                  icon: '💥',
+                  position: 'bottom-right',
+                })
+              else if (i == 2)
+                toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                  icon: '💥',
+                  position: 'top-right',
+                })
+              else
+                toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
+                  icon: '💥',
+                  position: 'top-left',
+                })
+              break
+            }
+        }
+      }
+
+      const handlePostPlayerActions = () => {
+        players[1].stash.push(players[1].hand.pop())
+        players[2].stash.push(players[2].hand.pop())
+        players[3].stash.push(players[3].hand.pop())
+
+        if(spec.includes('wasabi'))
+          handleWasabi()
+
+        if (roll.includes('uramaki')) scoreUramakiDuring()
+
+        if(app.includes('misosoup'))
+          handleMiso()
+
+        if (players[0].hand.length == 0)
+          if(round < 3)
+            players[1].hand.push(cards.NEXT)
+          else players[1].hand.push(cards.FINAL)
+
+        swapCards()
+        updateCardDisplay()
+      }
+
+      const handlePlayerSelection = async (e) => {
+        if(specialOrderFreeze)
+          return
+
+        // If the user is actually playing a card
+        if(players[0].hand[0].color != 'transparent') {
+          for (let i = 0; i < players[0].hand.length; i++)
+            if (e.target.alt == players[0].hand[i].text) {
+              let played = players[0].hand.splice(i, 1)[0]
+              players[0].stash.push(played)
+              if (e.target.alt == 'special order')
+                if(players[0].stash.length == 1) {
+                  toast("You have no cards to copy with special order", {
+                    icon: '🌈',
+                    position: 'bottom-left',
+                  })
+                  deck.discardPile.push(players[0].stash.pop())
+                }
+                else {
+                  specialOrderFreeze = true
+                  setUserStash([...userStash]) // couldn't tell you why this works but is does
+                  return
+                }
+              break
+            }
+          handlePostPlayerActions()
+        }
+        else {
+          players[0].hand = []
+          if(round < 3)
+            updateScores()
+
+          if (round == 1) replenishDeck(DESSERTCOUNTTWO)
+          else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
+          else setAsideDessert()
+
+          setUserDessert(players[0].dessert)
+          setCpuOneDessert(players[1].dessert)
+          setCpuTwoDessert(players[2].dessert)
+          setCpuThreeDessert(players[3].dessert)
+
+          if(round == 3) {
+            updateScoresDessert()
+            setShowResults(true)
+          }
+          else {
+            dealToPlayers()
+            updateCardDisplay()
+            advanceRound()
+          }
+        }
+      }
+
+      /* Can mean a lot of things */
+      const handleClick = (e) => {
+        if(specialOrderFreeze) {
+          players[0].stash.pop() // Pop the special order that is pushed for visuals
+          for (let i = 0; i < players[0].stash.length; i++)
+            if (e.target.alt == players[0].stash[i].text) {
+              players[0].stash.push(players[0].stash[i])
+              toast("Copied " + players[0].stash[i].text + " with special order", {
+                icon: '🌈',
+                position: 'bottom-left',
+              })
+              break
+            }
+          specialOrderFreeze = false
+          handlePostPlayerActions()
+        }
+      }
+
+      const Card = ({ info, action, fullDisplay }) => {
+        if(fullDisplay)
+          return (
+            // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+            <img
+              src={info.picpath}
+              alt={info.text}
+              onClick={action}
+              onKeyDown={action}
+              className="h-36 w-24"
+            />
+          )
         return (
-          // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          // leaving clickableness for now
           <img
             src={info.picpath}
             alt={info.text}
             onClick={action}
             onKeyDown={action}
-            className="h-36 w-24"
+            className="h-9 w-24 object-cover object-top"
           />
         )
       }
 
       const Hand = ({ selection }) => {
-        // A cornerstone of SushiGO gameplay is that players swap hands after playing cards, this is done here
-        const swapCards = () => {
-          let tempCards = players[0].hand
-          for (let i = 0; i < players.length - 1; i++)
-            players[i].hand = players[i + 1].hand
-          players[players.length - 1].hand = tempCards
-        }
-
-        // returns how many occurences of card are in cards
-        const countCard = (cards, card) => {
-          let count = 0
-          for (let i = 0; i < cards.length; i++)
-            if (cards[i].type == card.type) count++
-          return count
-        }
-
-        const scoreNigiri = (playerCards) => {
-          let points = 0
-          let wasabiActive = false
-
-          for(let i = 0; i < playerCards.length; i++) {
-            let marginalPoints = 0
-            if(playerCards[i].type == cards.WASABI.type)
-              wasabiActive = true
-            else if(playerCards[i].type == cards.EGG.type)
-              marginalPoints = 1
-            else if(playerCards[i].type == cards.SALMON.type)
-              marginalPoints = 2
-            else if(playerCards[i].type == cards.SQUID.type)
-              marginalPoints = 3
-
-            if(wasabiActive && marginalPoints > 0) {
-              marginalPoints *= 3
-              wasabiActive = false
-            }
-
-            points += marginalPoints
-          }
-
-          return points
-        }
-
-        const scoreMaki = (playerCards, oppsCards) => {
-          let makiCount =
-            countCard(playerCards, cards.MAKIONE) +
-            2 * countCard(playerCards, cards.MAKITWO) +
-            3 * countCard(playerCards, cards.MAKITHREE)
-
-          if (makiCount == 0) return 0
-
-          let points = 6
-
-          let oppMakiCounts = []
-
-          for (let oppCards of oppsCards) {
-            let oppMakiCount =
-              countCard(oppCards, cards.MAKIONE) +
-              2 * countCard(oppCards, cards.MAKITWO) +
-              3 * countCard(oppCards, cards.MAKITHREE)
-            if (!oppMakiCounts.includes(oppMakiCount))
-              oppMakiCounts.push(oppMakiCount)
-          }
-
-          for (let oppMakiCount of oppMakiCounts)
-            if (makiCount < oppMakiCount) points -= 3
-
-          return Math.max(points, 0)
-        }
-
-        const scoreTemaki = (playerCards, oppsCards) => {
-          let points = 0
-          let flagMost = false
-          let flagLeast = false
-          let temakiCount = countCard(playerCards, cards.TEMAKI)
-          for (let oppCards of oppsCards) {
-            if (!flagMost && temakiCount < countCard(oppCards, cards.TEMAKI)) {
-              points -= 4
-              flagMost = true
-            }
-            if (!flagLeast && temakiCount > countCard(oppCards, cards.TEMAKI)) {
-              points += 4
-              flagLeast = true
-            }
-          }
-          return points
-        }
-
-        const scoreUramakiDuring = () => {
-
-          // Remove uramaki by removing every card, and putting it in discard
-          // pile if it's a uramaki or putting it back if it's not
-          const cleanUramaki = (playerCards) => {
-            for(let i = playerCards.length - 1; i >= 0; i--) {
-              let removedCard = playerCards.pop()
-              if (removedCard.color == 'lime') // Uramaki is lime colored
-                deck.discardPile.push(removedCard)
-              else playerCards.unshift(removedCard)
-            }
-          }
-
-          // Check from 14 to 10 for scoring uramaki since ten is the minimum to score and
-          // 5 is the max that can be played in a round, so the max unscored amount is 10 - 1 + 5 = 14
-          for (let goal = 14; goal >= 10; goal--) {
-            if (uramakiPoints < 2) break
-            let decrease = 0
-            for (let i = 0; i < players.length; i++) {
-              let uramakiCount =
-                3 * countCard(players[i].stash, cards.URAMAKITHREE) +
-                4 * countCard(players[i].stash, cards.URAMAKIFOUR) +
-                5 * countCard(players[i].stash, cards.URAMAKIFIVE)
-
-              // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
-              // However, it is possible to score uramaki again at the end of the round
-              if (uramakiCount == goal && !players[i].uramakiScored) {
-                if (i == 0)  {
-                  setUserScore(userScore + uramakiPoints)
-                  cleanUramaki(players[i].stash)
-                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
-                    icon: '😋',
-                    position: 'bottom-left',
-                  })
-                }
-                else if (i == 1) {
-                  setCpuOneScore(cpuOneScore + uramakiPoints)
-                  cleanUramaki(players[i].stash)
-                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
-                    icon: '😋',
-                    position: 'bottom-right',
-                  })
-                }
-                else if (i == 2) {
-                  setCpuTwoScore(cpuTwoScore + uramakiPoints)
-                  cleanUramaki(players[i].stash)
-                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
-                    icon: '😋',
-                    position: 'top-right',
-                  })
-                }
-                else {
-                  setCpuThreeScore(cpuThreeScore + uramakiPoints)
-                  cleanUramaki(players[i].stash)
-                  toast("Ate " + goal + " uramaki for " + uramakiPoints + " points", {
-                    icon: '😋',
-                    position: 'top-left',
-                  })
-                }
-                players[i].uramakiScored = true
-                decrease += 3 // Do not decrease right away so tied players receive the same points
-              }
-            }
-            uramakiPoints -= decrease
-          }
-        }
-
-        const scoreUramakiEnd = (playerCards, oppsCards) => {
-          if (uramakiPoints < 2) return
-          let uramakiCount =
-            3 * countCard(playerCards, cards.URAMAKITHREE) +
-            4 * countCard(playerCards, cards.URAMAKIFOUR) +
-            5 * countCard(playerCards, cards.URAMAKIFIVE)
-
-          for (let oppCards of oppsCards) {
-            if (
-              uramakiCount <
-              3 * countCard(oppCards, cards.URAMAKITHREE) +
-                4 * countCard(oppCards, cards.URAMAKIFOUR) +
-                5 * countCard(oppCards, cards.URAMAKIFIVE)
-            )
-              return 0
-          }
-          return uramakiPoints
-        }
-
-        const scoreLeftovers = (playerCards) => {
-          return 2 * countCard(playerCards, cards.TOC)
-        }
-
-        const scoreTea = (playerCards) => {
-          let columnColors = []
-          let cardColumns = []
-          let mostCommonColorCount = 1
-
-          for (let i = 0; i < playerCards.length; i++) {
-            // Turned over cards do not count towards tea scoring
-            if (playerCards[i].type == cards.TOC.type) break
-
-            if (columnColors.indexOf(playerCards[i].color) == -1) {
-              columnColors.push(playerCards[i].color)
-              cardColumns.push([playerCards[i]])
-            } else
-              cardColumns[columnColors.indexOf(playerCards[i].color)].unshift(
-                playerCards[i]
-              )
-          }
-
-          for (let cardColumn of cardColumns)
-            mostCommonColorCount = Math.max(
-              mostCommonColorCount,
-              cardColumn.length
-            )
-
-          return mostCommonColorCount * countCard(playerCards, cards.TEA)
-        }
-
-        const scoreSoysauce = (playerCards, oppsCards) => {
-          let columnColors = []
-
-          for (let i = 0; i < playerCards.length; i++) {
-            // Turned over cards do not count towards soysauce scoring
-            if (playerCards[i].type == cards.TOC.type) break
-
-            if (columnColors.indexOf(playerCards[i].color) == -1)
-              columnColors.push(playerCards[i].color)
-          }
-
-          for (let oppCards of oppsCards) {
-            let oppColumnColors = []
-
-            for (let i = 0; i < oppCards.length; i++) {
-              // Turned over cards do not count towards soysauce scoring
-              if (oppCards[i].type == cards.TOC.type) break
-
-              if (oppColumnColors.indexOf(oppCards[i].color) == -1)
-                oppColumnColors.push(oppCards[i].color)
-            }
-
-            if (columnColors.length < oppColumnColors.length) return 0
-            else return 4 * countCard(playerCards, cards.SOYSAUCE)
-          }
-        }
-
-        const scoreDumpling = (playerCards) => {
-          switch (countCard(playerCards, cards.DUMPLING)) {
-            case 0:
-              return 0
-            case 1:
-              return 1
-            case 2:
-              return 3
-            case 3:
-              return 6
-            case 4:
-              return 10
-            default:
-              return 15
-          }
-        }
-
-        const scoreTempura = (playerCards) => {
-          return Math.floor(countCard(playerCards, cards.TEMPURA) / 2) * 5
-        }
-
-        const scoreSashimi = (playerCards) => {
-          return Math.floor(countCard(playerCards, cards.SASHIMI) / 3) * 10
-        }
-
-        const scoreMiso = (playerCards) => {
-          return 3 * countCard(playerCards, cards.MISO)
-        }
-
-        const scoreEdamame = (playerCards, oppsCards) => {
-          let oppWithEdamame = 0
-
-          for (let oppCards of oppsCards)
-            if (countCard(oppCards, cards.EDAMAME) > 0) oppWithEdamame++
-
-          return oppWithEdamame * countCard(playerCards, cards.EDAMAME)
-        }
-
-        const scoreEel = (playerCards) => {
-          switch (countCard(playerCards, cards.EEL)) {
-            case 0:
-              return 0
-            case 1:
-              return -3
-            default:
-              return 7
-          }
-        }
-
-        const scoreTofu = (playerCards) => {
-          switch (countCard(playerCards, cards.TOFU)) {
-            case 1:
-              return 2
-            case 2:
-              return 6
-            default:
-              return 0
-          }
-        }
-
-        const scoreOnigiri = (playerCards) => {
-          let onigiriCounts = [
-            countCard(playerCards, cards.ONICIRCLE),
-            countCard(playerCards, cards.ONISQUARE),
-            countCard(playerCards, cards.ONITRI),
-            countCard(playerCards, cards.ONIFLAT),
-          ]
-
-          let points = 0
-
-          while (Math.max(...onigiriCounts) > 0) {
-            let count = 0
-            for (let i = 0; i < onigiriCounts.length; i++)
-              if (onigiriCounts[i] > 0) {
-                count++
-                onigiriCounts[i]--
-              }
-
-            if (count == 1) points += 1
-            else if (count == 2) points += 4
-            else if (count == 3) points += 9
-            else points += 16
-          }
-
-          return points
-        }
-
-        const scorePudding = (playerDessert, oppsDessert) => {
-          let points = 0
-          let flagMost = false
-          let flagLeast = false
-          for (let oppDessert of oppsDessert) {
-            if (
-              !flagMost &&
-              playerDessert < oppDessert
-            ) {
-              points -= 6
-              flagMost = true
-            }
-            if (
-              !flagLeast &&
-              playerDessert > oppDessert
-            ) {
-              points += 6
-              flagLeast = true
-            }
-          }
-          return points
-        }
-
-        const scoreGTIC = (playerDessert) => {
-          return 12 * Math.floor(playerDessert / 4)
-        }
-
-        const scoreFruit = (fruitNumber) => {
-          let fruitCounts = parseFruit(fruitNumber)
-          let points = 0
-
-          for (let fruitCount of fruitCounts) {
-            if(fruitCount == 0)
-              points -= 2
-            else if(fruitCount == 1)
-              continue // points += 0
-            else if(fruitCount == 2)
-              points += 1
-            else if(fruitCount == 3)
-              points += 3
-            else if(fruitCount == 4)
-              points += 6
-            else points += 10
-          }
-
-          return points
-        }
-
-        const setAsideDessert = () => {
-          for (let i = 0; i < players.length; i++)
-            for (let j = players[i].stash.length - 1; j >= 0; j--) {
-              // i.e. If this is a dessert card
-              let removedCard = players[i].stash.pop()
-              if (['pink', 'blue', 'peach'].includes(removedCard.color))
-                if(removedCard.color == 'peach')
-                  addFruit(removedCard, players[i])
-                else players[i].dessert++
-              else players[i].stash.unshift(removedCard)
-            }
-        }
-
-        // Rebuilds the deck by grabbing all the played cards (excluding dessert)
-        // Also grabs discarded cards (e.g. uramaki, miso)
-        const replenishDeck = (moreDes) => {
-          setAsideDessert()
-
-          for (let i = 0; i < players.length; i++)
-            for (let j = players[i].stash.length - 1; j >= 0; j--)
-              deck.pile.push(players[i].stash.pop())
-
-          for(let i = deck.discardPile.length - 1; i >= 0; i--)
-            deck.pile.push(deck.discardPile.pop())
-
-          for (let i = 0; i < moreDes; i++)
-            deck.pile.push(deck.dessertPile.pop())
-
-          shuffle(deck.pile)
-        }
-
-        // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
-        const scorePlayer = (playerCards, oppsCards) => {
-          let runningScore = 0
-
-          // NIGIRI
-          runningScore += scoreNigiri(playerCards)
-
-          // ROLLS
-          for (let i = 0; i < roll.length; i++)
-            if (roll[i] == 'maki')
-              runningScore += scoreMaki(playerCards, oppsCards)
-            else if (roll[i] == 'temaki')
-              runningScore += scoreTemaki(playerCards, oppsCards)
-            else runningScore += scoreUramakiEnd(playerCards, oppsCards)
-
-          // SPECIALS
-          for (let i = 0; i < spec.length; i++)
-            if (spec[i] == 'takeout box')
-              runningScore += scoreLeftovers(playerCards)
-            else if (spec[i] == 'tea') runningScore += scoreTea(playerCards)
-            else if (spec[i] == 'soysauce')
-              runningScore += scoreSoysauce(playerCards, oppsCards)
-
-          // APPETIZERS
-          for (let i = 0; i < app.length; i++)
-            if (app[i] == 'dumpling') runningScore += scoreDumpling(playerCards)
-            else if (app[i] == 'tempura')
-              runningScore += scoreTempura(playerCards)
-            else if (app[i] == 'sashimi')
-              runningScore += scoreSashimi(playerCards)
-            else if (app[i] == 'misosoup')
-              runningScore += scoreMiso(playerCards)
-            else if (app[i] == 'edamame')
-              runningScore += scoreEdamame(playerCards, oppsCards)
-            else if (app[i] == 'eel') runningScore += scoreEel(playerCards)
-            else if (app[i] == 'tofu') runningScore += scoreTofu(playerCards)
-            else runningScore += scoreOnigiri(playerCards)
-
-          return runningScore
-        }
-
-        const scorePlayerDessert = (playerDessert, oppsDessert) => {
-          for (let i = 0; i < dess.length; i++)
-            if (dess[i] == 'pudding')
-              return scorePudding(playerDessert, oppsDessert)
-            else if (dess[i] == 'greenteaicecream')
-              return scoreGTIC(playerDessert)
-            else return scoreFruit(playerDessert)
-        }
-
-        const updateScores = () => {
-          setUserScore(
-            scorePlayer(players[0].stash, [
-              players[1].stash,
-              players[2].stash,
-              players[3].stash,
-            ]) + userScore
-          )
-          setCpuOneScore(
-            scorePlayer(players[1].stash, [
-              players[0].stash,
-              players[2].stash,
-              players[3].stash,
-            ]) + cpuOneScore
-          )
-          setCpuTwoScore(
-            scorePlayer(players[2].stash, [
-              players[1].stash,
-              players[0].stash,
-              players[3].stash,
-            ]) + cpuTwoScore
-          )
-          setCpuThreeScore(
-            scorePlayer(players[3].stash, [
-              players[1].stash,
-              players[2].stash,
-              players[0].stash,
-            ]) + cpuThreeScore
-          )
-        }
-
-        const updateScoresDessert = () => {
-          setUserScore(
-            scorePlayer(players[0].stash, [players[1].stash, players[2].stash, players[3].stash]) +
-            scorePlayerDessert(players[0].dessert, [
-              players[1].dessert,
-              players[2].dessert,
-              players[3].dessert,
-            ]) + userScore
-          )
-          setCpuOneScore(
-            scorePlayer(players[1].stash, [players[0].stash, players[2].stash, players[3].stash]) +
-            scorePlayerDessert(players[1].dessert, [
-              players[0].dessert,
-              players[2].dessert,
-              players[3].dessert,
-            ]) + cpuOneScore
-          )
-          setCpuTwoScore(
-            scorePlayer(players[2].stash, [players[1].stash, players[0].stash, players[3].stash]) +
-            scorePlayerDessert(players[2].dessert, [
-              players[1].dessert,
-              players[0].dessert,
-              players[3].dessert,
-            ]) + cpuTwoScore
-          )
-          setCpuThreeScore(
-            scorePlayer(players[3].stash, [players[1].stash, players[2].stash, players[0].stash]) +
-            scorePlayerDessert(players[3].dessert, [
-              players[1].dessert,
-              players[2].dessert,
-              players[0].dessert,
-            ]) + cpuThreeScore
-          )
-        }
-
-        const updateCardDisplay = () => {
-          setUserHand(players[0].hand)
-          setUserStash(players[0].stash)
-          setCpuOneStash(players[1].stash)
-          setCpuTwoStash(players[2].stash)
-          setCpuThreeStash(players[3].stash)
-        }
-
-        const handlePlayerSelection = (e) => {
-          const advanceRound = () => {
-            // Reset uramaki
-            uramakiPoints = 8
-            for(let i = 0; i < players.length; i++)
-              players[i].uramakiScored = false
-
-            round++
-          }
-
-          // If more than one miso soup is played all are removed
-          const handleMiso = () => {
-            let misoCount = 0
-            for(let i = 0; i < players.length; i++)
-              if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type)
-                misoCount++
-
-            if(misoCount > 1) {
-              for(let i = 0; i < players.length; i++) {
-                if(players[i].stash[players[i].stash.length - 1].type == cards.MISO.type) {
-                  deck.discardPile.push(players[i].stash.pop())
-                  if(i == 0)
-                    toast("Gave up non-unique miso soup", {
-                      icon: '😩',
-                      position: 'bottom-left',
-                    })
-                  else if(i == 1)
-                    toast("Gave up non-unique miso soup", {
-                      icon: '😩',
-                      position: 'bottom-right',
-                    })
-                  else if(i == 2)
-                    toast("Gave up non-unique miso soup", {
-                      icon: '😩',
-                      position: 'top-right',
-                    })
-                  else
-                    toast("Gave up non-unique miso soup", {
-                      icon: '😩',
-                      position: 'top-left',
-                    })
-                }
-              }
-            }
-          }
-
-          // Display message for successful usage and swap for display
-          const handleWasabi = () => {
-            for(let i = 0; i < players.length; i++) {
-              // Move on in if nigiri is not most recently played
-              if(![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[players[i].stash.length - 1].type))
-                continue
-
-              let wasabiLoc
-
-              // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
-              for(wasabiLoc = 0; wasabiLoc < players[i].stash.length - 1; wasabiLoc++)
-                if(players[i].stash[wasabiLoc].type == cards.WASABI.type && (wasabiLoc == players[i].stash.length - 2 ||
-                ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(players[i].stash[wasabiLoc + 1].type))) {
-                  players[i].stash.splice(wasabiLoc + 1, 0, players[i].stash.pop())
-                  if (i == 0)
-                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
-                      icon: '💥',
-                      position: 'bottom-left',
-                    })
-                  else if (i == 1)
-                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
-                      icon: '💥',
-                      position: 'bottom-right',
-                    })
-                  else if (i == 2)
-                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
-                      icon: '💥',
-                      position: 'top-right',
-                    })
-                  else
-                    toast("Tripled " +  players[i].stash[wasabiLoc + 1].text + " with wasabi", {
-                      icon: '💥',
-                      position: 'top-left',
-                    })
-                }
-            }
-          }
-
-          // If the user is actually playing a card
-          if(players[0].hand[0].color != 'transparent') {
-            for (let i = 0; i < players[0].hand.length; i++)
-              if (e.target.alt == players[0].hand[i].text) {
-                let temp = players[0].hand[players[0].hand.length - 1]
-                players[0].hand[players[0].hand.length - 1] = players[0].hand[i]
-                players[0].hand[i] = temp
-                players[0].stash.push(players[0].hand.pop())
-                break
-              }
-            players[1].stash.push(players[1].hand.pop())
-            players[2].stash.push(players[2].hand.pop())
-            players[3].stash.push(players[3].hand.pop())
-
-            if(spec.includes('wasabi'))
-              handleWasabi()
-
-            if(app.includes('miso'))
-              handleMiso()
-
-            if (roll.includes('uramaki')) scoreUramakiDuring()
-
-            if (players[0].hand.length == 0)
-              if(round < 3)
-                players[1].hand.push(cards.NEXT)
-              else players[1].hand.push(cards.FINAL)
-
-            swapCards()
-            updateCardDisplay()
-          }
-          else {
-            players[0].hand = []
-            if(round < 3)
-              updateScores()
-
-            if (round == 1) replenishDeck(DESSERTCOUNTTWO)
-            else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
-            else setAsideDessert()
-
-            setUserDessert(players[0].dessert)
-            setCpuOneDessert(players[1].dessert)
-            setCpuTwoDessert(players[2].dessert)
-            setCpuThreeDessert(players[3].dessert)
-
-            if(round == 3) {
-              updateScoresDessert()
-              setShowResults(true)
-            }
-            else {
-              dealToPlayers()
-              updateCardDisplay()
-              advanceRound()
-            }
-          }
-        }
-
         return (
           <div className="flex flex-row justify-center">
             {selection.map((card, i) => {
-              return <Card key={i} info={card} action={handlePlayerSelection} />
+              return <Card key={i} info={card} action={handlePlayerSelection} fullDisplay={true}/>
             })}
           </div>
         )
       }
 
-      const Stash = ({ platter, alignLeft }) => {
+      const Stash = ({ platter, alignLeft, interactable }) => {
         let columnColors = []
         let cardColumns = []
+        let classStringsLeft = [
+          'absolute bottom-0 left-0','absolute bottom-0 left-24','absolute bottom-0 left-48',
+          'absolute bottom-0 left-72', 'absolute bottom-0 left-96', 'absolute bottom-36 left-0',
+          'absolute bottom-36 left-24', 'absolute bottom-36 left-48', 'absolute bottom-36 left-72',
+        ]
+        let classStringsRight = [
+          'absolute bottom-0 right-0','absolute bottom-0 right-24','absolute bottom-0 right-48',
+          'absolute bottom-0 right-72', 'absolute bottom-0 right-96', 'absolute bottom-36 right-0',
+          'absolute bottom-36 right-24', 'absolute bottom-36 right-48', 'absolute bottom-36 right-72',
+        ]
 
         // Group the cards by color for display
         for (let i = 0; i < platter.length; i++) {
@@ -1646,21 +1705,33 @@ const PlayPage = () => {
 
         if(alignLeft)
           return (
-            <div className="absolute bottom-0 left-0">
-              {platter.map((card, i) => {
-                if(alignLeft)
-                  return <Card key={i} info={card} />
-                else return <Card key={i} info={card} />
+            <div>
+              {cardColumns.map((cardColumn, i) => {
+                return (
+                  <div key={i} className={classStringsLeft[i]}>
+                  {cardColumn.map((card, j) => {
+                    if(interactable)
+                      return <Card key={j} info={card} action={handleClick} fullDisplay={false}/>
+                    else return <Card key={j} info={card} fullDisplay={false}/>
+                  })}
+                  </div>
+                )
               })}
             </div>
           )
         else
           return (
-            <div className="absolute bottom-0 right-0">
-              {platter.map((card, i) => {
-                if(alignLeft)
-                  return <Card key={i} info={card} />
-                else return <Card key={i} info={card} />
+            <div>
+              {cardColumns.map((cardColumn, i) => {
+                return (
+                  <div key={i} className={classStringsRight[i]}>
+                  {cardColumn.map((card, j) => {
+                    if(interactable)
+                      return <Card key={j} info={card} action={handleClick} fullDisplay={false}/>
+                    else return <Card key={j} info={card} fullDisplay={false}/>
+                  })}
+                  </div>
+                )
               })}
             </div>
           )
@@ -1696,8 +1767,8 @@ const PlayPage = () => {
         <>
           <div className="flex h-screen flex-col">
             <div className="relative basis-2/5">
-              <Stash platter={cpuThreeStash} alignLeft={true}/>
-              <Stash platter={cpuTwoStash} alignLeft={false}/>
+              <Stash platter={cpuThreeStash} alignLeft={true} interactable={false}/>
+              <Stash platter={cpuTwoStash} alignLeft={false} interactable={false}/>
             </div>
             <div className="basis-1/5">
               <div className="flex flex-row">
@@ -1727,8 +1798,8 @@ const PlayPage = () => {
               </div>
             </div>
             <div className="basis-2/5">
-              <Stash platter={userStash} alignLeft={true}/>
-              <Stash platter={cpuOneStash} alignLeft={false}/>
+              <Stash platter={userStash} alignLeft={true} interactable={true}/>
+              <Stash platter={cpuOneStash} alignLeft={false} interactable={false}/>
             </div>
           </div>
         </>
