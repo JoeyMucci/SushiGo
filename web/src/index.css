@@ -31,7 +31,7 @@
  * END --- SETUP TAILWINDCSS EDIT
  */
 
-/* HIDE CHECKBOX AND FIX IMAGE */
+/* HIDE CHECKBOX */
 [type=checkbox] {
   position: absolute;
   opacity: 0;
@@ -46,11 +46,4 @@ img {
 
 [type=checkbox] + p {
   cursor: pointer;
-}
-
-/* OUTLINE*/
-[type=checkbox]:checked + img {
-  outline: 5px solid rgb(48, 69, 41);
-  position: relative;
-  z-index: 1000;
 }

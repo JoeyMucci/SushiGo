@@ -7,6 +7,28 @@ export const countCard = (cards, card) => {
   return count
 }
 
+export const scoreNigiri = (playerCards) => {
+  let points = 0
+  let wasabiActive = false
+
+  for (let i = 0; i < playerCards.length; i++) {
+    let marginalPoints = 0
+    if (playerCards[i].type == cards.WASABI.type) wasabiActive = true
+    else if (playerCards[i].type == cards.EGG.type) marginalPoints = 1
+    else if (playerCards[i].type == cards.SALMON.type) marginalPoints = 2
+    else if (playerCards[i].type == cards.SQUID.type) marginalPoints = 3
+
+    if (wasabiActive && marginalPoints > 0) {
+      marginalPoints *= 3
+      wasabiActive = false
+    }
+
+    points += marginalPoints
+  }
+
+  return points
+}
+
 export const scoreMaki = (playerCards, oppsCards) => {
   let makiCount =
     countCard(playerCards, cards.MAKIONE) +

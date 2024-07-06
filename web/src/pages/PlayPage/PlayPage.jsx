@@ -72,6 +72,7 @@ import wasabi from 'web/public/wasabi.jpg'
 import wasabiguide from 'web/public/wasabiguide.jpg'
 import {
   countCard,
+  scoreNigiri,
   scoreMaki,
   scoreTemaki,
   scoreLeftovers,
@@ -93,320 +94,433 @@ import {
 import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
+export const guides = Object.freeze({
+  MAKI: {
+    type: 1,
+    picpath: maki,
+    text: 'maki',
+  },
+  TEMAKI: {
+    type: 2,
+    picpath: temakiguide,
+    text: 'temaki',
+  },
+  URAMAKI: {
+    type: 3,
+    picpath: uramaki,
+    text: 'uramaki',
+  },
+  CHOPSTICKS: {
+    type: 4,
+    picpath: chopsticks,
+    text: 'chopsticks',
+  },
+  SPOON: {
+    type: 5,
+    picpath: spoon,
+    text: 'spoon',
+  },
+  MENU: {
+    type: 6,
+    picpath: menu,
+    text: 'menu',
+  },
+  TAKEOUT: {
+    type: 7,
+    picpath: takeoutbox,
+    text: 'takeout box',
+  },
+  TEA: {
+    type: 8,
+    picpath: teaguide,
+    text: 'tea',
+  },
+  WASABI: {
+    type: 9,
+    picpath: wasabiguide,
+    text: 'wasabi',
+  },
+  SOYSAUCE: {
+    type: 10,
+    picpath: soysauceguide,
+    text: 'soysauce',
+  },
+  SPECIALO: {
+    type: 11,
+    picpath: specialguide,
+    text: 'special order',
+  },
+  DUMPLING: {
+    type: 12,
+    picpath: dumplingguide,
+    text: 'dumpling',
+  },
+  TEMPURA: {
+    type: 13,
+    picpath: tempuraguide,
+    text: 'tempura',
+  },
+  SASHIMI: {
+    type: 14,
+    picpath: sashimiguide,
+    text: 'sashimi',
+  },
+  MISO: {
+    type: 15,
+    picpath: misoguide,
+    text: 'miso soup',
+  },
+  EDAMAME: {
+    type: 16,
+    picpath: edamameguide,
+    text: 'edamame',
+  },
+  EEL: {
+    type: 17,
+    picpath: eelguide,
+    text: 'eel',
+  },
+  TOFU: {
+    type: 18,
+    picpath: tofuguide,
+    text: 'tofu',
+  },
+  ONIGIRI: {
+    type: 19,
+    picpath: onigiri,
+    text: 'onigiri',
+  },
+  PUDDING: {
+    type: 20,
+    picpath: puddingguide,
+    text: 'pudding',
+  },
+  GTIC: {
+    type: 21,
+    picpath: gticguide,
+    text: 'green tea ice cream',
+  },
+  FRUIT: {
+    type: 22,
+    picpath: fruit,
+    text: 'fruit',
+  },
+})
+
 export const cards = Object.freeze({
   EGG: {
-    type: 0,
+    type: 1,
     text: 'egg nigiri',
     picpath: eggnigiri,
     color: 'yellow',
     count: 4,
   },
   SALMON: {
-    type: 1,
+    type: 2,
     text: 'salmon nigiri',
     picpath: salmonnigiri,
     color: 'yellow',
     count: 5,
   },
   SQUID: {
-    type: 2,
+    type: 3,
     text: 'squid nigiri',
     picpath: squidnigiri,
     color: 'yellow',
     count: 3,
   },
   MAKIONE: {
-    type: 3,
+    type: 4,
     text: 'one maki roll',
     picpath: maki1,
     color: 'red',
     count: 4,
   },
   MAKITWO: {
-    type: 4,
+    type: 5,
     text: 'two maki rolls',
     picpath: maki2,
     color: 'red',
     count: 5,
   },
   MAKITHREE: {
-    type: 5,
+    type: 6,
     text: 'three maki rolls',
     picpath: maki3,
     color: 'red',
     count: 3,
   },
   TEMAKI: {
-    type: 6,
+    type: 7,
     text: 'temaki',
     picpath: temaki,
     color: 'plum',
     count: 12,
   },
   URAMAKITHREE: {
-    type: 7,
+    type: 8,
     text: 'three uramaki rolls',
     picpath: uramaki3,
     color: 'lime',
     count: 4,
   },
   URAMAKIFOUR: {
-    type: 8,
+    type: 9,
     text: 'four uramaki rolls',
     picpath: uramaki4,
     color: 'lime',
     count: 4,
   },
   URAMAKIFIVE: {
-    type: 9,
+    type: 10,
     text: 'five uramaki rolls',
     picpath: uramaki5,
     color: 'lime',
     count: 4,
   },
   CHOPSTICKSONE: {
-    type: 10,
+    type: 11,
     text: 'chopsticks',
     picpath: chopsticks1,
     color: 'sky blue',
     count: 1,
   },
   CHOPSTICKSTWO: {
-    type: 11,
+    type: 12,
     text: 'chopsticks',
     picpath: chopsticks2,
     color: 'sky blue',
     count: 1,
   },
   CHOPSTICKSTHREE: {
-    type: 12,
+    type: 13,
     text: 'chopsticks',
     picpath: chopsticks3,
     color: 'sky blue',
     count: 1,
   },
   SPOONFOUR: {
-    type: 13,
+    type: 14,
     text: 'spoon',
     picpath: spoon4,
     color: 'gray',
     count: 1,
   },
   SPOONFIVE: {
-    type: 14,
+    type: 15,
     text: 'spoon',
     picpath: spoon5,
     color: 'gray',
     count: 1,
   },
   SPOONSIX: {
-    type: 15,
+    type: 16,
     text: 'spoon',
     picpath: spoon6,
     color: 'gray',
     count: 1,
   },
   MENUSEVEN: {
-    type: 16,
+    type: 17,
     text: 'menu',
     picpath: menu7,
     color: 'off white',
     count: 1,
   },
   MENUEIGHT: {
-    type: 17,
+    type: 18,
     text: 'menu',
     picpath: menu8,
     color: 'off white',
     count: 1,
   },
   MENUNINE: {
-    type: 18,
+    type: 19,
     text: 'menu',
     picpath: menu9,
     color: 'off white',
     count: 1,
   },
   TAKEOUTTEN: {
-    type: 19,
+    type: 20,
     text: 'takeout box',
     picpath: takeoutbox10,
     color: 'tan',
     count: 1,
   },
   TAKEOUTELEVEN: {
-    type: 20,
+    type: 21,
     text: 'takeout box',
     picpath: takeoutbox11,
     color: 'tan',
     count: 1,
   },
   TAKEOUTTWELVE: {
-    type: 21,
+    type: 22,
     text: 'takeout box',
     picpath: takeoutbox12,
     color: 'tan',
     count: 1,
   },
-  TEA: { type: 22, text: 'tea', picpath: tea, color: 'brown', count: 3 },
+  TEA: { type: 23, text: 'tea', picpath: tea, color: 'brown', count: 3 },
   WASABI: {
-    type: 23,
+    type: 24,
     text: 'wasabi',
     picpath: wasabi,
     color: 'yellow',
     count: 3,
   },
   SOYSAUCE: {
-    type: 24,
+    type: 25,
     text: 'soysauce',
     picpath: soysauce,
     color: 'orange',
     count: 3,
   },
   SPECIALO: {
-    type: 25,
+    type: 26,
     text: 'special order',
     picpath: specialorder,
     color: 'rainbow',
     count: 3,
   },
   DUMPLING: {
-    type: 26,
+    type: 27,
     text: 'dumpling',
     picpath: dumpling,
     color: 'indigo',
     count: 8,
   },
   TEMPURA: {
-    type: 27,
+    type: 28,
     text: 'tempura',
     picpath: tempura,
     color: 'light purple',
     count: 8,
   },
   SASHIMI: {
-    type: 28,
+    type: 29,
     text: 'sashimi',
     picpath: sashimi,
     color: 'light green',
     count: 8,
   },
   MISO: {
-    type: 29,
+    type: 30,
     text: 'miso soup',
     picpath: misosoup,
     color: 'teal',
     count: 8,
   },
   EDAMAME: {
-    type: 30,
+    type: 31,
     text: 'edamame',
     picpath: edamame,
     color: 'purple',
     count: 8,
   },
-  EEL: { type: 31, text: 'eel', picpath: eel, color: 'poison', count: 8 },
-  TOFU: { type: 32, text: 'tofu', picpath: tofu, color: 'green', count: 8 },
+  EEL: { type: 32, text: 'eel', picpath: eel, color: 'poison', count: 8 },
+  TOFU: { type: 33, text: 'tofu', picpath: tofu, color: 'green', count: 8 },
   ONICIRCLE: {
-    type: 33,
+    type: 34,
     text: 'circle onigiri',
     picpath: onigiricircle,
     color: 'hot pink',
     count: 2,
   },
   ONISQUARE: {
-    type: 34,
+    type: 35,
     text: 'square onigiri',
     picpath: onigirisquare,
     color: 'hot pink',
     count: 2,
   },
   ONITRI: {
-    type: 35,
+    type: 36,
     text: 'triangle onigiri',
     picpath: onigiritriangle,
     color: 'hot pink',
     count: 2,
   },
   ONIFLAT: {
-    type: 36,
+    type: 37,
     text: 'flat onigiri',
     picpath: onigiriflat,
     color: 'hot pink',
     count: 2,
   },
   PUDDING: {
-    type: 37,
+    type: 38,
     text: 'pudding',
     picpath: pudding,
     color: 'pink',
     count: 15,
   },
   GTIC: {
-    type: 38,
+    type: 39,
     text: 'green tea ice cream',
     picpath: greenteaicecream,
     color: 'blue',
     count: 15,
   },
   FRUITDUBWAT: {
-    type: 39,
+    type: 40,
     text: 'two watermelons',
     picpath: fruitdoublewatermelon,
     color: 'peach',
     count: 2,
   },
   FRUITDUBPINE: {
-    type: 40,
+    type: 41,
     text: 'two pineapples',
     picpath: fruitdoublepineapple,
     color: 'peach',
     count: 2,
   },
   FRUITDUBO: {
-    type: 41,
+    type: 42,
     text: 'two oranges',
     picpath: fruitdoubleorange,
     color: 'peach',
     count: 2,
   },
   FRUITWATERO: {
-    type: 42,
+    type: 43,
     text: 'one watermelon and one orange',
     picpath: fruitwatermelonorange,
     color: 'peach',
     count: 3,
   },
   FRUITPINEO: {
-    type: 43,
+    type: 44,
     text: 'one pineapple and one orange',
     picpath: fruitpineappleorange,
     color: 'peach',
     count: 3,
   },
   FRUITWATERPINE: {
-    type: 44,
+    type: 45,
     text: 'one watermlon and one pineapple',
     picpath: fruitwatermelonpineapple,
     color: 'peach',
     count: 3,
   },
   TOC: {
-    type: 45,
+    type: 46,
     text: 'turned over card',
     picpath: turnedovercard,
     color: null,
     count: 0,
   },
   NEXT: {
-    type: 46,
+    type: 47,
     text: 'next round',
     picpath: nextround,
     color: 'transparent',
     count: 0,
   },
   FINAL: {
-    type: 47,
+    type: 48,
     text: 'final score',
     picpath: finalscore,
     color: 'transparent',
@@ -430,106 +544,94 @@ const PlayPage = () => {
   const [app, setApp] = useState([])
   const [dess, setDess] = useState([])
   const [diff, setDiff] = useState([])
+  const ROLLCAP = 1
+  const SPECCAP = 2
+  const APPCAP = 3
+  const DESSCAP = 1
+  const DIFFCAP = 1
+
+  const Card = ({ numberName, info, action, opacityOn, fullDisplay }) => {
+    if (fullDisplay)
+      if (opacityOn)
+        return (
+          // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <img
+            name={numberName}
+            src={info.picpath}
+            alt={info.text}
+            onClick={action}
+            onKeyDown={action}
+            className="h-36 w-24"
+          />
+        )
+      else
+        return (
+          // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <img
+            name={numberName}
+            src={info.picpath}
+            alt={info.text}
+            onClick={action}
+            onKeyDown={action}
+            className="h-36 w-24 opacity-50"
+          />
+        )
+    return (
+      // leaving clickableness for now
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+      <img
+        name={numberName}
+        src={info.picpath}
+        alt={info.text}
+        onClick={action}
+        onKeyDown={action}
+        className="h-9 w-24 object-cover object-top"
+      />
+    )
+  }
 
   const OrderScreen = () => {
-    const ROLLCAP = 1
-    const SPECCAP = 2
-    const APPCAP = 3
-    const DESSCAP = 1
-    const DIFFCAP = 1
-
-    const BUTTONCLASS =
-      'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
-
-    let allowOrder = false
-
     const updateScreen = () => {
-      if (allowOrder) setShowGame(true)
-    }
-
-    const clickRoll = (e) => {
-      let mockList = roll
-      let cap = ROLLCAP
-      if (mockList.includes(e.target.id))
-        mockList.splice(mockList.indexOf(e.target.id), 1)
-      else if (mockList.length < cap) mockList.push(e.target.id)
-      else e.target.checked = false
-
-      setRoll(mockList)
-      updateAfterClick()
-    }
-
-    const clickSpec = (e) => {
-      let mockList = spec
-      let cap = SPECCAP
-      if (mockList.includes(e.target.id))
-        mockList.splice(mockList.indexOf(e.target.id), 1)
-      else if (mockList.length < cap) mockList.push(e.target.id)
-      else e.target.checked = false
-
-      setSpec(mockList)
-      updateAfterClick()
-    }
-
-    const clickApp = (e) => {
-      let mockList = app
-      let cap = APPCAP
-      if (mockList.includes(e.target.id))
-        mockList.splice(mockList.indexOf(e.target.id), 1)
-      else if (mockList.length < cap) mockList.push(e.target.id)
-      else e.target.checked = false
-
-      setApp(mockList)
-      updateAfterClick()
-    }
-
-    const clickDess = (e) => {
-      let mockList = dess
-      let cap = DESSCAP
-      if (mockList.includes(e.target.id))
-        mockList.splice(mockList.indexOf(e.target.id), 1)
-      else if (mockList.length < cap) mockList.push(e.target.id)
-      else e.target.checked = false
-
-      setDess(mockList)
-      updateAfterClick()
-    }
-
-    const clickDiff = (e) => {
-      let mockList = diff
-      let cap = DIFFCAP
-      if (mockList.includes(e.target.id))
-        mockList.splice(mockList.indexOf(e.target.id), 1)
-      else if (mockList.length < cap) mockList.push(e.target.id)
-      else e.target.checked = false
-
-      setDiff(mockList)
-
-      // Change opacity according to new selection status
-      if (e.target.checked)
-        document.getElementsByName(e.target.id)[0].className = BUTTONCLASS
-      else
-        document.getElementsByName(e.target.id)[0].className =
-          BUTTONCLASS + ' opacity-50'
-
-      updateAfterClick()
-    }
-
-    const updateAfterClick = () => {
       if (
         roll.length == ROLLCAP &&
         spec.length == SPECCAP &&
         app.length == APPCAP &&
         dess.length == DESSCAP &&
         diff.length == DIFFCAP
-      ) {
-        document.getElementsByName('START')[0].className = BUTTONCLASS
-        allowOrder = true
-      } else {
-        document.getElementsByName('START')[0].className =
-          BUTTONCLASS + ' opacity-50'
-        allowOrder = false
-      }
+      )
+        setShowGame(true)
+    }
+
+    const clickRoll = (e) => {
+      if (roll.includes(e.target.name))
+        setRoll(roll.toSpliced(roll.indexOf(e.target.name), 1))
+      else if (roll.length < ROLLCAP) setRoll([...roll, e.target.name])
+    }
+
+    const clickSpec = (e) => {
+      if (spec.includes(e.target.name))
+        setSpec(spec.toSpliced(spec.indexOf(e.target.name), 1))
+      else if (spec.length < SPECCAP) setSpec([...spec, e.target.name])
+    }
+
+    const clickApp = (e) => {
+      if (app.includes(e.target.name))
+        setApp(app.toSpliced(app.indexOf(e.target.name), 1))
+      else if (app.length < APPCAP) setApp([...app, e.target.name])
+    }
+
+    const clickDess = (e) => {
+      if (dess.includes(e.target.name))
+        setDess(dess.toSpliced(dess.indexOf(e.target.name), 1))
+      else if (dess.length < DESSCAP) setDess([...dess, e.target.name])
+    }
+
+    const clickDiff = (e) => {
+      if (diff.includes(e.target.id))
+        setDiff(diff.toSpliced(diff.indexOf(e.target.id), 1))
+      else if (diff.length < DIFFCAP) setDiff([...diff, e.target.id])
     }
 
     return (
@@ -544,135 +646,195 @@ const PlayPage = () => {
         <Form onSubmit={updateScreen}>
           <div className="flex flex-col items-center">
             <div className="flex flex-row">
-              <Label>
-                <CheckboxField id="maki" name="roll" onChange={clickRoll} />
-                <img src={maki} alt="maki roll" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="temaki" name="roll" onChange={clickRoll} />
-                <img
-                  src={temakiguide}
-                  alt="temaki roll"
-                  className="h-36 w-24"
-                />
-              </Label>
-              <Label>
-                <CheckboxField id="uramaki" name="roll" onChange={clickRoll} />
-                <img src={uramaki} alt="uramaki roll" className="h-36 w-24" />
-              </Label>
+              <Card
+                info={guides.MAKI}
+                numberName={guides.MAKI.type}
+                action={clickRoll}
+                opacityOn={roll.includes(guides.MAKI.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.TEMAKI}
+                numberName={guides.TEMAKI.type}
+                action={clickRoll}
+                opacityOn={roll.includes(guides.TEMAKI.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.URAMAKI}
+                numberName={guides.URAMAKI.type}
+                action={clickRoll}
+                opacityOn={roll.includes(guides.URAMAKI.type.toString())}
+                fullDisplay={true}
+              />
             </div>
             <div className="flex flex-row">
-              <Label>
-                <CheckboxField
-                  id="chopsticks"
-                  name="spec"
-                  onChange={clickSpec}
-                />
-                <img src={chopsticks} alt="chopsticks" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="spoon" name="spec" onChange={clickSpec} />
-                <img src={spoon} alt="spoon" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="menu" name="spec" onChange={clickSpec} />
-                <img src={menu} alt="menu" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField
-                  id="takeoutbox"
-                  name="spec"
-                  onChange={clickSpec}
-                />
-                <img src={takeoutbox} alt="takeout box" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="tea" name="spec" onChange={clickSpec} />
-                <img src={teaguide} alt="tea" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="wasabi" name="spec" onChange={clickSpec} />
-                <img src={wasabiguide} alt="wasabi" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="soysauce" name="spec" onChange={clickSpec} />
-                <img src={soysauceguide} alt="soysauce" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField
-                  id="specialorder"
-                  name="spec"
-                  onChange={clickSpec}
-                />
-                <img
-                  src={specialguide}
-                  alt="special order"
-                  className="h-36 w-24"
-                />
-              </Label>
+              <Card
+                info={guides.CHOPSTICKS}
+                numberName={guides.CHOPSTICKS.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.CHOPSTICKS.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.SPOON}
+                numberName={guides.SPOON.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.SPOON.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.MENU}
+                numberName={guides.MENU.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.MENU.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.TAKEOUT}
+                numberName={guides.TAKEOUT.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.TAKEOUT.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.TEA}
+                numberName={guides.TEA.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.TEA.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.WASABI}
+                numberName={guides.WASABI.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.WASABI.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.SOYSAUCE}
+                numberName={guides.SOYSAUCE.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.SOYSAUCE.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.SPECIALO}
+                numberName={guides.SPECIALO.type}
+                action={clickSpec}
+                opacityOn={spec.includes(guides.SPECIALO.type.toString())}
+                fullDisplay={true}
+              />
             </div>
             <div className="flex flex-row">
-              <Label>
-                <CheckboxField id="dumpling" name="app" onChange={clickApp} />
-                <img src={dumplingguide} alt="dumpling" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="tempura" name="app" onChange={clickApp} />
-                <img src={tempuraguide} alt="tempura" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="sashimi" name="app" onChange={clickApp} />
-                <img src={sashimiguide} alt="sashimi" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="misosoup" name="app" onChange={clickApp} />
-                <img src={misoguide} alt="miso soup" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="edamame" name="app" onChange={clickApp} />
-                <img src={edamameguide} alt="edamame" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="eel" name="app" onChange={clickApp} />
-                <img src={eelguide} alt="eel" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="tofu" name="app" onChange={clickApp} />
-                <img src={tofuguide} alt="tofu" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField id="onigiri" name="app" onChange={clickApp} />
-                <img src={onigiri} alt="onigiri" className="h-36 w-24" />
-              </Label>
+              <Card
+                info={guides.DUMPLING}
+                numberName={guides.DUMPLING.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.DUMPLING.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.TEMPURA}
+                numberName={guides.TEMPURA.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.TEMPURA.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.SASHIMI}
+                numberName={guides.SASHIMI.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.SASHIMI.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.MISO}
+                numberName={guides.MISO.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.MISO.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.EDAMAME}
+                numberName={guides.EDAMAME.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.EDAMAME.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.EEL}
+                numberName={guides.EEL.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.EEL.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.TOFU}
+                numberName={guides.TOFU.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.TOFU.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.ONIGIRI}
+                numberName={guides.ONIGIRI.type}
+                action={clickApp}
+                opacityOn={app.includes(guides.ONIGIRI.type.toString())}
+                fullDisplay={true}
+              />
             </div>
             <div className="flex flex-row">
-              <Label>
-                <CheckboxField id="pudding" name="dess" onChange={clickDess} />
-                <img src={puddingguide} alt="pudding" className="h-36 w-24" />
-              </Label>
-              <Label>
-                <CheckboxField
-                  id="greenteaicecream"
-                  name="dess"
-                  onChange={clickDess}
-                />
-                <img
-                  src={gticguide}
-                  alt="green tea ice cream"
-                  className="h-36 w-24"
-                />
-              </Label>
-              <Label>
-                <CheckboxField id="fruit" name="dess" onChange={clickDess} />
-                <img src={fruit} alt="fruit" className="h-36 w-24" />
-              </Label>
+              <Card
+                info={guides.PUDDING}
+                numberName={guides.PUDDING.type}
+                action={clickDess}
+                opacityOn={dess.includes(guides.PUDDING.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.GTIC}
+                numberName={guides.GTIC.type}
+                action={clickDess}
+                opacityOn={dess.includes(guides.GTIC.type.toString())}
+                fullDisplay={true}
+              />
+
+              <Card
+                info={guides.FRUIT}
+                numberName={guides.FRUIT.type}
+                action={clickDess}
+                opacityOn={dess.includes(guides.FRUIT.type.toString())}
+                fullDisplay={true}
+              />
             </div>
             <div className="flex flex-row">
               <Label className="m-2">
                 <CheckboxField id="easy" name="diff" onChange={clickDiff} />
                 <p
                   name="easy"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
+                  className={
+                    diff.includes('easy')
+                      ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                      : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+                  }
                 >
                   Easy
                 </p>
@@ -681,7 +843,11 @@ const PlayPage = () => {
                 <CheckboxField id="normal" name="diff" onChange={clickDiff} />
                 <p
                   name="normal"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
+                  className={
+                    diff.includes('normal')
+                      ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                      : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+                  }
                 >
                   Normal
                 </p>
@@ -690,7 +856,11 @@ const PlayPage = () => {
                 <CheckboxField id="hard" name="diff" onChange={clickDiff} />
                 <p
                   name="hard"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
+                  className={
+                    diff.includes('hard')
+                      ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                      : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+                  }
                 >
                   Hard
                 </p>
@@ -698,7 +868,15 @@ const PlayPage = () => {
             </div>
             <Submit
               name="START"
-              className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
+              className={
+                roll.length == ROLLCAP &&
+                spec.length == SPECCAP &&
+                app.length == APPCAP &&
+                dess.length == DESSCAP &&
+                diff.length == DIFFCAP
+                  ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                  : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+              }
             >
               START
             </Submit>
@@ -737,14 +915,14 @@ const PlayPage = () => {
     }
 
     const addRolls = (rollName) => {
-      if (rollName == 'maki') {
+      if (rollName == guides.MAKI.type.toString()) {
         for (let i = 0; i < cards.MAKIONE.count; i++)
           deck.pile.push(cards.MAKIONE)
         for (let i = 0; i < cards.MAKITWO.count; i++)
           deck.pile.push(cards.MAKITWO)
         for (let i = 0; i < cards.MAKITHREE.count; i++)
           deck.pile.push(cards.MAKITHREE)
-      } else if (rollName == 'temaki')
+      } else if (rollName == guides.TEMAKI.type.toString())
         for (let i = 0; i < cards.TEMAKI.count; i++)
           deck.pile.push(cards.TEMAKI)
       else {
@@ -758,40 +936,40 @@ const PlayPage = () => {
     }
 
     const addSpecials = (specialName) => {
-      if (specialName == 'chopsticks') {
+      if (specialName == guides.CHOPSTICKS.type.toString()) {
         for (let i = 0; i < cards.CHOPSTICKSONE.count; i++)
           deck.pile.push(cards.CHOPSTICKSONE)
         for (let i = 0; i < cards.CHOPSTICKSTWO.count; i++)
           deck.pile.push(cards.CHOPSTICKSTWO)
         for (let i = 0; i < cards.CHOPSTICKSTHREE.count; i++)
           deck.pile.push(cards.CHOPSTICKSTHREE)
-      } else if (specialName == 'spoon') {
+      } else if (specialName == guides.SPOON.type.toString()) {
         for (let i = 0; i < cards.SPOONFOUR.count; i++)
           deck.pile.push(cards.SPOONFOUR)
         for (let i = 0; i < cards.SPOONFIVE.count; i++)
           deck.pile.push(cards.SPOONFIVE)
         for (let i = 0; i < cards.SPOONSIX.count; i++)
           deck.pile.push(cards.SPOONSIX)
-      } else if (specialName == 'menu') {
+      } else if (specialName == guides.MENU.type.toString()) {
         for (let i = 0; i < cards.MENUSEVEN.count; i++)
           deck.pile.push(cards.MENUSEVEN)
         for (let i = 0; i < cards.MENUEIGHT.count; i++)
           deck.pile.push(cards.MENUEIGHT)
         for (let i = 0; i < cards.MENUNINE.count; i++)
           deck.pile.push(cards.MENUNINE)
-      } else if (specialName == 'takeoutbox') {
+      } else if (specialName == guides.TAKEOUT.type.toString()) {
         for (let i = 0; i < cards.TAKEOUTTEN.count; i++)
           deck.pile.push(cards.TAKEOUTTEN)
         for (let i = 0; i < cards.TAKEOUTELEVEN.count; i++)
           deck.pile.push(cards.TAKEOUTELEVEN)
         for (let i = 0; i < cards.TAKEOUTTWELVE.count; i++)
           deck.pile.push(cards.TAKEOUTTWELVE)
-      } else if (specialName == 'tea')
+      } else if (specialName == guides.TEA.type.toString())
         for (let i = 0; i < cards.TEA.count; i++) deck.pile.push(cards.TEA)
-      else if (specialName == 'wasabi')
+      else if (specialName == guides.WASABI.type.toString())
         for (let i = 0; i < cards.WASABI.count; i++)
           deck.pile.push(cards.WASABI)
-      else if (specialName == 'soysauce')
+      else if (specialName == guides.SOYSAUCE.type.toString())
         for (let i = 0; i < cards.SOYSAUCE.count; i++)
           deck.pile.push(cards.SOYSAUCE)
       else
@@ -800,23 +978,23 @@ const PlayPage = () => {
     }
 
     const addApps = (appName) => {
-      if (appName == 'dumpling')
+      if (appName == guides.DUMPLING.type.toString())
         for (let i = 0; i < cards.DUMPLING.count; i++)
           deck.pile.push(cards.DUMPLING)
-      else if (appName == 'tempura')
+      else if (appName == guides.TEMPURA.type.toString())
         for (let i = 0; i < cards.TEMPURA.count; i++)
           deck.pile.push(cards.TEMPURA)
-      else if (appName == 'sashimi')
+      else if (appName == guides.SASHIMI.type.toString())
         for (let i = 0; i < cards.SASHIMI.count; i++)
           deck.pile.push(cards.SASHIMI)
-      else if (appName == 'misosoup')
+      else if (appName == guides.MISO.type.toString())
         for (let i = 0; i < cards.MISO.count; i++) deck.pile.push(cards.MISO)
-      else if (appName == 'edamame')
+      else if (appName == guides.EDAMAME.type.toString())
         for (let i = 0; i < cards.EDAMAME.count; i++)
           deck.pile.push(cards.EDAMAME)
-      else if (appName == 'eel')
+      else if (appName == guides.EEL.type.toString())
         for (let i = 0; i < cards.EEL.count; i++) deck.pile.push(cards.EEL)
-      else if (appName == 'tofu')
+      else if (appName == guides.TOFU.type.toString())
         for (let i = 0; i < cards.TOFU.count; i++) deck.pile.push(cards.TOFU)
       else {
         for (let i = 0; i < cards.ONICIRCLE.count; i++)
@@ -831,10 +1009,10 @@ const PlayPage = () => {
     }
 
     const fillDessertPile = (dessertName) => {
-      if (dessertName == 'pudding')
+      if (dessertName == guides.PUDDING.type.toString())
         for (let i = 0; i < cards.PUDDING.count; i++)
           deck.dessertPile.push(cards.PUDDING)
-      else if (dessertName == 'greenteaicecream')
+      else if (dessertName == guides.GTIC.type.toString())
         for (let i = 0; i < cards.GTIC.count; i++)
           deck.dessertPile.push(cards.GTIC)
       else {
@@ -871,6 +1049,7 @@ const PlayPage = () => {
         name: 'Joey',
         hand: [],
         stash: [],
+        score: 0,
         dessert: 0,
         uramakiScored: false,
       },
@@ -878,6 +1057,7 @@ const PlayPage = () => {
         name: 'cpu one',
         hand: [],
         stash: [],
+        score: 0,
         dessert: 0,
         uramakiScored: false,
       },
@@ -885,6 +1065,7 @@ const PlayPage = () => {
         name: 'cpu two',
         hand: [],
         stash: [],
+        score: 0,
         dessert: 0,
         uramakiScored: false,
       },
@@ -892,6 +1073,7 @@ const PlayPage = () => {
         name: 'cpu three',
         hand: [],
         stash: [],
+        score: 0,
         dessert: 0,
         uramakiScored: false,
       },
@@ -928,7 +1110,7 @@ const PlayPage = () => {
       for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
 
       // Fruit is the only dessert card that is heterogeneous, so its the only one that needs to be shuffled
-      if (dess[0] == 'fruit') shuffle(deck.dessertPile)
+      if (dess.includes('fruit')) shuffle(deck.dessertPile)
 
       // Add dessert cards for first round
       for (let i = 0; i < DESSERTCOUNTONE; i++)
@@ -975,26 +1157,22 @@ const PlayPage = () => {
         players[players.length - 1].hand = tempCards
       }
 
-      const scoreNigiri = (playerCards) => {
-        let points = 0
-        let wasabiActive = false
+      const notify = (message, emoji, area) => {
+        let location
+        if (area == 0) location = 'bottom-left'
+        else if (area == 1) location = 'bottom-right'
+        else if (area == 2) location = 'top-right'
+        else location = 'top-left'
 
-        for (let i = 0; i < playerCards.length; i++) {
-          let marginalPoints = 0
-          if (playerCards[i].type == cards.WASABI.type) wasabiActive = true
-          else if (playerCards[i].type == cards.EGG.type) marginalPoints = 1
-          else if (playerCards[i].type == cards.SALMON.type) marginalPoints = 2
-          else if (playerCards[i].type == cards.SQUID.type) marginalPoints = 3
-
-          if (wasabiActive && marginalPoints > 0) {
-            marginalPoints *= 3
-            wasabiActive = false
-          }
-
-          points += marginalPoints
-        }
-
-        return points
+        toast(message, {
+          icon: emoji,
+          position: location,
+          style: {
+            background: '#004', // nightwing
+            color: '#ff917d', // salmon
+          },
+          className: 'font-cal text-2xl',
+        })
       }
 
       const scoreUramakiDuring = () => {
@@ -1024,47 +1202,13 @@ const PlayPage = () => {
             // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
             // However, it is possible to score uramaki again at the end of the round
             if (uramakiCount == goal && !players[i].uramakiScored) {
-              if (i == 0) {
-                setUserScore(userScore + uramakiPoints)
-                cleanUramaki(players[i].stash)
-                toast(
-                  'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
-                  {
-                    icon: '😋',
-                    position: 'bottom-left',
-                  }
-                )
-              } else if (i == 1) {
-                setCpuOneScore(cpuOneScore + uramakiPoints)
-                cleanUramaki(players[i].stash)
-                toast(
-                  'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
-                  {
-                    icon: '😋',
-                    position: 'bottom-right',
-                  }
-                )
-              } else if (i == 2) {
-                setCpuTwoScore(cpuTwoScore + uramakiPoints)
-                cleanUramaki(players[i].stash)
-                toast(
-                  'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
-                  {
-                    icon: '😋',
-                    position: 'top-right',
-                  }
-                )
-              } else {
-                setCpuThreeScore(cpuThreeScore + uramakiPoints)
-                cleanUramaki(players[i].stash)
-                toast(
-                  'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
-                  {
-                    icon: '😋',
-                    position: 'top-left',
-                  }
-                )
-              }
+              players[i].score += uramakiPoints
+              cleanUramaki(players[i].stash)
+              notify(
+                'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
+                '😋',
+                i
+              )
               players[i].uramakiScored = true
               decrease += 3 // Do not decrease right away so tied players receive the same points
             }
@@ -1098,7 +1242,7 @@ const PlayPage = () => {
             // i.e. If this is a dessert card
             let removedCard = players[i].stash.pop()
             if (['pink', 'blue', 'peach'].includes(removedCard.color))
-              if (removedCard.color == 'peach')
+              if (removedCard.color == cards.FRUITDUBWAT.color)
                 addFruit(removedCard, players[i])
               else players[i].dessert++
             else players[i].stash.unshift(removedCard)
@@ -1126,11 +1270,9 @@ const PlayPage = () => {
           }
       }
 
-      // Rebuilds the deck by grabbing all the played cards (excluding dessert)
-      // Also grabs discarded cards (e.g. uramaki, miso)
+      // PRECONDITION: Desserts are cleaned from stashes
+      // Rebuilds the deck by grabbing all the played/discarded cards
       const replenishDeck = (moreDes) => {
-        setAsideDessert()
-
         for (let i = 0; i < players.length; i++)
           for (let j = players[i].stash.length - 1; j >= 0; j--)
             deck.pile.push(players[i].stash.pop())
@@ -1140,13 +1282,13 @@ const PlayPage = () => {
 
         for (let i = 0; i < moreDes; i++) deck.pile.push(deck.dessertPile.pop())
 
-        if (spec.includes('takeoutbox')) takeoutBoxReplace()
+        if (spec.includes(guides.TAKEOUT.type.toString())) takeoutBoxReplace()
 
-        if (spec.includes('specialorder')) specialOrderReplace()
+        if (spec.includes(guides.TAKEOUT.type.toString())) specialOrderReplace()
 
         shuffle(deck.pile)
 
-        if (dess.includes('fruit')) {
+        if (dess.includes('')) {
           let allFruitCounts = [
             parseFruit(players[0].dessert),
             parseFruit(players[1].dessert),
@@ -1172,7 +1314,7 @@ const PlayPage = () => {
       }
 
       // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
-      const scorePlayer = (playerCards, oppsCards) => {
+      const scoreRegular = (playerCards, oppsCards) => {
         let runningScore = 0
 
         // NIGIRI
@@ -1209,7 +1351,7 @@ const PlayPage = () => {
         return runningScore
       }
 
-      const scorePlayerDessert = (playerDessert, oppsDessert) => {
+      const scoreDessert = (playerDessert, oppsDessert) => {
         for (let i = 0; i < dess.length; i++)
           if (dess[i] == 'pudding')
             return scorePudding(playerDessert, oppsDessert)
@@ -1218,98 +1360,48 @@ const PlayPage = () => {
           else return scoreFruit(playerDessert)
       }
 
-      const updateScores = () => {
-        setUserScore(
-          scorePlayer(players[0].stash, [
-            players[1].stash,
-            players[2].stash,
-            players[3].stash,
-          ]) + userScore
-        )
-        setCpuOneScore(
-          scorePlayer(players[1].stash, [
-            players[0].stash,
-            players[2].stash,
-            players[3].stash,
-          ]) + cpuOneScore
-        )
-        setCpuTwoScore(
-          scorePlayer(players[2].stash, [
-            players[1].stash,
-            players[0].stash,
-            players[3].stash,
-          ]) + cpuTwoScore
-        )
-        setCpuThreeScore(
-          scorePlayer(players[3].stash, [
-            players[1].stash,
-            players[2].stash,
-            players[0].stash,
-          ]) + cpuThreeScore
-        )
+      const scoreRound = () => {
+        players[0].score += scoreRegular(players[0].stash, [
+          (players[1].stash, players[2].stash, players[3].stash),
+        ])
+        players[1].score += scoreRegular(players[1].stash, [
+          (players[0].stash, players[2].stash, players[3].stash),
+        ])
+        players[2].score += scoreRegular(players[2].stash, [
+          (players[0].stash, players[1].stash, players[3].stash),
+        ])
+        players[3].score += scoreRegular(players[3].stash, [
+          (players[0].stash, players[1].stash, players[2].stash),
+        ])
       }
 
-      const updateScoresDessert = () => {
-        setUserScore(
-          scorePlayer(players[0].stash, [
-            players[1].stash,
-            players[2].stash,
-            players[3].stash,
-          ]) +
-            scorePlayerDessert(players[0].dessert, [
-              players[1].dessert,
-              players[2].dessert,
-              players[3].dessert,
-            ]) +
-            userScore
-        )
-        setCpuOneScore(
-          scorePlayer(players[1].stash, [
-            players[0].stash,
-            players[2].stash,
-            players[3].stash,
-          ]) +
-            scorePlayerDessert(players[1].dessert, [
-              players[0].dessert,
-              players[2].dessert,
-              players[3].dessert,
-            ]) +
-            cpuOneScore
-        )
-        setCpuTwoScore(
-          scorePlayer(players[2].stash, [
-            players[1].stash,
-            players[0].stash,
-            players[3].stash,
-          ]) +
-            scorePlayerDessert(players[2].dessert, [
-              players[1].dessert,
-              players[0].dessert,
-              players[3].dessert,
-            ]) +
-            cpuTwoScore
-        )
-        setCpuThreeScore(
-          scorePlayer(players[3].stash, [
-            players[1].stash,
-            players[2].stash,
-            players[0].stash,
-          ]) +
-            scorePlayerDessert(players[3].dessert, [
-              players[1].dessert,
-              players[2].dessert,
-              players[0].dessert,
-            ]) +
-            cpuThreeScore
-        )
+      const scoreDesserts = () => {
+        players[0].score += scoreDessert(players[0].stash, [
+          (players[1].stash, players[2].stash, players[3].stash),
+        ])
+        players[1].score += scoreDessert(players[1].stash, [
+          (players[0].stash, players[2].stash, players[3].stash),
+        ])
+        players[2].score += scoreDessert(players[2].stash, [
+          (players[0].stash, players[1].stash, players[3].stash),
+        ])
+        players[3].score += scoreDessert(players[3].stash, [
+          (players[0].stash, players[1].stash, players[2].stash),
+        ])
       }
 
-      const updateCardDisplay = () => {
-        setUserHand(players[0].hand)
-        setUserStash(players[0].stash)
-        setCpuOneStash(players[1].stash)
-        setCpuTwoStash(players[2].stash)
-        setCpuThreeStash(players[3].stash)
+      const updateData = (updateScores) => {
+        setUserHand([...players[0].hand])
+        setUserStash([...players[0].stash])
+        setCpuOneStash([...players[1].stash])
+        setCpuTwoStash([...players[2].stash])
+        setCpuThreeStash([...players[3].stash])
+        if (updateScores || roll.includes(guides.URAMAKI.type.toString())) {
+          setUserScore(players[0].score)
+          setCpuOneScore(players[1].score)
+          setCpuTwoScore(players[2].score)
+          setCpuThreeScore(players[3].score)
+        }
       }
 
       const advanceRound = () => {
@@ -1322,46 +1414,27 @@ const PlayPage = () => {
       }
 
       // If more than one miso soup is played all are removed
-      const handleMiso = () => {
-        let misoCount = 0
-        for (let i = 0; i < players.length; i++)
-          if (
-            players[i].stash[players[i].stash.length - 1].type ==
-            cards.MISO.type
-          )
-            misoCount++
+      // const handleMiso = () => {
+      //   let misoCount = 0
+      //   for (let i = 0; i < players.length; i++)
+      //     if (
+      //       players[i].stash[players[i].stash.length - 1].type ==
+      //       cards.MISO.type
+      //     )
+      //       misoCount++
 
-        if (misoCount > 1) {
-          for (let i = 0; i < players.length; i++) {
-            if (
-              players[i].stash[players[i].stash.length - 1].type ==
-              cards.MISO.type
-            ) {
-              deck.discardPile.push(players[i].stash.pop())
-              if (i == 0)
-                toast('Gave up non-unique miso soup', {
-                  icon: '😩',
-                  position: 'bottom-left',
-                })
-              else if (i == 1)
-                toast('Gave up non-unique miso soup', {
-                  icon: '😩',
-                  position: 'bottom-right',
-                })
-              else if (i == 2)
-                toast('Gave up non-unique miso soup', {
-                  icon: '😩',
-                  position: 'top-right',
-                })
-              else
-                toast('Gave up non-unique miso soup', {
-                  icon: '😩',
-                  position: 'top-left',
-                })
-            }
-          }
-        }
-      }
+      //   if (misoCount > 1) {
+      //     for (let i = 0; i < players.length; i++) {
+      //       if (
+      //         players[i].stash[players[i].stash.length - 1].type ==
+      //         cards.MISO.type
+      //       ) {
+      //         deck.discardPile.push(players[i].stash.pop())
+      //         notify('Gave up non-unique miso soup', '😩', i)
+      //       }
+      //     }
+      //   }
+      // }
 
       // Display message for successful usage and swap for display
       const handleWasabi = () => {
@@ -1390,46 +1463,14 @@ const PlayPage = () => {
                 ))
             ) {
               players[i].stash.splice(wasabiLoc + 1, 0, players[i].stash.pop())
-              if (i == 0)
-                toast(
-                  'Tripled ' +
-                    players[i].stash[wasabiLoc + 1].text +
-                    ' with wasabi',
-                  {
-                    icon: '💥',
-                    position: 'bottom-left',
-                  }
-                )
-              else if (i == 1)
-                toast(
-                  'Tripled ' +
-                    players[i].stash[wasabiLoc + 1].text +
-                    ' with wasabi',
-                  {
-                    icon: '💥',
-                    position: 'bottom-right',
-                  }
-                )
-              else if (i == 2)
-                toast(
-                  'Tripled ' +
-                    players[i].stash[wasabiLoc + 1].text +
-                    ' with wasabi',
-                  {
-                    icon: '💥',
-                    position: 'top-right',
-                  }
-                )
-              else
-                toast(
-                  'Tripled ' +
-                    players[i].stash[wasabiLoc + 1].text +
-                    ' with wasabi',
-                  {
-                    icon: '💥',
-                    position: 'top-left',
-                  }
-                )
+              notify(
+                'Tripled ' +
+                  players[i].stash[wasabiLoc + 1].text +
+                  ' with wasabi',
+                '💥',
+                i
+              )
+
               break
             }
         }
@@ -1440,35 +1481,35 @@ const PlayPage = () => {
         players[2].stash.push(players[2].hand.pop())
         players[3].stash.push(players[3].hand.pop())
 
-        if (spec.includes('wasabi')) handleWasabi()
+        if (spec.includes(guides.WASABI.type.toString())) handleWasabi()
 
-        if (roll.includes('uramaki')) scoreUramakiDuring()
+        if (roll.includes(guides.URAMAKI.type.toString())) scoreUramakiDuring()
 
-        if (app.includes('misosoup')) handleMiso()
+        // Miso is bugging we leacing it out for now
+        // if (app.includes(guides.MISO.type.toString())) handleMiso()
 
         if (players[0].hand.length == 0)
-          if (round < 3) players[1].hand.push(cards.NEXT)
-          else players[1].hand.push(cards.FINAL)
+          if (round < 3) players[0].hand.push(cards.NEXT)
+          else players[0].hand.push(cards.FINAL)
+        else swapCards()
 
-        swapCards()
-        updateCardDisplay()
+        updateData(false)
       }
 
       const handlePlayerSelection = async (e) => {
         if (specialOrderFreeze || takeoutBoxFreeze) return
 
         // If the user is actually playing a card
-        if (players[0].hand[0].color != 'transparent') {
+        if (players[0].hand[0].color != cards.NEXT.color) {
+          // The name serves as an index within the hand
           let played = players[0].hand.splice(parseInt(e.target.name), 1)[0]
           if (usingMenu) {
             if (played.color == cards.MENUSEVEN.color) {
-              toast('Cannot play menu from menu', {
-                icon: '📖',
-                position: 'bottom-left',
-              })
+              notify('Cannot play menu from menu', '📖', 0)
               return
             }
             deck.discardPile.push(players[0].stash.pop()) // Pop the menu that is pushed for visuals
+            notify('Played ' + played.text + ' with menu', '📖', 0)
           }
           players[0].stash.push(played)
           if (played.color == cards.MENUSEVEN.color) {
@@ -1482,31 +1523,27 @@ const PlayPage = () => {
             savedHand = players[0].hand
             players[0].hand = tempHand
             usingMenu = true
-            setUserStash([...userStash]) // couldn't tell you why this works but it does
-            setUserHand(players[0].hand)
+            setUserHand([...players[0].hand])
+            setUserStash([...players[0].stash])
             return
           } else if (played.color == cards.TAKEOUTTEN.color)
             if (players[0].stash.length == 1) {
-              toast('Took out 0 items with takeout box', {
-                icon: '🥡',
-                position: 'bottom-left',
-              })
+              notify('Took out 0 items with takeout box', '🥡', 0)
               deck.discardPile.push(players[0].stash.pop())
             } else {
               takeoutBoxFreeze = true
-              setUserStash([...userStash]) // couldn't tell you why this works but it does
+              setUserHand([...players[0].hand])
+              setUserStash([...players[0].stash])
               return
             }
           else if (played.type == cards.SPECIALO.type)
             if (players[0].stash.length == 1) {
-              toast('Played special order without copying', {
-                icon: '🌈',
-                position: 'bottom-left',
-              })
+              notify('Played special order without copying', '🌈', 0)
               deck.discardPile.push(players[0].stash.pop())
             } else {
               specialOrderFreeze = true
-              setUserStash([...players[0].stash]) // couldn't tell you why this works but it does
+              setUserHand([...players[0].hand])
+              setUserStash([...players[0].stash])
               return
             }
           if (usingMenu) {
@@ -1520,11 +1557,12 @@ const PlayPage = () => {
           handlePostPlayerActions()
         } else {
           players[0].hand = []
-          if (round < 3) updateScores()
+          scoreRound()
+
+          setAsideDessert()
 
           if (round == 1) replenishDeck(DESSERTCOUNTTWO)
           else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
-          else setAsideDessert()
 
           setUserDessert(players[0].dessert)
           setCpuOneDessert(players[1].dessert)
@@ -1532,11 +1570,12 @@ const PlayPage = () => {
           setCpuThreeDessert(players[3].dessert)
 
           if (round == 3) {
-            updateScoresDessert()
+            scoreDesserts()
+            updateData(true)
             setShowResults(true)
           } else {
             dealToPlayers()
-            updateCardDisplay()
+            updateData(true)
             advanceRound()
           }
         }
@@ -1548,10 +1587,11 @@ const PlayPage = () => {
         const takeoutPressed = () => {
           deck.discardPile.push(players[0].stash.pop()) // Move takeout box to discard pile
           let itemString = takeoutCount == 1 ? ' item' : ' items'
-          toast('Took out ' + takeoutCount + itemString + ' with takeout box', {
-            icon: '🥡',
-            position: 'bottom-left',
-          })
+          notify(
+            'Took out ' + takeoutCount + itemString + ' with takeout box',
+            '🥡',
+            0
+          )
           takeoutCount = 0
           takeoutBoxFreeze = false
           handlePostPlayerActions()
@@ -1578,10 +1618,7 @@ const PlayPage = () => {
         } else if (specialOrderFreeze) {
           players[0].stash.pop() // Pop the special order that is pushed for visuals
           if (e.target.alt == 'special order') {
-            toast('Played special order without copying', {
-              icon: '🌈',
-              position: 'bottom-left',
-            })
+            notify('Played special order without copying', '🌈', 0)
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
             handlePostPlayerActions()
@@ -1590,60 +1627,16 @@ const PlayPage = () => {
           for (let i = 0; i < players[0].stash.length; i++)
             if (e.target.alt == players[0].stash[i].text) {
               players[0].stash.push(players[0].stash[i])
-              toast(
+              notify(
                 'Copied ' + players[0].stash[i].text + ' with special order',
-                {
-                  icon: '🌈',
-                  position: 'bottom-left',
-                }
+                '🌈',
+                0
               )
               break
             }
           specialOrderFreeze = false
           handlePostPlayerActions()
         }
-      }
-
-      const Card = ({ index, info, action, opacityOn, fullDisplay }) => {
-        if (fullDisplay)
-          if (opacityOn)
-            return (
-              // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
-              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-              <img
-                name={index}
-                src={info.picpath}
-                alt={info.text}
-                onClick={action}
-                onKeyDown={action}
-                className="h-36 w-24"
-              />
-            )
-          else
-            return (
-              // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
-              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-              <img
-                name={index}
-                src={info.picpath}
-                alt={info.text}
-                onClick={action}
-                onKeyDown={action}
-                className="h-36 w-24 opacity-50"
-              />
-            )
-        return (
-          // leaving clickableness for now
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-          <img
-            name={index}
-            src={info.picpath}
-            alt={info.text}
-            onClick={action}
-            onKeyDown={action}
-            className="h-9 w-24 object-cover object-top"
-          />
-        )
       }
 
       const Hand = ({ selection }) => {
@@ -1654,7 +1647,7 @@ const PlayPage = () => {
                 return (
                   <Card
                     key={i}
-                    index={i}
+                    numberName={i}
                     info={card}
                     action={handlePlayerSelection}
                     opacityOn={false}
@@ -1665,7 +1658,7 @@ const PlayPage = () => {
                 return (
                   <Card
                     key={i}
-                    index={i}
+                    numberName={i}
                     info={card}
                     action={handlePlayerSelection}
                     opacityOn={true}
@@ -1749,7 +1742,7 @@ const PlayPage = () => {
                         return (
                           <Card
                             key={j}
-                            index={j}
+                            numberName={j}
                             info={card}
                             action={handleClick}
                             fullDisplay={false}
@@ -1759,7 +1752,7 @@ const PlayPage = () => {
                         return (
                           <Card
                             key={j}
-                            index={j}
+                            numberName={j}
                             info={card}
                             fullDisplay={false}
                           />
