@@ -70,6 +70,7 @@ import uramaki5 from 'web/public/uramaki(5).jpg'
 import uramaki from 'web/public/uramaki.jpg'
 import wasabi from 'web/public/wasabi.jpg'
 import wasabiguide from 'web/public/wasabiguide.jpg'
+import { pickComputerCard } from 'web/src/pages/PlayPage/ComputerActions.jsx'
 import {
   countCard,
   scoreNigiri,
@@ -895,6 +896,7 @@ const PlayPage = () => {
     const DESSERTCOUNTTHREE = 2
 
     let round = 1
+    // let priority = 1
     let uramakiPoints = 8
     let usingMenu = false
     let savedHand = []
@@ -902,6 +904,8 @@ const PlayPage = () => {
     let takeoutCount = 0
     let takeoutCards = []
     let specialOrderFreeze = false
+    let misoAllowed = true
+    let firstMisoIndex = -1
     let deck = {
       pile: [],
       dessertPile: [],
@@ -1056,6 +1060,7 @@ const PlayPage = () => {
       {
         name: 'cpu one',
         hand: [],
+        willPlayIndex: -1,
         stash: [],
         score: 0,
         dessert: 0,
@@ -1064,6 +1069,7 @@ const PlayPage = () => {
       {
         name: 'cpu two',
         hand: [],
+        willPlayIndex: -1,
         stash: [],
         score: 0,
         dessert: 0,
@@ -1072,6 +1078,7 @@ const PlayPage = () => {
       {
         name: 'cpu three',
         hand: [],
+        willPlayIndex: -1,
         stash: [],
         score: 0,
         dessert: 0,
@@ -1157,6 +1164,14 @@ const PlayPage = () => {
         players[players.length - 1].hand = tempCards
       }
 
+      const opps = (excludedIndex) => {
+        return [
+          players[(excludedIndex + 1) % 4],
+          players[(excludedIndex + 2) % 4],
+          players[(excludedIndex + 3) % 4],
+        ]
+      }
+
       const notify = (message, emoji, area) => {
         let location
         if (area == 0) location = 'bottom-left'
@@ -1173,6 +1188,14 @@ const PlayPage = () => {
           },
           className: 'font-cal text-2xl',
         })
+      }
+
+      const cleanupMenu = () => {
+        for (let i = players[0].hand.length - 1; i >= 0; i--)
+          deck.pile.push(players[0].hand.pop())
+        shuffle(deck.pile)
+        players[0].hand = savedHand
+        usingMenu = false
       }
 
       const scoreUramakiDuring = () => {
@@ -1404,7 +1427,7 @@ const PlayPage = () => {
         }
       }
 
-      const advanceRound = () => {
+      const incrementRound = () => {
         // Reset uramaki
         uramakiPoints = 8
         for (let i = 0; i < players.length; i++)
@@ -1413,69 +1436,247 @@ const PlayPage = () => {
         round++
       }
 
-      // If more than one miso soup is played all are removed
-      // const handleMiso = () => {
-      //   let misoCount = 0
-      //   for (let i = 0; i < players.length; i++)
-      //     if (
-      //       players[i].stash[players[i].stash.length - 1].type ==
-      //       cards.MISO.type
-      //     )
-      //       misoCount++
+      const reorderMaki = (index) => {
+        if (
+          players[index].stash.length == 0 ||
+          players[index].stash[players[index].stash.length - 1].color !=
+            cards.MAKIONE.color
+        )
+          return
 
-      //   if (misoCount > 1) {
-      //     for (let i = 0; i < players.length; i++) {
-      //       if (
-      //         players[i].stash[players[i].stash.length - 1].type ==
-      //         cards.MISO.type
-      //       ) {
-      //         deck.discardPile.push(players[i].stash.pop())
-      //         notify('Gave up non-unique miso soup', '😩', i)
-      //       }
-      //     }
-      //   }
-      // }
+        if (
+          players[index].stash[players[index].stash.length - 1].type ==
+          cards.MAKIONE.type
+        )
+          return
 
-      // Display message for successful usage and swap for display
-      const handleWasabi = () => {
-        for (let i = 0; i < players.length; i++) {
-          // Move on in if nigiri is not most recently played
-          if (
-            ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
-              players[i].stash[players[i].stash.length - 1].type
-            )
-          )
-            continue
-
-          let wasabiLoc
-
-          // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
-          for (
-            wasabiLoc = 0;
-            wasabiLoc < players[i].stash.length - 1;
-            wasabiLoc++
-          )
-            if (
-              players[i].stash[wasabiLoc].type == cards.WASABI.type &&
-              (wasabiLoc == players[i].stash.length - 2 ||
-                ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
-                  players[i].stash[wasabiLoc + 1].type
-                ))
-            ) {
-              players[i].stash.splice(wasabiLoc + 1, 0, players[i].stash.pop())
-              notify(
-                'Tripled ' +
-                  players[i].stash[wasabiLoc + 1].text +
-                  ' with wasabi',
-                '💥',
-                i
-              )
-
+        if (
+          players[index].stash[players[index].stash.length - 1].type ==
+          cards.MAKITWO.type
+        ) {
+          for (let i = 0; i < players[index].stash.length; i++)
+            if (players[index].stash[i].type == cards.MAKIONE.type) {
+              players[index].stash[i] = cards.MAKITWO
+              players[index].stash[players[index].stash.length - 1] =
+                cards.MAKIONE
               break
             }
+          return
+        }
+
+        for (let i = 0; i < players[index].stash.length; i++)
+          if (players[index].stash[i].type == cards.MAKITWO.type) {
+            players[index].stash[i] = cards.MAKITHREE
+            players[index].stash[players[index].stash.length - 1] =
+              cards.MAKITWO
+            break
+          }
+
+        if (
+          players[index].stash[players[index].stash.length - 1] == cards.MAKITWO
+        )
+          reorderMaki(index)
+      }
+
+      const reorderUramaki = (index) => {
+        if (
+          players[index].stash.length == 0 ||
+          players[index].stash[players[index].stash.length - 1].color !=
+            cards.URAMAKITHREE.color
+        )
+          return
+
+        if (
+          players[index].stash[players[index].stash.length - 1].type ==
+          cards.URAMAKITHREE.type
+        )
+          return
+
+        if (
+          players[index].stash[players[index].stash.length - 1].type ==
+          cards.URAMAKIFOUR.type
+        ) {
+          for (let i = 0; i < players[index].stash.length; i++)
+            if (players[index].stash[i].type == cards.URAMAKITHREE.type) {
+              players[index].stash[i] = cards.URAMAKIFOUR
+              players[index].stash[players[index].stash.length - 1] =
+                cards.URAMAKITHREE
+              break
+            }
+          return
+        }
+
+        for (let i = 0; i < players[index].stash.length; i++)
+          if (players[index].stash[i].type == cards.URAMAKIFOUR.type) {
+            players[index].stash[i] = cards.URAMAKIFIVE
+            players[index].stash[players[index].stash.length - 1] =
+              cards.URAMAKIFOUR
+            break
+          }
+
+        if (
+          players[index].stash[players[index].stash.length - 1] ==
+          cards.URAMAKIFOUR
+        )
+          reorderUramaki(index)
+      }
+
+      // If more than one miso soup is played all are removed
+      const handleMiso = (index) => {
+        if (
+          players[index].stash[players[index].stash.length - 1].type !=
+          cards.MISO.type
+        )
+          return
+
+        if (misoAllowed) {
+          misoAllowed = false
+          firstMisoIndex = index
+          return
+        }
+
+        deck.discardPile.push(players[index].stash.pop())
+        notify('Gave up non-unique miso soup', '😩', index)
+
+        if (firstMisoIndex != -1) {
+          deck.discardPile.push(players[firstMisoIndex].pop())
+          notify('Gave up non-unique miso soup', '😩', firstMisoIndex)
+          firstMisoIndex = -1
+        }
+        // let misoCount = 0
+        // for (let i = 0; i < players.length; i++)
+        //   if (
+        //     players[i].stash[players[i].stash.length - 1].type ==
+        //     cards.MISO.type
+        //   )
+        //     misoCount++
+
+        // if (misoCount > 1) {
+        //   for (let i = 0; i < players.length; i++) {
+        //     if (
+        //       players[i].stash[players[i].stash.length - 1].type ==
+        //       cards.MISO.type
+        //     ) {
+        //       deck.discardPile.push(players[i].stash.pop())
+        //       notify('Gave up non-unique miso soup', '😩', i)
+        //     }
+        //   }
+        // }
+      }
+
+      // Display message for successful usage and swap for display
+      const handleWasabi = (index) => {
+        // Move on in if nigiri is not most recently played
+        if (
+          ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
+            players[index].stash[players[index].stash.length - 1].type
+          )
+        )
+          return
+
+        let wasabiLoc
+
+        // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
+        for (
+          wasabiLoc = 0;
+          wasabiLoc < players[index].stash.length - 1;
+          wasabiLoc++
+        )
+          if (
+            players[index].stash[wasabiLoc].type == cards.WASABI.type &&
+            (wasabiLoc == players[index].stash.length - 2 ||
+              ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
+                players[index].stash[wasabiLoc + 1].type
+              ))
+          ) {
+            players[index].stash.splice(
+              wasabiLoc + 1,
+              0,
+              players[index].stash.pop()
+            )
+            notify(
+              'Tripled ' +
+                players[index].stash[wasabiLoc + 1].text +
+                ' with wasabi',
+              '💥',
+              index
+            )
+
+            break
+          }
+      }
+
+      const playCard = (cardIndex, playerIndex, checkUramaki) => {
+        let card = players[playerIndex].hand.splice(cardIndex, 1)[0]
+        players[playerIndex].stash.push(card)
+        if (card.type == cards.SPECIALO.type)
+          if (playerIndex == 0)
+            if (players[0].stash.length == 1) {
+              // player special order
+              notify('Played special order without copying', '🌈', 0)
+              deck.discardPile.push(players[0].stash.pop())
+            } else {
+              specialOrderFreeze = true
+              // setUserHand([...players[0].hand])
+              // setUserStash([...players[0].stash])
+              return
+            }
+          else if (players[playerIndex].stash.length == 1) {
+            // cpu special order
+            notify('Played special order without copying', '🌈', playerIndex)
+            deck.discardPile.push(players[playerIndex].stash.pop())
+          } else {
+            notify(
+              'Copied ' +
+                players[playerIndex].stash[0].text +
+                ' with special order',
+              '🌈',
+              playerIndex
+            )
+            players[playerIndex].stash[players[playerIndex].stash.length - 1] =
+              players[playerIndex].stash[0]
+          }
+
+        if (roll.includes(guides.MAKI.type.toString())) reorderMaki(playerIndex)
+
+        if (roll.includes(guides.URAMAKI.type.toString()))
+          reorderUramaki(playerIndex)
+
+        if (spec.includes(guides.WASABI.type.toString()))
+          handleWasabi(playerIndex)
+
+        if (app.includes(guides.MISO.type.toString())) handleMiso()
+
+        if (checkUramaki && roll.includes(guides.URAMAKI.type.toString()))
+          scoreUramakiDuring()
+      }
+
+      const advanceRound = () => {
+        players[0].hand = []
+        scoreRound()
+
+        setAsideDessert()
+
+        if (round == 1) replenishDeck(DESSERTCOUNTTWO)
+        else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
+
+        setUserDessert(players[0].dessert)
+        setCpuOneDessert(players[1].dessert)
+        setCpuTwoDessert(players[2].dessert)
+        setCpuThreeDessert(players[3].dessert)
+
+        if (round == 3) {
+          scoreDesserts()
+          updateData(true)
+          setShowResults(true)
+        } else {
+          dealToPlayers()
+          updateData(true)
+          incrementRound()
         }
       }
 
+      /*
       const handlePostPlayerActions = () => {
         players[1].stash.push(players[1].hand.pop())
         players[2].stash.push(players[2].hand.pop())
@@ -1495,8 +1696,204 @@ const PlayPage = () => {
 
         updateData(false)
       }
+      */
 
-      const handlePlayerSelection = async (e) => {
+      const resolveTurn = (playComputerCards) => {
+        // CHOPSTICKS -> SPOON -> MENU -> TAKEOUT BOX
+        const handleSpecials = () => {
+          const handleMenu = (index) => {
+            let tempHand = [
+              deck.pile.pop(),
+              deck.pile.pop(),
+              deck.pile.pop(),
+              deck.pile.pop(),
+            ]
+
+            savedHand = players[index].hand
+            players[index].hand = tempHand
+
+            if (index == 0) {
+              usingMenu = true
+              // setUserHand([...players[0].hand])
+              // setUserStash([...players[0].stash])
+              return
+            }
+
+            deck.discardPile.push(players[0].stash.pop())
+
+            let choice = pickComputerCard(
+              tempHand,
+              [
+                players[(index + 1) % 4],
+                players[(index + 2) % 4],
+                players[(index + 3) % 4],
+              ],
+              round,
+              diff[0]
+            )
+
+            notify('Played ' + tempHand[choice].text + ' with menu', '📖', 0)
+
+            for (let i = players[index].hand.length - 1; i >= 0; i--)
+              deck.pile.push(players[index].hand.pop())
+            shuffle(deck.pile)
+            players[index].hand = savedHand
+          }
+
+          const handleTakeout = (index) => {
+            if (players[index].stash.length == 1) {
+              notify('Took out 0 items with takeout box', '🥡', 0)
+              deck.discardPile.push(players[0].stash.pop())
+              return
+            }
+
+            if (index == 0) {
+              takeoutBoxFreeze = true
+              // setUserHand([...players[0].hand])
+              // setUserStash([...players[0].stash])
+              return
+            }
+
+            // Computer takeout behavior to be determined, just don't use for now
+            notify('Took out 0 items with takeout box', '🥡', index)
+            deck.discardPile.push(players[index].stash.pop())
+          }
+
+          // SPOON
+
+          // CHOPSTICKS
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.MENUSEVEN.type
+            )
+              handleMenu(i)
+
+          if (usingMenu) return
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.MENUEIGHT.type
+            )
+              handleMenu(i)
+
+          if (usingMenu) return
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.MENUNINE.type
+            )
+              handleMenu(i)
+
+          if (usingMenu) return
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.TAKEOUTTEN.type
+            )
+              handleTakeout(i)
+
+          if (takeoutBoxFreeze) return
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.TAKEOUTELEVEN.type
+            )
+              handleTakeout(i)
+
+          if (takeoutBoxFreeze) return
+
+          for (let i = 0; i < players.length; i++)
+            if (
+              players[i].stash.length > 0 &&
+              players[i].stash[players[i].stash.length - 1].type ==
+                cards.TAKEOUTTWELVE.type
+            )
+              handleTakeout(i)
+        }
+
+        // Have computers play their predetermined cards
+        if (playComputerCards)
+          for (let i = 1; i < players.length; i++)
+            playCard(players[i].willPlayIndex, i, false)
+
+        handleSpecials()
+
+        if (usingMenu || takeoutBoxFreeze) return
+
+        if (players[0].hand.length == 0)
+          if (round < 3) players[0].hand.push(cards.NEXT)
+          else players[0].hand.push(cards.FINAL)
+        else swapCards()
+      }
+
+      const handClick = (e) => {
+        // During special order or takeout box use, cannot play from hand
+        if (specialOrderFreeze || takeoutBoxFreeze) return
+
+        // User menu handling
+        if (usingMenu) {
+          let clicked = players[0].hand[parseInt(e.target.name)]
+          if (clicked.color == cards.MENUSEVEN.color) {
+            notify('Cannot play menu from menu', '📖', 0)
+            return
+          }
+
+          deck.discardPile.push(players[0].stash.pop()) // Pop the menu from stash
+          playCard(parseInt(e.target.name), 0, false) // Play the card played
+
+          notify('Played ' + clicked.text + ' with menu', '📖', 0)
+
+          // Break out if user played special order
+          if (specialOrderFreeze) {
+            updateData(false)
+            return
+          }
+
+          cleanupMenu()
+        }
+
+        // Probably going to change this but it checks for end of round press
+        if (players[0].hand[0].color == cards.NEXT.color) {
+          advanceRound()
+          return
+        }
+
+        // REGULAR START
+        // Have the computers make up their mind
+        for (let i = 1; i < players.length; i++)
+          players[i].willPlayIndex = pickComputerCard(
+            players[i].hand,
+            opps[i],
+            round,
+            diff[0]
+          )
+
+        // Play the user card
+        playCard(parseInt(e.target.name), 0, false)
+
+        // Break out if user played special order
+        if (specialOrderFreeze) {
+          updateData(false)
+          return
+        }
+
+        resolveTurn(true)
+        updateData(false)
+      }
+
+      /*
+      const handClickOld = (e) => {
         if (specialOrderFreeze || takeoutBoxFreeze) return
 
         // If the user is actually playing a card
@@ -1576,15 +1973,16 @@ const PlayPage = () => {
           } else {
             dealToPlayers()
             updateData(true)
-            advanceRound()
+            incrementRound()
           }
         }
       }
+      */
 
-      /* Can mean a lot of things */
-      const handleClick = (e) => {
+      const stashClick = (e) => {
         // Ends the selection process
         const takeoutPressed = () => {
+          if (usingMenu) cleanupMenu()
           deck.discardPile.push(players[0].stash.pop()) // Move takeout box to discard pile
           let itemString = takeoutCount == 1 ? ' item' : ' items'
           notify(
@@ -1594,7 +1992,8 @@ const PlayPage = () => {
           )
           takeoutCount = 0
           takeoutBoxFreeze = false
-          handlePostPlayerActions()
+          resolveTurn(false)
+          updateData(false)
         }
 
         if (takeoutBoxFreeze) {
@@ -1616,12 +2015,15 @@ const PlayPage = () => {
               }
           }
         } else if (specialOrderFreeze) {
-          players[0].stash.pop() // Pop the special order that is pushed for visuals
+          if (usingMenu) cleanupMenu()
+          players[0].stash.pop() // Pop the special order from stash
           if (e.target.alt == 'special order') {
             notify('Played special order without copying', '🌈', 0)
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
-            handlePostPlayerActions()
+
+            resolveTurn(!usingMenu)
+            updateData(false)
             return
           }
           for (let i = 0; i < players[0].stash.length; i++)
@@ -1635,7 +2037,8 @@ const PlayPage = () => {
               break
             }
           specialOrderFreeze = false
-          handlePostPlayerActions()
+          resolveTurn(!usingMenu)
+          updateData(false)
         }
       }
 
@@ -1649,7 +2052,7 @@ const PlayPage = () => {
                     key={i}
                     numberName={i}
                     info={card}
-                    action={handlePlayerSelection}
+                    action={handClick}
                     opacityOn={false}
                     fullDisplay={true}
                   />
@@ -1660,7 +2063,7 @@ const PlayPage = () => {
                     key={i}
                     numberName={i}
                     info={card}
-                    action={handlePlayerSelection}
+                    action={handClick}
                     opacityOn={true}
                     fullDisplay={true}
                   />
@@ -1719,7 +2122,7 @@ const PlayPage = () => {
                           <Card
                             key={j}
                             info={card}
-                            action={handleClick}
+                            action={stashClick}
                             fullDisplay={false}
                           />
                         )
@@ -1744,7 +2147,7 @@ const PlayPage = () => {
                             key={j}
                             numberName={j}
                             info={card}
-                            action={handleClick}
+                            action={stashClick}
                             fullDisplay={false}
                           />
                         )
@@ -1766,13 +2169,13 @@ const PlayPage = () => {
       }
 
       const Scoreline = ({ name, score, dessert }) => {
-        if (dess.includes('pudding'))
+        if (dess.includes(guides.PUDDING.type.toString()))
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Pudding: {dessert}
             </div>
           )
-        else if (dess.includes('greenteaicecream'))
+        else if (dess.includes(guides.GTIC.type.toString()))
           return (
             <div className="basis-1/2 text-center font-cal text-2xl text-[color:var(--color-nature)]">
               {name}: Score: {score}; Green Tea Ice Cream: {dessert}
