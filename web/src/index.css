@@ -31,19 +31,21 @@
  * END --- SETUP TAILWINDCSS EDIT
  */
 
-/* HIDE CHECKBOX */
+/* Put cursor on images */
+img {
+  cursor: pointer;
+}
+
+/* Put cursor on checkbox */
+[type=checkbox] + p {
+  cursor: pointer;
+}
+
+
+/* Hide the actual checkbox */
 [type=checkbox] {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
-}
-
-/* IMAGE STYLES */
-img {
-  cursor: pointer;
-}
-
-[type=checkbox] + p {
-  cursor: pointer;
 }

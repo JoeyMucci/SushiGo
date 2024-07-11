@@ -1162,13 +1162,25 @@ const PlayPage = () => {
         for (let i = 0; i < players.length - 1; i++)
           players[i].hand = players[i + 1].hand
         players[players.length - 1].hand = tempCards
+
+        // Reset miso vars
+        misoAllowed = true
+        firstMisoIndex = -1
       }
 
-      const opps = (excludedIndex) => {
+      const getOppsStashes = (excludedIndex) => {
         return [
-          players[(excludedIndex + 1) % 4],
-          players[(excludedIndex + 2) % 4],
-          players[(excludedIndex + 3) % 4],
+          players[(excludedIndex + 1) % 4].stash,
+          players[(excludedIndex + 2) % 4].stash,
+          players[(excludedIndex + 3) % 4].stash,
+        ]
+      }
+
+      const getOppsDesserts = (excludedIndex) => {
+        return [
+          players[(excludedIndex + 1) % 4].dessert,
+          players[(excludedIndex + 2) % 4].dessert,
+          players[(excludedIndex + 3) % 4].dessert,
         ]
       }
 
@@ -1186,7 +1198,7 @@ const PlayPage = () => {
             background: '#004', // nightwing
             color: '#ff917d', // salmon
           },
-          className: 'font-cal text-2xl',
+          className: 'font-cal text-2xl hover:bg-sky-700',
         })
       }
 
@@ -1241,13 +1253,17 @@ const PlayPage = () => {
       }
 
       const scoreUramakiEnd = (playerCards, oppsCards) => {
-        if (uramakiPoints < 2) return
+        if (uramakiPoints < 2) return 0
         let uramakiCount =
           3 * countCard(playerCards, cards.URAMAKITHREE) +
           4 * countCard(playerCards, cards.URAMAKIFOUR) +
           5 * countCard(playerCards, cards.URAMAKIFIVE)
 
+        console.log('ALERT')
+        console.log(oppsCards)
+
         for (let oppCards of oppsCards) {
+          console.log(oppCards)
           if (
             uramakiCount <
             3 * countCard(oppCards, cards.URAMAKITHREE) +
@@ -1311,7 +1327,7 @@ const PlayPage = () => {
 
         shuffle(deck.pile)
 
-        if (dess.includes('')) {
+        if (dess.includes(guides.FRUIT.type.toString())) {
           let allFruitCounts = [
             parseFruit(players[0].dessert),
             parseFruit(players[1].dessert),
@@ -1338,93 +1354,91 @@ const PlayPage = () => {
 
       // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
       const scoreRegular = (playerCards, oppsCards) => {
+        console.log('SCORING START')
+        console.log(playerCards)
         let runningScore = 0
 
         // NIGIRI
         runningScore += scoreNigiri(playerCards)
 
+        console.log('POST NIGIRI')
+        console.log(runningScore)
+
         // ROLLS
-        if (roll.includes('maki'))
+        if (roll.includes(guides.MAKI.type.toString()))
           runningScore += scoreMaki(playerCards, oppsCards)
-        else if (roll.includes('temaki'))
+        else if (roll.includes(guides.TEMAKI.type.toString()))
           runningScore += scoreTemaki(playerCards, oppsCards)
         else runningScore += scoreUramakiEnd(playerCards, oppsCards)
 
+        console.log('POST ROLLS')
+        console.log(runningScore)
+
         // SPECIALS
-        if (spec.includes('takeoutbox'))
+        if (spec.includes(guides.TAKEOUT.type.toString()))
           runningScore += scoreLeftovers(playerCards)
-        else if (spec.includes('tea')) runningScore += scoreTea(playerCards)
-        else if (spec.includes('soysauce'))
+        if (spec.includes(guides.TEA.type.toString()))
+          runningScore += scoreTea(playerCards)
+        if (spec.includes(guides.SOYSAUCE.type.toString()))
           runningScore += scoreSoysauce(playerCards, oppsCards)
 
+        console.log('POST SPECIALS')
+        console.log(runningScore)
+        console.log(app)
+        console.log(guides.TOFU.type.toString())
+
         // APPETIZERS
-        if (app.includes('dumpling')) runningScore += scoreDumpling(playerCards)
-        else if (app.includes('tempura'))
+        if (app.includes(guides.DUMPLING.type.toString()))
+          runningScore += scoreDumpling(playerCards)
+        if (app.includes(guides.TEMPURA.type.toString()))
           runningScore += scoreTempura(playerCards)
-        else if (app.includes('sashimi'))
+        if (app.includes(guides.SASHIMI.type.toString()))
           runningScore += scoreSashimi(playerCards)
-        else if (app.includes('misosoup'))
+        if (app.includes(guides.MISO.type.toString()))
           runningScore += scoreMiso(playerCards)
-        else if (app.includes('edamame'))
+        if (app.includes(guides.EDAMAME.type.toString()))
           runningScore += scoreEdamame(playerCards, oppsCards)
-        else if (app.includes('eel')) runningScore += scoreEel(playerCards)
-        else if (app.includes('tofu')) runningScore += scoreTofu(playerCards)
-        else runningScore += scoreOnigiri(playerCards)
+        if (app.includes(guides.EEL.type.toString()))
+          runningScore += scoreEel(playerCards)
+        if (app.includes(guides.TOFU.type.toString()))
+          runningScore += scoreTofu(playerCards)
+        if (app.includes(guides.ONIGIRI.type.toString()))
+          runningScore += scoreOnigiri(playerCards)
+
+        console.log('POST APPS')
+        console.log(runningScore)
 
         return runningScore
       }
 
       const scoreDessert = (playerDessert, oppsDessert) => {
-        for (let i = 0; i < dess.length; i++)
-          if (dess[i] == 'pudding')
-            return scorePudding(playerDessert, oppsDessert)
-          else if (dess[i] == 'greenteaicecream')
-            return scoreGTIC(playerDessert)
-          else return scoreFruit(playerDessert)
+        if (dess.includes(guides.PUDDING.type.toString()))
+          return scorePudding(playerDessert, oppsDessert)
+        else if (dess.includes(guides.GTIC.type.toString()))
+          return scoreGTIC(playerDessert)
+        else return scoreFruit(playerDessert)
       }
 
       const scoreRound = () => {
-        players[0].score += scoreRegular(players[0].stash, [
-          (players[1].stash, players[2].stash, players[3].stash),
-        ])
-        players[1].score += scoreRegular(players[1].stash, [
-          (players[0].stash, players[2].stash, players[3].stash),
-        ])
-        players[2].score += scoreRegular(players[2].stash, [
-          (players[0].stash, players[1].stash, players[3].stash),
-        ])
-        players[3].score += scoreRegular(players[3].stash, [
-          (players[0].stash, players[1].stash, players[2].stash),
-        ])
+        for (let i = 0; i < players.length; i++)
+          players[i].score += scoreRegular(players[i].stash, getOppsStashes(i))
       }
 
       const scoreDesserts = () => {
-        players[0].score += scoreDessert(players[0].stash, [
-          (players[1].stash, players[2].stash, players[3].stash),
-        ])
-        players[1].score += scoreDessert(players[1].stash, [
-          (players[0].stash, players[2].stash, players[3].stash),
-        ])
-        players[2].score += scoreDessert(players[2].stash, [
-          (players[0].stash, players[1].stash, players[3].stash),
-        ])
-        players[3].score += scoreDessert(players[3].stash, [
-          (players[0].stash, players[1].stash, players[2].stash),
-        ])
+        for (let i = 0; i < players.length; i++)
+          players[i].score += scoreDessert(players[i].stash, getOppsDesserts(i))
       }
 
-      const updateData = (updateScores) => {
+      const updateData = () => {
         setUserHand([...players[0].hand])
         setUserStash([...players[0].stash])
         setCpuOneStash([...players[1].stash])
         setCpuTwoStash([...players[2].stash])
         setCpuThreeStash([...players[3].stash])
-        if (updateScores || roll.includes(guides.URAMAKI.type.toString())) {
-          setUserScore(players[0].score)
-          setCpuOneScore(players[1].score)
-          setCpuTwoScore(players[2].score)
-          setCpuThreeScore(players[3].score)
-        }
+        setUserScore(players[0].score)
+        setCpuOneScore(players[1].score)
+        setCpuTwoScore(players[2].score)
+        setCpuThreeScore(players[3].score)
       }
 
       const incrementRound = () => {
@@ -1432,6 +1446,10 @@ const PlayPage = () => {
         uramakiPoints = 8
         for (let i = 0; i < players.length; i++)
           players[i].uramakiScored = false
+
+        // Reset miso soup
+        misoAllowed = true
+        firstMisoIndex = -1
 
         round++
       }
@@ -1464,18 +1482,17 @@ const PlayPage = () => {
           return
         }
 
-        for (let i = 0; i < players[index].stash.length; i++)
-          if (players[index].stash[i].type == cards.MAKITWO.type) {
-            players[index].stash[i] = cards.MAKITHREE
-            players[index].stash[players[index].stash.length - 1] =
-              cards.MAKITWO
-            break
-          }
+        let makiSpots = []
 
-        if (
-          players[index].stash[players[index].stash.length - 1] == cards.MAKITWO
-        )
-          reorderMaki(index)
+        for (let i = 0; i < players[index].stash.length; i++)
+          if (players[index].stash[i].color == cards.MAKIONE.color)
+            makiSpots.push(i)
+
+        for (let i = makiSpots.length - 1; i > 0; i--)
+          players[index].stash[makiSpots[i]] =
+            players[index].stash[makiSpots[i - 1]]
+
+        players[index].stash[makiSpots[0]] = cards.MAKITHREE
       }
 
       const reorderUramaki = (index) => {
@@ -1506,26 +1523,25 @@ const PlayPage = () => {
           return
         }
 
-        for (let i = 0; i < players[index].stash.length; i++)
-          if (players[index].stash[i].type == cards.URAMAKIFOUR.type) {
-            players[index].stash[i] = cards.URAMAKIFIVE
-            players[index].stash[players[index].stash.length - 1] =
-              cards.URAMAKIFOUR
-            break
-          }
+        let uramakiSpots = []
 
-        if (
-          players[index].stash[players[index].stash.length - 1] ==
-          cards.URAMAKIFOUR
-        )
-          reorderUramaki(index)
+        for (let i = 0; i < players[index].stash.length; i++)
+          if (players[index].stash[i].color == cards.URAMAKITHREE.color)
+            uramakiSpots.push(i)
+
+        for (let i = uramakiSpots.length - 1; i > 0; i--)
+          players[index].stash[uramakiSpots[i]] =
+            players[index].stash[uramakiSpots[i - 1]]
+
+        players[index].stash[uramakiSpots[0]] = cards.URAMAKIFIVE
       }
 
       // If more than one miso soup is played all are removed
       const handleMiso = (index) => {
         if (
+          players[index].stash.length == 0 ||
           players[index].stash[players[index].stash.length - 1].type !=
-          cards.MISO.type
+            cards.MISO.type
         )
           return
 
@@ -1539,7 +1555,13 @@ const PlayPage = () => {
         notify('Gave up non-unique miso soup', '😩', index)
 
         if (firstMisoIndex != -1) {
-          deck.discardPile.push(players[firstMisoIndex].pop())
+          for (let i = players[firstMisoIndex].stash.length - 1; i >= 0; i--)
+            if (players[firstMisoIndex].stash[i].type == cards.MISO.type) {
+              deck.discardPile.push(
+                players[firstMisoIndex].stash.splice(i, 1)[0]
+              )
+              break
+            }
           notify('Gave up non-unique miso soup', '😩', firstMisoIndex)
           firstMisoIndex = -1
         }
@@ -1645,7 +1667,7 @@ const PlayPage = () => {
         if (spec.includes(guides.WASABI.type.toString()))
           handleWasabi(playerIndex)
 
-        if (app.includes(guides.MISO.type.toString())) handleMiso()
+        if (app.includes(guides.MISO.type.toString())) handleMiso(playerIndex)
 
         if (checkUramaki && roll.includes(guides.URAMAKI.type.toString()))
           scoreUramakiDuring()
@@ -1667,11 +1689,11 @@ const PlayPage = () => {
 
         if (round == 3) {
           scoreDesserts()
-          updateData(true)
+          updateData()
           setShowResults(true)
         } else {
           dealToPlayers()
-          updateData(true)
+          updateData()
           incrementRound()
         }
       }
@@ -1694,7 +1716,7 @@ const PlayPage = () => {
           else players[0].hand.push(cards.FINAL)
         else swapCards()
 
-        updateData(false)
+        updateData()
       }
       */
 
@@ -1719,31 +1741,34 @@ const PlayPage = () => {
               return
             }
 
-            deck.discardPile.push(players[0].stash.pop())
+            deck.discardPile.push(players[index].stash.pop()) // Remove menu from stash
 
+            players[index].hand = tempHand
             let choice = pickComputerCard(
-              tempHand,
-              [
-                players[(index + 1) % 4],
-                players[(index + 2) % 4],
-                players[(index + 3) % 4],
-              ],
+              players[index].hand,
+              getOppsStashes(index),
               round,
               diff[0]
             )
 
-            notify('Played ' + tempHand[choice].text + ' with menu', '📖', 0)
+            notify(
+              'Played ' + players[index].hand[choice].text + ' with menu',
+              '📖',
+              index
+            )
+            playCard(choice, index, true)
 
             for (let i = players[index].hand.length - 1; i >= 0; i--)
               deck.pile.push(players[index].hand.pop())
             shuffle(deck.pile)
             players[index].hand = savedHand
+            updateData()
           }
 
           const handleTakeout = (index) => {
             if (players[index].stash.length == 1) {
-              notify('Took out 0 items with takeout box', '🥡', 0)
-              deck.discardPile.push(players[0].stash.pop())
+              notify('Took out 0 items with takeout box', '🥡', index)
+              deck.discardPile.push(players[index].stash.pop()) // Move takeout box to discard pile
               return
             }
 
@@ -1756,7 +1781,7 @@ const PlayPage = () => {
 
             // Computer takeout behavior to be determined, just don't use for now
             notify('Took out 0 items with takeout box', '🥡', index)
-            deck.discardPile.push(players[index].stash.pop())
+            deck.discardPile.push(players[index].stash.pop()) // Move takeout box to discard pile
           }
 
           // SPOON
@@ -1825,7 +1850,7 @@ const PlayPage = () => {
         // Have computers play their predetermined cards
         if (playComputerCards)
           for (let i = 1; i < players.length; i++)
-            playCard(players[i].willPlayIndex, i, false)
+            playCard(players[i].willPlayIndex, i, i == players.length - 1)
 
         handleSpecials()
 
@@ -1850,17 +1875,17 @@ const PlayPage = () => {
           }
 
           deck.discardPile.push(players[0].stash.pop()) // Pop the menu from stash
-          playCard(parseInt(e.target.name), 0, false) // Play the card played
+          playCard(parseInt(e.target.name), 0, true) // Play the card played
 
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
 
-          // Break out if user played special order
-          if (specialOrderFreeze) {
-            updateData(false)
-            return
+          if (!specialOrderFreeze && !takeoutBoxFreeze) {
+            cleanupMenu()
+            resolveTurn(false)
           }
 
-          cleanupMenu()
+          updateData()
+          return
         }
 
         // Probably going to change this but it checks for end of round press
@@ -1874,7 +1899,7 @@ const PlayPage = () => {
         for (let i = 1; i < players.length; i++)
           players[i].willPlayIndex = pickComputerCard(
             players[i].hand,
-            opps[i],
+            getOppsStashes(i),
             round,
             diff[0]
           )
@@ -1884,12 +1909,12 @@ const PlayPage = () => {
 
         // Break out if user played special order
         if (specialOrderFreeze) {
-          updateData(false)
+          updateData()
           return
         }
 
         resolveTurn(true)
-        updateData(false)
+        updateData()
       }
 
       /*
@@ -1968,11 +1993,11 @@ const PlayPage = () => {
 
           if (round == 3) {
             scoreDesserts()
-            updateData(true)
+            updateData()
             setShowResults(true)
           } else {
             dealToPlayers()
-            updateData(true)
+            updateData()
             incrementRound()
           }
         }
@@ -1993,7 +2018,7 @@ const PlayPage = () => {
           takeoutCount = 0
           takeoutBoxFreeze = false
           resolveTurn(false)
-          updateData(false)
+          updateData()
         }
 
         if (takeoutBoxFreeze) {
@@ -2015,6 +2040,7 @@ const PlayPage = () => {
               }
           }
         } else if (specialOrderFreeze) {
+          let wasUsingMenu = usingMenu
           if (usingMenu) cleanupMenu()
           players[0].stash.pop() // Pop the special order from stash
           if (e.target.alt == 'special order') {
@@ -2022,13 +2048,14 @@ const PlayPage = () => {
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
 
-            resolveTurn(!usingMenu)
-            updateData(false)
+            resolveTurn(!wasUsingMenu)
+            updateData()
             return
           }
           for (let i = 0; i < players[0].stash.length; i++)
             if (e.target.alt == players[0].stash[i].text) {
-              players[0].stash.push(players[0].stash[i])
+              players[0].hand.unshift(players[0].stash[i])
+              playCard(0, 0, usingMenu)
               notify(
                 'Copied ' + players[0].stash[i].text + ' with special order',
                 '🌈',
@@ -2037,8 +2064,8 @@ const PlayPage = () => {
               break
             }
           specialOrderFreeze = false
-          resolveTurn(!usingMenu)
-          updateData(false)
+          resolveTurn(!wasUsingMenu)
+          updateData()
         }
       }
 
