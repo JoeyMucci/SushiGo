@@ -529,7 +529,8 @@ export const cards = Object.freeze({
   },
 })
 
-// Return counts in the following order: watermelon, pineapple, orange
+/* Return counts in the following order: watermelon, pineapple, orange
+   fruitNumnber = watermelon*11^2+pineapple*11+orange */
 export const parseFruit = (fruitNumber) => {
   let watermelon = Math.floor(fruitNumber / 11 / 11)
   let dessertLeft = fruitNumber - watermelon * 11 * 11
@@ -539,6 +540,7 @@ export const parseFruit = (fruitNumber) => {
 }
 
 const PlayPage = () => {
+  // This information bridges the selection phase and the game phase so it is useful to have outside
   const [showGame, setShowGame] = useState(false)
   const [roll, setRoll] = useState([])
   const [spec, setSpec] = useState([])
@@ -551,9 +553,14 @@ const PlayPage = () => {
   const DESSCAP = 1
   const DIFFCAP = 1
 
-  const Card = ({ numberName, info, action, opacityOn, fullDisplay }) => {
+  /* numberName - a number identifier
+     info - the information about the actual card (text representation, source image, etc.)
+     action - function to be called on click
+     fullOpacity - shows the card at 50% opacity when false
+     fullDisplay - whether to show the entire card or just the top */
+  const Card = ({ numberName, info, action, fullOpacity, fullDisplay }) => {
     if (fullDisplay)
-      if (opacityOn)
+      if (fullOpacity)
         return (
           // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
           // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -579,6 +586,21 @@ const PlayPage = () => {
             className="h-36 w-24 opacity-50"
           />
         )
+
+    if (fullOpacity)
+      return (
+        // leaving clickableness for now
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+        <img
+          name={numberName}
+          src={info.picpath}
+          alt={info.text}
+          onClick={action}
+          onKeyDown={action}
+          className="h-9 w-24 object-cover object-top"
+        />
+      )
+
     return (
       // leaving clickableness for now
       // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -588,12 +610,14 @@ const PlayPage = () => {
         alt={info.text}
         onClick={action}
         onKeyDown={action}
-        className="h-9 w-24 object-cover object-top"
+        className="h-9 w-24 object-cover object-top opacity-50"
       />
     )
   }
 
+  // The screen where the user selects the cards to play with
   const OrderScreen = () => {
+    // Moves to the game screen IF all card information is supplied
     const updateScreen = () => {
       if (
         roll.length == ROLLCAP &&
@@ -605,6 +629,7 @@ const PlayPage = () => {
         setShowGame(true)
     }
 
+    // The following functions update the appropriate array depending on the card type
     const clickRoll = (e) => {
       if (roll.includes(e.target.name))
         setRoll(roll.toSpliced(roll.indexOf(e.target.name), 1))
@@ -635,6 +660,10 @@ const PlayPage = () => {
       else if (diff.length < DIFFCAP) setDiff([...diff, e.target.id])
     }
 
+    /* Displays guiding text at the top, then has 4 rows of cards for user to pick
+       desired roll, specials, appetizers, and dessert respectively. Then, has a
+       difficulty selection and a start button. Everything displayes with 50%
+       opacity unless it is selected */
     return (
       <>
         <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
@@ -651,7 +680,7 @@ const PlayPage = () => {
                 info={guides.MAKI}
                 numberName={guides.MAKI.type}
                 action={clickRoll}
-                opacityOn={roll.includes(guides.MAKI.type.toString())}
+                fullOpacity={roll.includes(guides.MAKI.type.toString())}
                 fullDisplay={true}
               />
 
@@ -659,7 +688,7 @@ const PlayPage = () => {
                 info={guides.TEMAKI}
                 numberName={guides.TEMAKI.type}
                 action={clickRoll}
-                opacityOn={roll.includes(guides.TEMAKI.type.toString())}
+                fullOpacity={roll.includes(guides.TEMAKI.type.toString())}
                 fullDisplay={true}
               />
 
@@ -667,7 +696,7 @@ const PlayPage = () => {
                 info={guides.URAMAKI}
                 numberName={guides.URAMAKI.type}
                 action={clickRoll}
-                opacityOn={roll.includes(guides.URAMAKI.type.toString())}
+                fullOpacity={roll.includes(guides.URAMAKI.type.toString())}
                 fullDisplay={true}
               />
             </div>
@@ -676,7 +705,7 @@ const PlayPage = () => {
                 info={guides.CHOPSTICKS}
                 numberName={guides.CHOPSTICKS.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.CHOPSTICKS.type.toString())}
+                fullOpacity={spec.includes(guides.CHOPSTICKS.type.toString())}
                 fullDisplay={true}
               />
 
@@ -684,7 +713,7 @@ const PlayPage = () => {
                 info={guides.SPOON}
                 numberName={guides.SPOON.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.SPOON.type.toString())}
+                fullOpacity={spec.includes(guides.SPOON.type.toString())}
                 fullDisplay={true}
               />
 
@@ -692,7 +721,7 @@ const PlayPage = () => {
                 info={guides.MENU}
                 numberName={guides.MENU.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.MENU.type.toString())}
+                fullOpacity={spec.includes(guides.MENU.type.toString())}
                 fullDisplay={true}
               />
 
@@ -700,7 +729,7 @@ const PlayPage = () => {
                 info={guides.TAKEOUT}
                 numberName={guides.TAKEOUT.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.TAKEOUT.type.toString())}
+                fullOpacity={spec.includes(guides.TAKEOUT.type.toString())}
                 fullDisplay={true}
               />
 
@@ -708,7 +737,7 @@ const PlayPage = () => {
                 info={guides.TEA}
                 numberName={guides.TEA.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.TEA.type.toString())}
+                fullOpacity={spec.includes(guides.TEA.type.toString())}
                 fullDisplay={true}
               />
 
@@ -716,7 +745,7 @@ const PlayPage = () => {
                 info={guides.WASABI}
                 numberName={guides.WASABI.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.WASABI.type.toString())}
+                fullOpacity={spec.includes(guides.WASABI.type.toString())}
                 fullDisplay={true}
               />
 
@@ -724,7 +753,7 @@ const PlayPage = () => {
                 info={guides.SOYSAUCE}
                 numberName={guides.SOYSAUCE.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.SOYSAUCE.type.toString())}
+                fullOpacity={spec.includes(guides.SOYSAUCE.type.toString())}
                 fullDisplay={true}
               />
 
@@ -732,7 +761,7 @@ const PlayPage = () => {
                 info={guides.SPECIALO}
                 numberName={guides.SPECIALO.type}
                 action={clickSpec}
-                opacityOn={spec.includes(guides.SPECIALO.type.toString())}
+                fullOpacity={spec.includes(guides.SPECIALO.type.toString())}
                 fullDisplay={true}
               />
             </div>
@@ -741,7 +770,7 @@ const PlayPage = () => {
                 info={guides.DUMPLING}
                 numberName={guides.DUMPLING.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.DUMPLING.type.toString())}
+                fullOpacity={app.includes(guides.DUMPLING.type.toString())}
                 fullDisplay={true}
               />
 
@@ -749,7 +778,7 @@ const PlayPage = () => {
                 info={guides.TEMPURA}
                 numberName={guides.TEMPURA.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.TEMPURA.type.toString())}
+                fullOpacity={app.includes(guides.TEMPURA.type.toString())}
                 fullDisplay={true}
               />
 
@@ -757,7 +786,7 @@ const PlayPage = () => {
                 info={guides.SASHIMI}
                 numberName={guides.SASHIMI.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.SASHIMI.type.toString())}
+                fullOpacity={app.includes(guides.SASHIMI.type.toString())}
                 fullDisplay={true}
               />
 
@@ -765,7 +794,7 @@ const PlayPage = () => {
                 info={guides.MISO}
                 numberName={guides.MISO.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.MISO.type.toString())}
+                fullOpacity={app.includes(guides.MISO.type.toString())}
                 fullDisplay={true}
               />
 
@@ -773,7 +802,7 @@ const PlayPage = () => {
                 info={guides.EDAMAME}
                 numberName={guides.EDAMAME.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.EDAMAME.type.toString())}
+                fullOpacity={app.includes(guides.EDAMAME.type.toString())}
                 fullDisplay={true}
               />
 
@@ -781,7 +810,7 @@ const PlayPage = () => {
                 info={guides.EEL}
                 numberName={guides.EEL.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.EEL.type.toString())}
+                fullOpacity={app.includes(guides.EEL.type.toString())}
                 fullDisplay={true}
               />
 
@@ -789,7 +818,7 @@ const PlayPage = () => {
                 info={guides.TOFU}
                 numberName={guides.TOFU.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.TOFU.type.toString())}
+                fullOpacity={app.includes(guides.TOFU.type.toString())}
                 fullDisplay={true}
               />
 
@@ -797,7 +826,7 @@ const PlayPage = () => {
                 info={guides.ONIGIRI}
                 numberName={guides.ONIGIRI.type}
                 action={clickApp}
-                opacityOn={app.includes(guides.ONIGIRI.type.toString())}
+                fullOpacity={app.includes(guides.ONIGIRI.type.toString())}
                 fullDisplay={true}
               />
             </div>
@@ -806,7 +835,7 @@ const PlayPage = () => {
                 info={guides.PUDDING}
                 numberName={guides.PUDDING.type}
                 action={clickDess}
-                opacityOn={dess.includes(guides.PUDDING.type.toString())}
+                fullOpacity={dess.includes(guides.PUDDING.type.toString())}
                 fullDisplay={true}
               />
 
@@ -814,7 +843,7 @@ const PlayPage = () => {
                 info={guides.GTIC}
                 numberName={guides.GTIC.type}
                 action={clickDess}
-                opacityOn={dess.includes(guides.GTIC.type.toString())}
+                fullOpacity={dess.includes(guides.GTIC.type.toString())}
                 fullDisplay={true}
               />
 
@@ -822,7 +851,7 @@ const PlayPage = () => {
                 info={guides.FRUIT}
                 numberName={guides.FRUIT.type}
                 action={clickDess}
-                opacityOn={dess.includes(guides.FRUIT.type.toString())}
+                fullOpacity={dess.includes(guides.FRUIT.type.toString())}
                 fullDisplay={true}
               />
             </div>
@@ -889,15 +918,19 @@ const PlayPage = () => {
     )
   }
 
+  // The screen where the user actually plays the game
   const GameScreen = () => {
-    // DECK PREPERATION
+    const STARTCARDS = 9
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
+    const NUMROUNDS = 3
 
     let round = 1
-    // let priority = 1
     let uramakiPoints = 8
+    let chopsticksOneActive = false
+    let chopsticksTwoActive = false
+    let chopsticksThreeActive = false
     let usingMenu = false
     let savedHand = []
     let takeoutBoxFreeze = false
@@ -912,6 +945,50 @@ const PlayPage = () => {
       discardPile: [],
     }
 
+    // players[0] is the user
+    let players = [
+      {
+        name: 'Joey',
+        hand: [],
+        stash: [],
+        score: 0,
+        dessert: 0,
+        uramakiScored: false,
+        utensilUsed: false,
+      },
+      {
+        name: 'cpu one',
+        hand: [],
+        willPlayIndex: -1,
+        stash: [],
+        score: 0,
+        dessert: 0,
+        uramakiScored: false,
+        utensilUsed: false,
+      },
+      {
+        name: 'cpu two',
+        hand: [],
+        willPlayIndex: -1,
+        stash: [],
+        score: 0,
+        dessert: 0,
+        uramakiScored: false,
+        utensilUsed: false,
+      },
+      {
+        name: 'cpu three',
+        hand: [],
+        willPlayIndex: -1,
+        stash: [],
+        score: 0,
+        dessert: 0,
+        uramakiScored: false,
+        utensilUsed: false,
+      },
+    ]
+
+    // The following functions add the appropriate versions of the different card types
     const addNigiri = () => {
       for (let i = 0; i < cards.EGG.count; i++) deck.pile.push(cards.EGG)
       for (let i = 0; i < cards.SALMON.count; i++) deck.pile.push(cards.SALMON)
@@ -1044,52 +1121,9 @@ const PlayPage = () => {
       }
     }
 
-    // PLAYER INITIALIZATION
-    const STARTCARDS = 9
-
-    // players[0] is the user
-    let players = [
-      {
-        name: 'Joey',
-        hand: [],
-        stash: [],
-        score: 0,
-        dessert: 0,
-        uramakiScored: false,
-      },
-      {
-        name: 'cpu one',
-        hand: [],
-        willPlayIndex: -1,
-        stash: [],
-        score: 0,
-        dessert: 0,
-        uramakiScored: false,
-      },
-      {
-        name: 'cpu two',
-        hand: [],
-        willPlayIndex: -1,
-        stash: [],
-        score: 0,
-        dessert: 0,
-        uramakiScored: false,
-      },
-      {
-        name: 'cpu three',
-        hand: [],
-        willPlayIndex: -1,
-        stash: [],
-        score: 0,
-        dessert: 0,
-        uramakiScored: false,
-      },
-    ]
-
-    // Fruit count is stored as an undecimal number (watermelon is most significant, orange is least significant)
-    // Since fruit is stored weirdly adding these methods for abstraction
-
-    // PRECONDITION: fruitCard.color == 'peach'
+    /* Fruit count is stored as an undecimal number (watermelon*11^2+pineapple*11+orange)
+       Since fruit is stored weirdly adding this method for abstraction
+       PRECONDITION: fruitCard.color == 'peach' */
     const addFruit = (fruitCard, player) => {
       if (fruitCard.type == cards.FRUITDUBWAT.type)
         player.dessert += 2 * 11 * 11
@@ -1116,7 +1150,7 @@ const PlayPage = () => {
       for (let i = 0; i < app.length; i++) addApps(app[i])
       for (let i = 0; i < dess.length; i++) fillDessertPile(dess[i])
 
-      // Fruit is the only dessert card that is heterogeneous, so its the only one that needs to be shuffled
+      // Fruit is the only dessert card that is heterogeneous, so shuffle if it appears
       if (dess.includes('fruit')) shuffle(deck.dessertPile)
 
       // Add dessert cards for first round
@@ -1136,8 +1170,10 @@ const PlayPage = () => {
     buildDeck()
     dealToPlayers()
 
+    // Displays all the played cards, the user hand, and the scorelines
     const CardDisplay = () => {
       const [showResults, setShowResults] = useState(false)
+      const [userClickedType, setUserClickedType] = useState(-1)
       const [userHand, setUserHand] = useState(players[0].hand)
       const [userStash, setUserStash] = useState(players[0].stash)
       const [cpuOneStash, setCpuOneStash] = useState(players[1].stash)
@@ -1147,25 +1183,50 @@ const PlayPage = () => {
       const [cpuOneScore, setCpuOneScore] = useState(0)
       const [cpuTwoScore, setCpuTwoScore] = useState(0)
       const [cpuThreeScore, setCpuThreeScore] = useState(0)
-
-      // Fruit is stored as a 3 undigit base-11 number (watermelon is most significant, orange is least significant)
-      // This is possible because for each fruit type the max icons is 10: 15 fruit cards * 2 icons/card / 3 icon types = 10
-      // e.g. 2 watermelon, 1 pineapple, 3 orange is represented as 2 * 11 * 11 + 1 * 11 + 3 = 256
       const [userDessert, setUserDessert] = useState(players[0].dessert)
       const [cpuOneDessert, setCpuOneDessert] = useState(players[1].dessert)
       const [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
       const [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
 
-      // A cornerstone of SushiGO gameplay is that players swap hands after playing cards, this is done here
+      // A cornerstone of SushiGO gameplay is that players swap hands after playing cards
       const swapCards = () => {
         let tempCards = players[0].hand
         for (let i = 0; i < players.length - 1; i++)
           players[i].hand = players[i + 1].hand
         players[players.length - 1].hand = tempCards
+      }
 
-        // Reset miso vars
+      const resetUramaki = () => {
+        uramakiPoints = 8
+        for (let i = 0; i < players.length; i++)
+          players[i].uramakiScored = false
+      }
+
+      const resetChopsticks = () => {
+        chopsticksOneActive = false
+        chopsticksTwoActive = false
+        chopsticksThreeActive = false
+        for (let i = 0; i < players.length; i++) {
+          players[i].utensilUsed = false
+          for (let j = 0; j < players[i].stash.length; j++)
+            if (players[i].stash[j].type == cards.CHOPSTICKSONE.type)
+              chopsticksOneActive = true
+            else if (players[i].stash[j].type == cards.CHOPSTICKSTWO.type)
+              chopsticksTwoActive = true
+            else if (players[i].stash[j].type == cards.CHOPSTICKSTHREE.type)
+              chopsticksThreeActive = true
+        }
+      }
+
+      const resetMiso = () => {
         misoAllowed = true
         firstMisoIndex = -1
+      }
+
+      const prepareNextTurn = () => {
+        swapCards()
+        if (spec.includes(guides.CHOPSTICKS.type.toString())) resetChopsticks()
+        if (app.includes(guides.MISO.type.toString())) resetMiso()
       }
 
       const getOppsStashes = (excludedIndex) => {
@@ -1184,6 +1245,7 @@ const PlayPage = () => {
         ]
       }
 
+      // Display toast notifications, area corresponds to the player
       const notify = (message, emoji, area) => {
         let location
         if (area == 0) location = 'bottom-left'
@@ -1202,31 +1264,22 @@ const PlayPage = () => {
         })
       }
 
-      const cleanupMenu = () => {
-        for (let i = players[0].hand.length - 1; i >= 0; i--)
-          deck.pile.push(players[0].hand.pop())
+      const cleanupMenu = (index) => {
+        for (let i = players[index].hand.length - 1; i >= 0; i--)
+          deck.pile.push(players[index].hand.pop())
         shuffle(deck.pile)
-        players[0].hand = savedHand
-        usingMenu = false
+        players[index].hand = savedHand
+
+        // Update the usingMenu var if the user used menu
+        if (index == 0) usingMenu = false
       }
 
+      // Once a player reaches 10 uramaki rolls they instantly score points
       const scoreUramakiDuring = () => {
-        // Remove uramaki by removing every card, and putting it in discard
-        // pile if it's a uramaki or putting it back if it's not
-        const cleanUramaki = (playerCards) => {
-          for (let i = playerCards.length - 1; i >= 0; i--) {
-            let removedCard = playerCards.pop()
-            if (removedCard.color == 'lime')
-              // Uramaki is lime colored
-              deck.discardPile.push(removedCard)
-            else playerCards.unshift(removedCard)
-          }
-        }
-
-        // Check from 14 to 10 for scoring uramaki since ten is the minimum to score and
-        // 5 is the max that can be played in a round, so the max unscored amount is 10 - 1 + 5 = 14
+        /* Check from 14 to 10 for scoring uramaki since 10 is the minimum to score and
+           5 is the most icons on a card, so the max unscored amount is 10 - 1 + 5 = 14 */
         for (let goal = 14; goal >= 10; goal--) {
-          if (uramakiPoints < 2) break
+          if (uramakiPoints < 2) break // Cannot score less than 2 points
           let decrease = 0
           for (let i = 0; i < players.length; i++) {
             let uramakiCount =
@@ -1234,16 +1287,21 @@ const PlayPage = () => {
               4 * countCard(players[i].stash, cards.URAMAKIFOUR) +
               5 * countCard(players[i].stash, cards.URAMAKIFIVE)
 
-            // It is not possible to score twice in a round by reaching 10+ rolls, hence the second condition
-            // However, it is possible to score uramaki again at the end of the round
+            /* If the player reaches the criteria for scoring uramaki, add
+               to their score, remove their uramaki, and display toast */
             if (uramakiCount == goal && !players[i].uramakiScored) {
               players[i].score += uramakiPoints
-              cleanUramaki(players[i].stash)
+              for (let j = players[i].hand.length - 1; j >= 0; j--)
+                if (players[i].hand[j].color == cards.URAMAKITHREE.color)
+                  deck.discardPile.push(players[i].stash.splice(j, 1)[0])
               notify(
                 'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
                 '😋',
                 i
               )
+
+              /* It is not possible to score twice in a round by reaching 10+ rolls,
+               However, it is possible to score uramaki again at the end of the round */
               players[i].uramakiScored = true
               decrease += 3 // Do not decrease right away so tied players receive the same points
             }
@@ -1252,15 +1310,13 @@ const PlayPage = () => {
         }
       }
 
+      // The player with the most uramaki left gets any unclaimed point
       const scoreUramakiEnd = (playerCards, oppsCards) => {
         if (uramakiPoints < 2) return 0
         let uramakiCount =
           3 * countCard(playerCards, cards.URAMAKITHREE) +
           4 * countCard(playerCards, cards.URAMAKIFOUR) +
           5 * countCard(playerCards, cards.URAMAKIFIVE)
-
-        console.log('ALERT')
-        console.log(oppsCards)
 
         for (let oppCards of oppsCards) {
           console.log(oppCards)
@@ -1275,12 +1331,18 @@ const PlayPage = () => {
         return uramakiPoints
       }
 
+      // Dessert does not go back into deck and is tracked to score at end
       const setAsideDessert = () => {
         for (let i = 0; i < players.length; i++)
           for (let j = players[i].stash.length - 1; j >= 0; j--) {
-            // i.e. If this is a dessert card
             let removedCard = players[i].stash.pop()
-            if (['pink', 'blue', 'peach'].includes(removedCard.color))
+            if (
+              [
+                cards.PUDDING.color,
+                cards.GTIC.color,
+                cards.FRUITDUBWAT.color,
+              ].includes(removedCard.color)
+            )
               if (removedCard.color == cards.FRUITDUBWAT.color)
                 addFruit(removedCard, players[i])
               else players[i].dessert++
@@ -1288,7 +1350,7 @@ const PlayPage = () => {
           }
       }
 
-      // Changes turned over cards back into their original
+      // Changes turned over cards back
       const takeoutBoxReplace = () => {
         for (let i = 0; i < deck.pile.length; i++)
           if (deck.pile[i].type == cards.TOC.type)
@@ -1301,6 +1363,7 @@ const PlayPage = () => {
 
         if (specialOrderCount == cards.SPECIALO.count) return
 
+        // If any card is more common than it should be, one is a special order
         for (let i = 0; i < deck.pile; i++)
           if (countCard(deck.pile, deck.pile[i]) > deck.pile[i].count) {
             deck.pile[i] = cards.SPECIALO
@@ -1309,8 +1372,8 @@ const PlayPage = () => {
           }
       }
 
-      // PRECONDITION: Desserts are cleaned from stashes
-      // Rebuilds the deck by grabbing all the played/discarded cards
+      /* PRECONDITION: Desserts are cleaned from stashes
+         Rebuilds the deck by grabbing all the played/discarded cards */
       const replenishDeck = (moreDes) => {
         for (let i = 0; i < players.length; i++)
           for (let j = players[i].stash.length - 1; j >= 0; j--)
@@ -1323,7 +1386,8 @@ const PlayPage = () => {
 
         if (spec.includes(guides.TAKEOUT.type.toString())) takeoutBoxReplace()
 
-        if (spec.includes(guides.TAKEOUT.type.toString())) specialOrderReplace()
+        if (spec.includes(guides.SPECIALO.type.toString()))
+          specialOrderReplace()
 
         shuffle(deck.pile)
 
@@ -1352,7 +1416,8 @@ const PlayPage = () => {
         console.log(deck.pile)
       }
 
-      // Scores a player's cards, only accounts for end of turn (i.e. no uramaki reaching 10 or dessert)
+      /* Scores a player's cards, only accounts for end of turn
+         (i.e. no uramaki reaching 10 or dessert) */
       const scoreRegular = (playerCards, oppsCards) => {
         console.log('SCORING START')
         console.log(playerCards)
@@ -1426,9 +1491,13 @@ const PlayPage = () => {
 
       const scoreDesserts = () => {
         for (let i = 0; i < players.length; i++)
-          players[i].score += scoreDessert(players[i].stash, getOppsDesserts(i))
+          players[i].score += scoreDessert(
+            players[i].dessert,
+            getOppsDesserts(i)
+          )
       }
 
+      // Updates display data, should be called excatly once for each click
       const updateData = () => {
         setUserHand([...players[0].hand])
         setUserStash([...players[0].stash])
@@ -1442,18 +1511,14 @@ const PlayPage = () => {
       }
 
       const incrementRound = () => {
-        // Reset uramaki
-        uramakiPoints = 8
-        for (let i = 0; i < players.length; i++)
-          players[i].uramakiScored = false
-
-        // Reset miso soup
-        misoAllowed = true
-        firstMisoIndex = -1
+        resetUramaki()
+        resetChopsticks()
+        resetMiso()
 
         round++
       }
 
+      // Automatically display makis in order of decreasing icons
       const reorderMaki = (index) => {
         if (
           players[index].stash.length == 0 ||
@@ -1495,6 +1560,7 @@ const PlayPage = () => {
         players[index].stash[makiSpots[0]] = cards.MAKITHREE
       }
 
+      // Automatically display uramakis in order of decreasing icons
       const reorderUramaki = (index) => {
         if (
           players[index].stash.length == 0 ||
@@ -1536,24 +1602,22 @@ const PlayPage = () => {
         players[index].stash[uramakiSpots[0]] = cards.URAMAKIFIVE
       }
 
-      // If more than one miso soup is played all are removed
+      /* If more than one miso soup is played all are removed
+         PRECONDITION: Miso soup was played by player at index */
       const handleMiso = (index) => {
-        if (
-          players[index].stash.length == 0 ||
-          players[index].stash[players[index].stash.length - 1].type !=
-            cards.MISO.type
-        )
-          return
-
+        /* If miso soup is allowed, do not remove but flag this player
+           in case someone play miso soup later, when it would not be allowed */
         if (misoAllowed) {
           misoAllowed = false
           firstMisoIndex = index
           return
         }
 
+        // Miso soup is not allowed, so remove the miso soup
         deck.discardPile.push(players[index].stash.pop())
         notify('Gave up non-unique miso soup', '😩', index)
 
+        // Remove the player who played the first miso soup if not done yet
         if (firstMisoIndex != -1) {
           for (let i = players[firstMisoIndex].stash.length - 1; i >= 0; i--)
             if (players[firstMisoIndex].stash[i].type == cards.MISO.type) {
@@ -1565,25 +1629,6 @@ const PlayPage = () => {
           notify('Gave up non-unique miso soup', '😩', firstMisoIndex)
           firstMisoIndex = -1
         }
-        // let misoCount = 0
-        // for (let i = 0; i < players.length; i++)
-        //   if (
-        //     players[i].stash[players[i].stash.length - 1].type ==
-        //     cards.MISO.type
-        //   )
-        //     misoCount++
-
-        // if (misoCount > 1) {
-        //   for (let i = 0; i < players.length; i++) {
-        //     if (
-        //       players[i].stash[players[i].stash.length - 1].type ==
-        //       cards.MISO.type
-        //     ) {
-        //       deck.discardPile.push(players[i].stash.pop())
-        //       notify('Gave up non-unique miso soup', '😩', i)
-        //     }
-        //   }
-        // }
       }
 
       // Display message for successful usage and swap for display
@@ -1598,7 +1643,8 @@ const PlayPage = () => {
 
         let wasabiLoc
 
-        // If an unclaimed wasabi is found, insert nigiri immediately after wasabi
+        /* If an unclaimed wasabi is found, insert nigiri immediately after wasabi
+           and display a toast message */
         for (
           wasabiLoc = 0;
           wasabiLoc < players[index].stash.length - 1;
@@ -1628,23 +1674,25 @@ const PlayPage = () => {
           }
       }
 
+      /* Handles the actions that must be taken after playing a card at any stage
+         1. Copy a card if special order played
+         2. Reorder maki or uramaki
+         3. Reorder nigiri if it is played on a wasabi
+         4. Check to remove miso soup
+         5. Check to score uramaki */
       const playCard = (cardIndex, playerIndex, checkUramaki) => {
         let card = players[playerIndex].hand.splice(cardIndex, 1)[0]
         players[playerIndex].stash.push(card)
         if (card.type == cards.SPECIALO.type)
           if (playerIndex == 0)
             if (players[0].stash.length == 1) {
-              // player special order
               notify('Played special order without copying', '🌈', 0)
               deck.discardPile.push(players[0].stash.pop())
             } else {
               specialOrderFreeze = true
-              // setUserHand([...players[0].hand])
-              // setUserStash([...players[0].stash])
               return
             }
           else if (players[playerIndex].stash.length == 1) {
-            // cpu special order
             notify('Played special order without copying', '🌈', playerIndex)
             deck.discardPile.push(players[playerIndex].stash.pop())
           } else {
@@ -1667,12 +1715,14 @@ const PlayPage = () => {
         if (spec.includes(guides.WASABI.type.toString()))
           handleWasabi(playerIndex)
 
-        if (app.includes(guides.MISO.type.toString())) handleMiso(playerIndex)
+        // Check if the actual card is miso soup because wasabi step can shift the stash
+        if (card.type == cards.MISO.type) handleMiso(playerIndex)
 
         if (checkUramaki && roll.includes(guides.URAMAKI.type.toString()))
           scoreUramakiDuring()
       }
 
+      // Ends a round and moves to the next (or results screen)
       const advanceRound = () => {
         players[0].hand = []
         scoreRound()
@@ -1687,7 +1737,7 @@ const PlayPage = () => {
         setCpuTwoDessert(players[2].dessert)
         setCpuThreeDessert(players[3].dessert)
 
-        if (round == 3) {
+        if (round == NUMROUNDS) {
           scoreDesserts()
           updateData()
           setShowResults(true)
@@ -1698,32 +1748,54 @@ const PlayPage = () => {
         }
       }
 
-      /*
-      const handlePostPlayerActions = () => {
-        players[1].stash.push(players[1].hand.pop())
-        players[2].stash.push(players[2].hand.pop())
-        players[3].stash.push(players[3].hand.pop())
-
-        if (spec.includes(guides.WASABI.type.toString())) handleWasabi()
-
-        if (roll.includes(guides.URAMAKI.type.toString())) scoreUramakiDuring()
-
-        // Miso is bugging we leacing it out for now
-        // if (app.includes(guides.MISO.type.toString())) handleMiso()
-
-        if (players[0].hand.length == 0)
-          if (round < 3) players[0].hand.push(cards.NEXT)
-          else players[0].hand.push(cards.FINAL)
-        else swapCards()
-
-        updateData()
-      }
-      */
-
+      /* 1. Play computer cards (if desired)
+         2. Chopsticks
+         3. Spoon
+         4. Menu
+         5. Takeout Box
+         6. Swap cards for next turn */
       const resolveTurn = (playComputerCards) => {
         // CHOPSTICKS -> SPOON -> MENU -> TAKEOUT BOX
         const handleSpecials = () => {
+          // PRECONDITION: chopsticksCard is in the hand of the player at index
+          const handleChopsticks = (chopsticksCard, index) => {
+            // Can only use chopsticks/spoon once a turn and hand must not be empty
+            if (!players[index].utensilUsed && players[index].hand.length > 0) {
+              // Remove the chopsticks
+              for (let i = players[index].stash.length - 1; i >= 0; i--)
+                if (players[index].stash[i].type == chopsticksCard.type)
+                  players[index].stash.splice(i, 1)
+
+              let choice = pickComputerCard(
+                players[index].hand,
+                getOppsStashes(index),
+                round,
+                diff[0]
+              )
+
+              notify(
+                'Played ' +
+                  players[index].hand[choice].text +
+                  ' with chopsticks',
+                '🥢',
+                index
+              )
+              playCard(choice, index, true)
+
+              // Put the chopsticks back at a random location
+              players[index].hand.splice(
+                Math.floor(Math.random() * (players[index].hand.length + 1)),
+                0,
+                chopsticksCard
+              )
+            }
+
+            // Make true regardless for cpu so they only consider once
+            if (index != 0) players[index].utensilUsed = true
+          }
+
           const handleMenu = (index) => {
+            // Make the 4 card choice provided by playing a menu
             let tempHand = [
               deck.pile.pop(),
               deck.pile.pop(),
@@ -1736,12 +1808,11 @@ const PlayPage = () => {
 
             if (index == 0) {
               usingMenu = true
-              // setUserHand([...players[0].hand])
-              // setUserStash([...players[0].stash])
               return
             }
 
-            deck.discardPile.push(players[index].stash.pop()) // Remove menu from stash
+            // Move menu to discard pile
+            deck.discardPile.push(players[index].stash.pop())
 
             players[index].hand = tempHand
             let choice = pickComputerCard(
@@ -1758,35 +1829,55 @@ const PlayPage = () => {
             )
             playCard(choice, index, true)
 
-            for (let i = players[index].hand.length - 1; i >= 0; i--)
-              deck.pile.push(players[index].hand.pop())
-            shuffle(deck.pile)
-            players[index].hand = savedHand
-            updateData()
+            cleanupMenu(index)
           }
 
           const handleTakeout = (index) => {
+            // Cannot use takeout box if there are no cards to turn over
             if (players[index].stash.length == 1) {
               notify('Took out 0 items with takeout box', '🥡', index)
-              deck.discardPile.push(players[index].stash.pop()) // Move takeout box to discard pile
+
+              // Move takeout box to discard pile
+              deck.discardPile.push(players[index].stash.pop())
               return
             }
 
             if (index == 0) {
               takeoutBoxFreeze = true
-              // setUserHand([...players[0].hand])
-              // setUserStash([...players[0].stash])
               return
             }
 
             // Computer takeout behavior to be determined, just don't use for now
             notify('Took out 0 items with takeout box', '🥡', index)
-            deck.discardPile.push(players[index].stash.pop()) // Move takeout box to discard pile
+
+            // Move takeout box to discard pile
+            deck.discardPile.push(players[index].stash.pop())
           }
 
-          // SPOON
-
           // CHOPSTICKS
+
+          // Do not need to check user
+          for (let i = 1; i < players.length; i++)
+            if (
+              chopsticksOneActive &&
+              countCard(players[i].stash, cards.CHOPSTICKSONE) > 0
+            )
+              handleChopsticks(cards.CHOPSTICKSONE, i)
+
+          for (let i = 1; i < players.length; i++)
+            if (
+              chopsticksTwoActive &&
+              countCard(players[i].stash, cards.CHOPSTICKSTWO) > 0
+            )
+              handleChopsticks(cards.CHOPSTICKSTWO, i)
+
+          for (let i = 1; i < players.length; i++)
+            if (
+              chopsticksThreeActive &&
+              countCard(players[i].stash, cards.CHOPSTICKSTHREE) > 0
+            )
+              handleChopsticks(cards.CHOPSTICKSTHREE, i)
+          // SPOON
 
           for (let i = 0; i < players.length; i++)
             if (
@@ -1854,12 +1945,14 @@ const PlayPage = () => {
 
         handleSpecials()
 
+        /* If the player is taking a special action need to disrupt the flow
+           to allow the user to interact and make decision */
         if (usingMenu || takeoutBoxFreeze) return
 
         if (players[0].hand.length == 0)
           if (round < 3) players[0].hand.push(cards.NEXT)
           else players[0].hand.push(cards.FINAL)
-        else swapCards()
+        else prepareNextTurn()
       }
 
       const handClick = (e) => {
@@ -1875,12 +1968,12 @@ const PlayPage = () => {
           }
 
           deck.discardPile.push(players[0].stash.pop()) // Pop the menu from stash
-          playCard(parseInt(e.target.name), 0, true) // Play the card played
 
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
+          playCard(parseInt(e.target.name), 0, true) // Play the card played
 
           if (!specialOrderFreeze && !takeoutBoxFreeze) {
-            cleanupMenu()
+            cleanupMenu(0)
             resolveTurn(false)
           }
 
@@ -1907,7 +2000,7 @@ const PlayPage = () => {
         // Play the user card
         playCard(parseInt(e.target.name), 0, false)
 
-        // Break out if user played special order
+        // Need to wait for user to pick card to copy before resolving turn
         if (specialOrderFreeze) {
           updateData()
           return
@@ -1917,98 +2010,13 @@ const PlayPage = () => {
         updateData()
       }
 
-      /*
-      const handClickOld = (e) => {
-        if (specialOrderFreeze || takeoutBoxFreeze) return
-
-        // If the user is actually playing a card
-        if (players[0].hand[0].color != cards.NEXT.color) {
-          // The name serves as an index within the hand
-          let played = players[0].hand.splice(parseInt(e.target.name), 1)[0]
-          if (usingMenu) {
-            if (played.color == cards.MENUSEVEN.color) {
-              notify('Cannot play menu from menu', '📖', 0)
-              return
-            }
-            deck.discardPile.push(players[0].stash.pop()) // Pop the menu that is pushed for visuals
-            notify('Played ' + played.text + ' with menu', '📖', 0)
-          }
-          players[0].stash.push(played)
-          if (played.color == cards.MENUSEVEN.color) {
-            // Make a hand for the menu selection
-            let tempHand = [
-              deck.pile.pop(),
-              deck.pile.pop(),
-              deck.pile.pop(),
-              deck.pile.pop(),
-            ]
-            savedHand = players[0].hand
-            players[0].hand = tempHand
-            usingMenu = true
-            setUserHand([...players[0].hand])
-            setUserStash([...players[0].stash])
-            return
-          } else if (played.color == cards.TAKEOUTTEN.color)
-            if (players[0].stash.length == 1) {
-              notify('Took out 0 items with takeout box', '🥡', 0)
-              deck.discardPile.push(players[0].stash.pop())
-            } else {
-              takeoutBoxFreeze = true
-              setUserHand([...players[0].hand])
-              setUserStash([...players[0].stash])
-              return
-            }
-          else if (played.type == cards.SPECIALO.type)
-            if (players[0].stash.length == 1) {
-              notify('Played special order without copying', '🌈', 0)
-              deck.discardPile.push(players[0].stash.pop())
-            } else {
-              specialOrderFreeze = true
-              setUserHand([...players[0].hand])
-              setUserStash([...players[0].stash])
-              return
-            }
-          if (usingMenu) {
-            // Add unpicked menu cards back to deck and shuffle
-            for (let i = players[0].hand.length - 1; i >= 0; i--)
-              deck.pile.push(players[0].hand.pop())
-            shuffle(deck.pile)
-            players[0].hand = savedHand
-            usingMenu = false
-          }
-          handlePostPlayerActions()
-        } else {
-          players[0].hand = []
-          scoreRound()
-
-          setAsideDessert()
-
-          if (round == 1) replenishDeck(DESSERTCOUNTTWO)
-          else if (round == 2) replenishDeck(DESSERTCOUNTTHREE)
-
-          setUserDessert(players[0].dessert)
-          setCpuOneDessert(players[1].dessert)
-          setCpuTwoDessert(players[2].dessert)
-          setCpuThreeDessert(players[3].dessert)
-
-          if (round == 3) {
-            scoreDesserts()
-            updateData()
-            setShowResults(true)
-          } else {
-            dealToPlayers()
-            updateData()
-            incrementRound()
-          }
-        }
-      }
-      */
-
       const stashClick = (e) => {
-        // Ends the selection process
+        // Ends the selection process for takeout box
         const takeoutPressed = () => {
           if (usingMenu) cleanupMenu()
-          deck.discardPile.push(players[0].stash.pop()) // Move takeout box to discard pile
+
+          // Move takeout box to discard pile
+          deck.discardPile.push(players[0].stash.pop())
           let itemString = takeoutCount == 1 ? ' item' : ' items'
           notify(
             'Took out ' + takeoutCount + itemString + ' with takeout box',
@@ -2022,8 +2030,11 @@ const PlayPage = () => {
         }
 
         if (takeoutBoxFreeze) {
-          if (e.target.alt == 'takeout box') takeoutPressed()
-          /* turning over a card */ else {
+          if (e.target.alt == cards.TAKEOUTTEN.text) takeoutPressed()
+          else {
+            /* This code is for actually turning over a card
+               Note: Cannot turn over an already turned over card
+               Otherwise, turn the card over and record it to be reset correctly later */
             for (let i = 0; i < players[0].stash.length; i++)
               if (
                 e.target.alt == players[0].stash[i].text &&
@@ -2041,19 +2052,22 @@ const PlayPage = () => {
           }
         } else if (specialOrderFreeze) {
           let wasUsingMenu = usingMenu
-          if (usingMenu) cleanupMenu()
+          if (usingMenu) cleanupMenu(0)
           players[0].stash.pop() // Pop the special order from stash
-          if (e.target.alt == 'special order') {
+          if (e.target.alt == cards.SPECIALO.text) {
+            // If the user clicks special order, they elect not to use it
             notify('Played special order without copying', '🌈', 0)
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
 
+            // If not played from a menu, want to play computer cards
             resolveTurn(!wasUsingMenu)
             updateData()
             return
           }
           for (let i = 0; i < players[0].stash.length; i++)
             if (e.target.alt == players[0].stash[i].text) {
+              // Add selected card to start of hand then play it
               players[0].hand.unshift(players[0].stash[i])
               playCard(0, 0, usingMenu)
               notify(
@@ -2064,11 +2078,20 @@ const PlayPage = () => {
               break
             }
           specialOrderFreeze = false
+
+          // If not played from a menu, want to play computer cards
           resolveTurn(!wasUsingMenu)
           updateData()
+        } else {
+          console.log(e.target)
+          console.log(e.target.name)
+          console.log(e.currentTarget.name)
+          console.log(parseInt(e.target.name))
+          setUserClickedType(parseInt(e.target.name))
         }
       }
 
+      // selection - The cards in the hand
       const Hand = ({ selection }) => {
         return (
           <div className="flex flex-row justify-center">
@@ -2080,7 +2103,7 @@ const PlayPage = () => {
                     numberName={i}
                     info={card}
                     action={handClick}
-                    opacityOn={false}
+                    fullOpacity={false}
                     fullDisplay={true}
                   />
                 )
@@ -2091,7 +2114,7 @@ const PlayPage = () => {
                     numberName={i}
                     info={card}
                     action={handClick}
-                    opacityOn={true}
+                    fullOpacity={true}
                     fullDisplay={true}
                   />
                 )
@@ -2100,6 +2123,9 @@ const PlayPage = () => {
         )
       }
 
+      /* platter - The cards in the stash
+         alignLeft - True -> Align to left, False -> Align to right
+         interactable - Whether clicking on a card should do anything */
       const Stash = ({ platter, alignLeft, interactable }) => {
         let columnColors = []
         let cardColumns = []
@@ -2137,6 +2163,7 @@ const PlayPage = () => {
             )
         }
 
+        // Displays only the top of cards and sorts them by color
         if (alignLeft)
           return (
             <div>
@@ -2148,13 +2175,30 @@ const PlayPage = () => {
                         return (
                           <Card
                             key={j}
+                            numberName={card.type}
                             info={card}
                             action={stashClick}
                             fullDisplay={false}
+                            fullOpacity={
+                              card.type == userClickedType ||
+                              (card.color != cards.CHOPSTICKSONE.color &&
+                                card.color != cards.SPOONFOUR.color)
+                            }
                           />
                         )
                       else
-                        return <Card key={j} info={card} fullDisplay={false} />
+                        return (
+                          <Card
+                            key={j}
+                            numberName={card.type}
+                            info={card}
+                            fullDisplay={false}
+                            fullOpacity={
+                              card.color != cards.MENUSEVEN.color &&
+                              card.color != cards.TAKEOUTTEN.color
+                            }
+                          />
+                        )
                     })}
                   </div>
                 )
@@ -2168,25 +2212,18 @@ const PlayPage = () => {
                 return (
                   <div key={i} className={classStringsRight[i]}>
                     {cardColumn.map((card, j) => {
-                      if (interactable)
-                        return (
-                          <Card
-                            key={j}
-                            numberName={j}
-                            info={card}
-                            action={stashClick}
-                            fullDisplay={false}
-                          />
-                        )
-                      else
-                        return (
-                          <Card
-                            key={j}
-                            numberName={j}
-                            info={card}
-                            fullDisplay={false}
-                          />
-                        )
+                      return (
+                        <Card
+                          key={j}
+                          numberName={card.type}
+                          info={card}
+                          fullDisplay={false}
+                          fullOpacity={
+                            card.color != cards.MENUSEVEN.color &&
+                            card.color != cards.TAKEOUTTEN.color
+                          }
+                        />
+                      )
                     })}
                   </div>
                 )
@@ -2195,6 +2232,7 @@ const PlayPage = () => {
           )
       }
 
+      // Displays a user's name, score, and dessert count
       const Scoreline = ({ name, score, dessert }) => {
         if (dess.includes(guides.PUDDING.type.toString()))
           return (
@@ -2220,6 +2258,9 @@ const PlayPage = () => {
         }
       }
 
+      /* If not showing results, then display one hand in each corner and the user hand
+       in the middle with the scores. Otherwise, show the results screen, which has the
+       player's and their scores sorted to determine the winner. */
       if (!showResults)
         return (
           <>
@@ -2263,7 +2304,7 @@ const PlayPage = () => {
                   />
                 </div>
               </div>
-              <div className="basis-2/5">
+              <div className="relative basis-2/5">
                 <Stash
                   platter={userStash}
                   alignLeft={true}
@@ -2290,7 +2331,8 @@ const PlayPage = () => {
         let cpuTwoDessertCount = cpuTwoDessert
         let cpuThreeDessertCount = cpuThreeDessert
 
-        // Change dessertCount to number of cards played for fruit
+        /* Change dessertCount to number of cards played for fruit
+           For fruit dessert=watermelon*11^2+pineapple*11+orange */
         if (dess[0] == 'fruit') {
           let userFruitCounts = parseFruit(userDessert)
           userDessertCount =
@@ -2345,6 +2387,8 @@ const PlayPage = () => {
 
         displayInfo.sort(comparePlayers)
 
+        /* Display the players in order by score, gold for 1st,
+           silver for 2nd, bronze for third, and regular for last */
         return (
           <div className="flex h-screen flex-col justify-center">
             <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
@@ -2374,6 +2418,8 @@ const PlayPage = () => {
     return <CardDisplay />
   }
 
+  /* If we are not showing the game, show the selection screen,
+     otherwise, show the game screen */
   if (!showGame)
     return (
       <>
