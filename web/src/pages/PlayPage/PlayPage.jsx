@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 import { useState } from 'react'
 
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
@@ -927,7 +928,9 @@ const PlayPage = () => {
     const NUMROUNDS = 3
 
     let round = 1
+    let priority = 0
     let uramakiPoints = 8
+    let usingChopsticks = false
     let chopsticksOneActive = false
     let chopsticksTwoActive = false
     let chopsticksThreeActive = false
@@ -1227,6 +1230,7 @@ const PlayPage = () => {
         swapCards()
         if (spec.includes(guides.CHOPSTICKS.type.toString())) resetChopsticks()
         if (app.includes(guides.MISO.type.toString())) resetMiso()
+        priority = 0
       }
 
       const getOppsStashes = (excludedIndex) => {
@@ -1264,7 +1268,62 @@ const PlayPage = () => {
         })
       }
 
-      const cleanupMenu = (index) => {
+      const priorityToCard = () => {
+        switch (priority) {
+          case 1:
+            return cards.CHOPSTICKSONE
+          case 2:
+            return cards.CHOPSTICKSTWO
+          case 3:
+            return cards.CHOPSTICKSTHREE
+          case 4:
+            return cards.SPOONFOUR
+          case 5:
+            return cards.SPOONFIVE
+          case 6:
+            return cards.SPOONSIX
+          case 7:
+            return cards.MENUSEVEN
+          case 8:
+            return cards.MENUEIGHT
+          case 9:
+            return cards.MENUNINE
+          case 10:
+            return cards.TAKEOUTTEN
+          case 11:
+            return cards.TAKEOUTELEVEN
+          case 12:
+            return cards.TAKEOUTTWELVE
+          default:
+            return null
+        }
+      }
+
+      const cleanupChopsticks = (index, toMatch) => {
+        // Remove the chopsticks
+        for (let i = players[index].stash.length - 1; i >= 0; i--)
+          if (players[index].stash[i].type == toMatch.type)
+            players[index].stash.splice(i, 1)
+
+        // Put the chopsticks back at a random location
+        players[index].hand.splice(
+          Math.floor(Math.random() * (players[index].hand.length + 1)),
+          0,
+          toMatch
+        )
+        if (index == 0) {
+          usingChopsticks = false
+          setUserClickedType(-1)
+        }
+        players[index].utensilUsed = true
+      }
+
+      const cleanupMenu = (index, toMatch) => {
+        // Remove the menu
+        for (let i = players[index].stash.length - 1; i >= 0; i--)
+          if (players[index].stash[i].type == toMatch.type)
+            players[index].stash.splice(i, 1)
+
         for (let i = players[index].hand.length - 1; i >= 0; i--)
           deck.pile.push(players[index].hand.pop())
         shuffle(deck.pile)
@@ -1514,7 +1573,7 @@ const PlayPage = () => {
         resetUramaki()
         resetChopsticks()
         resetMiso()
-
+        priority = 0
         round++
       }
 
@@ -1748,73 +1807,23 @@ const PlayPage = () => {
         }
       }
 
-      /* 1. Play computer cards (if desired)
-         2. Chopsticks
-         3. Spoon
-         4. Menu
-         5. Takeout Box
+      /* Priority variable tracks what stage we are are
+         1. Play computer cards (if desired) (priority 0)
+         2. Chopsticks (priority 1-3)
+         3. Spoon (priority 4-6)
+         4. Menu (priority 7-9)
+         5. Takeout Box (priority 10-12)
          6. Swap cards for next turn */
-      const resolveTurn = (playComputerCards) => {
-        // CHOPSTICKS -> SPOON -> MENU -> TAKEOUT BOX
-        const handleSpecials = () => {
-          // PRECONDITION: chopsticksCard is in the hand of the player at index
-          const handleChopsticks = (chopsticksCard, index) => {
-            // Can only use chopsticks/spoon once a turn and hand must not be empty
-            if (!players[index].utensilUsed && players[index].hand.length > 0) {
-              // Remove the chopsticks
-              for (let i = players[index].stash.length - 1; i >= 0; i--)
-                if (players[index].stash[i].type == chopsticksCard.type)
-                  players[index].stash.splice(i, 1)
-
-              let choice = pickComputerCard(
-                players[index].hand,
-                getOppsStashes(index),
-                round,
-                diff[0]
-              )
-
-              notify(
-                'Played ' +
-                  players[index].hand[choice].text +
-                  ' with chopsticks',
-                '🥢',
-                index
-              )
-              playCard(choice, index, true)
-
-              // Put the chopsticks back at a random location
-              players[index].hand.splice(
-                Math.floor(Math.random() * (players[index].hand.length + 1)),
-                0,
-                chopsticksCard
-              )
-            }
-
-            // Make true regardless for cpu so they only consider once
-            if (index != 0) players[index].utensilUsed = true
-          }
-
-          const handleMenu = (index) => {
-            // Make the 4 card choice provided by playing a menu
-            let tempHand = [
-              deck.pile.pop(),
-              deck.pile.pop(),
-              deck.pile.pop(),
-              deck.pile.pop(),
-            ]
-
-            savedHand = players[index].hand
-            players[index].hand = tempHand
-
+      const resolveTurn = () => {
+        // PRECONDITION: chopsticksCard is in the hand of the player at index
+        const handleChopsticks = (index) => {
+          // Can only use chopsticks/spoon once a turn and hand must not be empty
+          if (!players[index].utensilUsed && players[index].hand.length > 0) {
             if (index == 0) {
-              usingMenu = true
+              usingChopsticks = true
               return
             }
 
-            // Move menu to discard pile
-            deck.discardPile.push(players[index].stash.pop())
-
-            players[index].hand = tempHand
             let choice = pickComputerCard(
               players[index].hand,
               getOppsStashes(index),
@@ -1823,141 +1832,205 @@ const PlayPage = () => {
             )
 
             notify(
-              'Played ' + players[index].hand[choice].text + ' with menu',
-              '📖',
+              'Played ' + players[index].hand[choice].text + ' with chopsticks',
+              '🥢',
               index
             )
             playCard(choice, index, true)
 
-            cleanupMenu(index)
+            cleanupChopsticks(index, priorityToCard())
+          }
+        }
+
+        const handleMenu = (index) => {
+          // Make the 4 card choice provided by playing a menu
+          let tempHand = [
+            deck.pile.pop(),
+            deck.pile.pop(),
+            deck.pile.pop(),
+            deck.pile.pop(),
+          ]
+
+          savedHand = players[index].hand
+          players[index].hand = tempHand
+
+          if (index == 0) {
+            usingMenu = true
+            return
           }
 
-          const handleTakeout = (index) => {
-            // Cannot use takeout box if there are no cards to turn over
-            if (players[index].stash.length == 1) {
-              notify('Took out 0 items with takeout box', '🥡', index)
+          players[index].hand = tempHand
+          let choice = pickComputerCard(
+            players[index].hand,
+            getOppsStashes(index),
+            round,
+            diff[0]
+          )
 
-              // Move takeout box to discard pile
-              deck.discardPile.push(players[index].stash.pop())
-              return
-            }
+          notify(
+            'Played ' + players[index].hand[choice].text + ' with menu',
+            '📖',
+            index
+          )
+          playCard(choice, index, true)
 
-            if (index == 0) {
-              takeoutBoxFreeze = true
-              return
-            }
+          cleanupMenu(index, priorityToCard())
+        }
 
-            // Computer takeout behavior to be determined, just don't use for now
+        const handleTakeout = (index) => {
+          // Cannot use takeout box if there are no cards to turn over
+          if (players[index].stash.length == 1) {
             notify('Took out 0 items with takeout box', '🥡', index)
 
             // Move takeout box to discard pile
             deck.discardPile.push(players[index].stash.pop())
+            return
           }
 
-          // CHOPSTICKS
+          if (index == 0) {
+            takeoutBoxFreeze = true
+            return
+          }
 
-          // Do not need to check user
-          for (let i = 1; i < players.length; i++)
-            if (
-              chopsticksOneActive &&
-              countCard(players[i].stash, cards.CHOPSTICKSONE) > 0
-            )
-              handleChopsticks(cards.CHOPSTICKSONE, i)
+          // Computer takeout behavior to be determined, just don't use for now
+          notify('Took out 0 items with takeout box', '🥡', index)
 
-          for (let i = 1; i < players.length; i++)
-            if (
-              chopsticksTwoActive &&
-              countCard(players[i].stash, cards.CHOPSTICKSTWO) > 0
-            )
-              handleChopsticks(cards.CHOPSTICKSTWO, i)
-
-          for (let i = 1; i < players.length; i++)
-            if (
-              chopsticksThreeActive &&
-              countCard(players[i].stash, cards.CHOPSTICKSTHREE) > 0
-            )
-              handleChopsticks(cards.CHOPSTICKSTHREE, i)
-          // SPOON
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.MENUSEVEN.type
-            )
-              handleMenu(i)
-
-          if (usingMenu) return
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.MENUEIGHT.type
-            )
-              handleMenu(i)
-
-          if (usingMenu) return
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.MENUNINE.type
-            )
-              handleMenu(i)
-
-          if (usingMenu) return
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.TAKEOUTTEN.type
-            )
-              handleTakeout(i)
-
-          if (takeoutBoxFreeze) return
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.TAKEOUTELEVEN.type
-            )
-              handleTakeout(i)
-
-          if (takeoutBoxFreeze) return
-
-          for (let i = 0; i < players.length; i++)
-            if (
-              players[i].stash.length > 0 &&
-              players[i].stash[players[i].stash.length - 1].type ==
-                cards.TAKEOUTTWELVE.type
-            )
-              handleTakeout(i)
+          // Move takeout box to discard pile
+          deck.discardPile.push(players[index].stash.pop())
         }
 
-        // Have computers play their predetermined cards
-        if (playComputerCards)
-          for (let i = 1; i < players.length; i++)
-            playCard(players[i].willPlayIndex, i, i == players.length - 1)
-
-        handleSpecials()
-
-        /* If the player is taking a special action need to disrupt the flow
-           to allow the user to interact and make decision */
-        if (usingMenu || takeoutBoxFreeze) return
-
-        if (players[0].hand.length == 0)
-          if (round < 3) players[0].hand.push(cards.NEXT)
-          else players[0].hand.push(cards.FINAL)
-        else prepareNextTurn()
+        /* There is INTENTIONAL fall-through here, the idea is that priority
+           marks where to start and then you keep going until a user action
+           potentially necessitates a break in the sequence, but the spot will
+           be saved for when the user is done with that action  */
+        switch (priority) {
+          case 0:
+            for (let i = 1; i < players.length; i++)
+              playCard(players[i].willPlayIndex, i, i == players.length - 1)
+            priority++
+          case 1:
+            for (let i = 0; i < players.length; i++)
+              if (
+                chopsticksOneActive &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleChopsticks(i)
+            if (usingChopsticks) break
+            priority++
+          case 2:
+            for (let i = 0; i < players.length; i++)
+              if (
+                chopsticksTwoActive &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleChopsticks(i)
+            if (usingChopsticks) return
+            priority++
+          case 3:
+            for (let i = 0; i < players.length; i++)
+              if (
+                chopsticksThreeActive &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleChopsticks(i)
+            if (usingChopsticks) break
+            priority++
+          case 4:
+            priority++
+          case 5:
+            priority++
+          case 6:
+            priority++
+          case 7:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleMenu(i)
+            if (usingMenu) break
+            priority++
+          case 8:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleMenu(i)
+            if (usingMenu) break
+            priority++
+          case 9:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleMenu(i)
+            if (usingMenu) break
+            priority++
+          case 10:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleTakeout(i)
+            if (takeoutBoxFreeze) break
+            priority++
+          case 11:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleTakeout(i)
+            if (takeoutBoxFreeze) break
+            priority++
+          case 12:
+            for (let i = 0; i < players.length; i++)
+              if (
+                players[i].stash.length > 0 &&
+                countCard(players[i].stash, priorityToCard()) == 1
+              )
+                handleTakeout(i)
+            if (takeoutBoxFreeze) break
+            priority++
+          default:
+            if (players[0].hand.length == 0)
+              if (round < 3) players[0].hand.push(cards.NEXT)
+              else players[0].hand.push(cards.FINAL)
+            else prepareNextTurn()
+        }
       }
 
       const handClick = (e) => {
         // During special order or takeout box use, cannot play from hand
         if (specialOrderFreeze || takeoutBoxFreeze) return
+
+        // User chopsticks handling
+        if (usingChopsticks) {
+          notify(
+            'Played ' +
+              players[0].hand[parseInt(e.target.name)].text +
+              ' with chopsticks',
+            '🥢',
+            0
+          )
+          playCard(parseInt(e.target.name), 0, true)
+
+          cleanupChopsticks(0, priorityToCard())
+
+          if (!specialOrderFreeze) {
+            priority++
+            resolveTurn()
+          }
+
+          updateData()
+          return
+        }
 
         // User menu handling
         if (usingMenu) {
@@ -1967,14 +2040,14 @@ const PlayPage = () => {
             return
           }
 
-          deck.discardPile.push(players[0].stash.pop()) // Pop the menu from stash
-
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
           playCard(parseInt(e.target.name), 0, true) // Play the card played
 
-          if (!specialOrderFreeze && !takeoutBoxFreeze) {
-            cleanupMenu(0)
-            resolveTurn(false)
+          cleanupMenu(0, priorityToCard())
+
+          if (!specialOrderFreeze) {
+            priority++
+            resolveTurn()
           }
 
           updateData()
@@ -2006,15 +2079,13 @@ const PlayPage = () => {
           return
         }
 
-        resolveTurn(true)
+        resolveTurn()
         updateData()
       }
 
       const stashClick = (e) => {
         // Ends the selection process for takeout box
         const takeoutPressed = () => {
-          if (usingMenu) cleanupMenu()
-
           // Move takeout box to discard pile
           deck.discardPile.push(players[0].stash.pop())
           let itemString = takeoutCount == 1 ? ' item' : ' items'
@@ -2025,12 +2096,20 @@ const PlayPage = () => {
           )
           takeoutCount = 0
           takeoutBoxFreeze = false
-          resolveTurn(false)
+          priority++
+          resolveTurn()
           updateData()
         }
 
         if (takeoutBoxFreeze) {
-          if (e.target.alt == cards.TAKEOUTTEN.text) takeoutPressed()
+          if (
+            [
+              cards.TAKEOUTTEN.type,
+              cards.TAKEOUTELEVEN.type,
+              cards.TAKEOUTTWELVE.type,
+            ].includes(parseInt(e.target.name))
+          )
+            takeoutPressed()
           else {
             /* This code is for actually turning over a card
                Note: Cannot turn over an already turned over card
@@ -2051,43 +2130,50 @@ const PlayPage = () => {
               }
           }
         } else if (specialOrderFreeze) {
-          let wasUsingMenu = usingMenu
-          if (usingMenu) cleanupMenu(0)
-          players[0].stash.pop() // Pop the special order from stash
-          if (e.target.alt == cards.SPECIALO.text) {
+          if (e.target.name == cards.SPECIALO.type.toString()) {
+            players[0].stash.pop() // Pop the special order from stash
             // If the user clicks special order, they elect not to use it
             notify('Played special order without copying', '🌈', 0)
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
 
             // If not played from a menu, want to play computer cards
-            resolveTurn(!wasUsingMenu)
+            resolveTurn()
             updateData()
             return
           }
+          if (
+            parseInt(e.target.name) == userClickedType &&
+            [
+              cards.CHOPSTICKSONE.type,
+              cards.CHOPSTICKSTWO.type,
+              cards.CHOPSTICKSTHREE.type,
+            ].includes(parseInt(e.target.name))
+          ) {
+            notify('Cannot copy chopsticks currently being used', '🌈', 0)
+            return
+          }
           for (let i = 0; i < players[0].stash.length; i++)
-            if (e.target.alt == players[0].stash[i].text) {
+            if (e.target.name == players[0].stash[i].type.toString()) {
+              players[0].stash.pop() // Pop the special order from stash
               // Add selected card to start of hand then play it
               players[0].hand.unshift(players[0].stash[i])
-              playCard(0, 0, usingMenu)
               notify(
                 'Copied ' + players[0].stash[i].text + ' with special order',
                 '🌈',
                 0
               )
+              playCard(0, 0, priority > 0)
               break
             }
           specialOrderFreeze = false
 
-          // If not played from a menu, want to play computer cards
-          resolveTurn(!wasUsingMenu)
+          resolveTurn()
           updateData()
         } else {
-          console.log(e.target)
-          console.log(e.target.name)
-          console.log(e.currentTarget.name)
-          console.log(parseInt(e.target.name))
-          setUserClickedType(parseInt(e.target.name))
+          if (!usingChopsticks)
+            if (e.target.name == userClickedType) setUserClickedType(-1)
+            else setUserClickedType(parseInt(e.target.name))
         }
       }
 
@@ -2126,31 +2212,63 @@ const PlayPage = () => {
       /* platter - The cards in the stash
          alignLeft - True -> Align to left, False -> Align to right
          interactable - Whether clicking on a card should do anything */
-      const Stash = ({ platter, alignLeft, interactable }) => {
+      const Stash = ({ platter, area }) => {
+        const compareStacks = (a, b) => {
+          return b.length - a.length
+        }
+
         let columnColors = []
         let cardColumns = []
-        let classStringsLeft = [
-          'absolute bottom-0 left-0',
-          'absolute bottom-0 left-24',
-          'absolute bottom-0 left-48',
-          'absolute bottom-0 left-72',
-          'absolute bottom-0 left-96',
-          'absolute bottom-36 left-0',
-          'absolute bottom-36 left-24',
-          'absolute bottom-36 left-48',
-          'absolute bottom-36 left-72',
-        ]
-        let classStringsRight = [
-          'absolute bottom-0 right-0',
-          'absolute bottom-0 right-24',
-          'absolute bottom-0 right-48',
-          'absolute bottom-0 right-72',
-          'absolute bottom-0 right-96',
-          'absolute bottom-36 right-0',
-          'absolute bottom-36 right-24',
-          'absolute bottom-36 right-48',
-          'absolute bottom-36 right-72',
-        ]
+        let classStrings = []
+
+        if (area == 0)
+          classStrings = [
+            'absolute bottom-36 left-0',
+            'absolute bottom-36 left-24',
+            'absolute bottom-36 left-48',
+            'absolute bottom-36 left-72',
+            'absolute bottom-36 left-96',
+            'absolute bottom-0 left-96',
+            'absolute bottom-0 left-72',
+            'absolute bottom-0 left-48',
+            'absolute bottom-0 left-24',
+          ]
+        else if (area == 1)
+          classStrings = [
+            'absolute bottom-36 right-0',
+            'absolute bottom-36 right-24',
+            'absolute bottom-36 right-48',
+            'absolute bottom-36 right-72',
+            'absolute bottom-36 right-96',
+            'absolute bottom-0 right-72',
+            'absolute bottom-0 right-48',
+            'absolute bottom-0 right-24',
+            'absolute bottom-0 right-0',
+          ]
+        else if (area == 2)
+          classStrings = [
+            'absolute bottom-0 right-0',
+            'absolute bottom-0 right-24',
+            'absolute bottom-0 right-48',
+            'absolute bottom-0 right-72',
+            'absolute bottom-0 right-96',
+            'absolute bottom-36 right-96',
+            'absolute bottom-36 right-72',
+            'absolute bottom-36 right-48',
+            'absolute bottom-36 right-24',
+          ]
+        else
+          classStrings = [
+            'absolute bottom-0 left-0',
+            'absolute bottom-0 left-24',
+            'absolute bottom-0 left-48',
+            'absolute bottom-0 left-72',
+            'absolute bottom-0 left-96',
+            'absolute bottom-36 left-96',
+            'absolute bottom-36 left-72',
+            'absolute bottom-36 left-48',
+            'absolute bottom-36 left-24',
+          ]
 
         // Group the cards by color for display
         for (let i = 0; i < platter.length; i++) {
@@ -2163,55 +2281,32 @@ const PlayPage = () => {
             )
         }
 
+        cardColumns.sort(compareStacks)
+
         // Displays only the top of cards and sorts them by color
-        if (alignLeft)
-          return (
-            <div>
-              {cardColumns.map((cardColumn, i) => {
-                return (
-                  <div key={i} className={classStringsLeft[i]}>
-                    {cardColumn.map((card, j) => {
-                      if (interactable)
-                        return (
-                          <Card
-                            key={j}
-                            numberName={card.type}
-                            info={card}
-                            action={stashClick}
-                            fullDisplay={false}
-                            fullOpacity={
-                              card.type == userClickedType ||
-                              (card.color != cards.CHOPSTICKSONE.color &&
-                                card.color != cards.SPOONFOUR.color)
-                            }
-                          />
-                        )
-                      else
-                        return (
-                          <Card
-                            key={j}
-                            numberName={card.type}
-                            info={card}
-                            fullDisplay={false}
-                            fullOpacity={
-                              card.color != cards.MENUSEVEN.color &&
-                              card.color != cards.TAKEOUTTEN.color
-                            }
-                          />
-                        )
-                    })}
-                  </div>
-                )
-              })}
-            </div>
-          )
-        else
-          return (
-            <div>
-              {cardColumns.map((cardColumn, i) => {
-                return (
-                  <div key={i} className={classStringsRight[i]}>
-                    {cardColumn.map((card, j) => {
+        return (
+          <div>
+            {cardColumns.map((cardColumn, i) => {
+              return (
+                <div key={i} className={classStrings[i]}>
+                  {cardColumn.map((card, j) => {
+                    if (area == 0)
+                      return (
+                        <Card
+                          key={j}
+                          numberName={card.type}
+                          info={card}
+                          action={stashClick}
+                          fullDisplay={false}
+                          fullOpacity={
+                            (card.type == userClickedType &&
+                              userHand.length > 1) ||
+                            (card.color != cards.CHOPSTICKSONE.color &&
+                              card.color != cards.SPOONFOUR.color)
+                          }
+                        />
+                      )
+                    else
                       return (
                         <Card
                           key={j}
@@ -2224,12 +2319,12 @@ const PlayPage = () => {
                           }
                         />
                       )
-                    })}
-                  </div>
-                )
-              })}
-            </div>
-          )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        )
       }
 
       // Displays a user's name, score, and dessert count
@@ -2266,16 +2361,8 @@ const PlayPage = () => {
           <>
             <div className="flex h-screen flex-col">
               <div className="relative basis-2/5">
-                <Stash
-                  platter={cpuThreeStash}
-                  alignLeft={true}
-                  interactable={false}
-                />
-                <Stash
-                  platter={cpuTwoStash}
-                  alignLeft={false}
-                  interactable={false}
-                />
+                <Stash platter={cpuThreeStash} area={3} />
+                <Stash platter={cpuTwoStash} area={2} />
               </div>
               <div className="basis-1/5">
                 <div className="flex flex-row">
@@ -2305,16 +2392,8 @@ const PlayPage = () => {
                 </div>
               </div>
               <div className="relative basis-2/5">
-                <Stash
-                  platter={userStash}
-                  alignLeft={true}
-                  interactable={true}
-                />
-                <Stash
-                  platter={cpuOneStash}
-                  alignLeft={false}
-                  interactable={false}
-                />
+                <Stash platter={userStash} area={0} />
+                <Stash platter={cpuOneStash} area={1} />
               </div>
             </div>
           </>
