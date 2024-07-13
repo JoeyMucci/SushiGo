@@ -911,8 +911,8 @@ const PlayPage = () => {
             >
               START
             </Submit>
-            <br></br>
-            <br></br>
+            <br />
+            <br />
           </div>
         </Form>
       </>
@@ -1199,6 +1199,11 @@ const PlayPage = () => {
         players[players.length - 1].hand = tempCards
       }
 
+      // When user elects to play again with same cards
+      const resetVars = () => {
+        window.location.href = '/play'
+      }
+
       const resetUramaki = () => {
         uramakiPoints = 8
         for (let i = 0; i < players.length; i++)
@@ -1299,17 +1304,18 @@ const PlayPage = () => {
         }
       }
 
-      const cleanupChopsticks = (index, toMatch) => {
-        // Remove the chopsticks
+      const removePriorityCard = (index) => {
         for (let i = players[index].stash.length - 1; i >= 0; i--)
-          if (players[index].stash[i].type == toMatch.type)
-            players[index].stash.splice(i, 1)
+          if (players[index].stash[i].type == priorityToCard().type)
+            return players[index].stash.splice(i, 1)[0]
+      }
 
+      const cleanupChopsticks = (index) => {
         // Put the chopsticks back at a random location
         players[index].hand.splice(
           Math.floor(Math.random() * (players[index].hand.length + 1)),
           0,
-          toMatch
+          removePriorityCard(index)
         )
         if (index == 0) {
           usingChopsticks = false
@@ -1318,11 +1324,9 @@ const PlayPage = () => {
         players[index].utensilUsed = true
       }
 
-      const cleanupMenu = (index, toMatch) => {
-        // Remove the menu
-        for (let i = players[index].stash.length - 1; i >= 0; i--)
-          if (players[index].stash[i].type == toMatch.type)
-            players[index].stash.splice(i, 1)
+      const cleanupMenu = (index) => {
+        // Put the menu in the discard pile
+        deck.discardPile.push(removePriorityCard(index))
 
         for (let i = players[index].hand.length - 1; i >= 0; i--)
           deck.pile.push(players[index].hand.pop())
@@ -1350,8 +1354,8 @@ const PlayPage = () => {
                to their score, remove their uramaki, and display toast */
             if (uramakiCount == goal && !players[i].uramakiScored) {
               players[i].score += uramakiPoints
-              for (let j = players[i].hand.length - 1; j >= 0; j--)
-                if (players[i].hand[j].color == cards.URAMAKITHREE.color)
+              for (let j = players[i].stash.length - 1; j >= 0; j--)
+                if (players[i].stash[j].color == cards.URAMAKITHREE.color)
                   deck.discardPile.push(players[i].stash.splice(j, 1)[0])
               notify(
                 'Ate ' + goal + ' uramaki for ' + uramakiPoints + ' points',
@@ -1744,7 +1748,14 @@ const PlayPage = () => {
         players[playerIndex].stash.push(card)
         if (card.type == cards.SPECIALO.type)
           if (playerIndex == 0)
-            if (players[0].stash.length == 1) {
+            if (
+              players[0].stash.length == 1 ||
+              (players[0].stash.length == 2 &&
+                players[0].stash[0].type == userClickedType &&
+                [cards.CHOPSTICKSONE.color, cards.SPOONFOUR.color].includes(
+                  players[0].stash[0].color
+                ))
+            ) {
               notify('Played special order without copying', '🌈', 0)
               deck.discardPile.push(players[0].stash.pop())
             } else {
@@ -1838,7 +1849,7 @@ const PlayPage = () => {
             )
             playCard(choice, index, true)
 
-            cleanupChopsticks(index, priorityToCard())
+            cleanupChopsticks(index)
           }
         }
 
@@ -1874,7 +1885,7 @@ const PlayPage = () => {
           )
           playCard(choice, index, true)
 
-          cleanupMenu(index, priorityToCard())
+          cleanupMenu(index)
         }
 
         const handleTakeout = (index) => {
@@ -2021,7 +2032,7 @@ const PlayPage = () => {
           )
           playCard(parseInt(e.target.name), 0, true)
 
-          cleanupChopsticks(0, priorityToCard())
+          cleanupChopsticks(0)
 
           if (!specialOrderFreeze) {
             priority++
@@ -2043,7 +2054,7 @@ const PlayPage = () => {
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
           playCard(parseInt(e.target.name), 0, true) // Play the card played
 
-          cleanupMenu(0, priorityToCard())
+          cleanupMenu(0)
 
           if (!specialOrderFreeze) {
             priority++
@@ -2167,7 +2178,6 @@ const PlayPage = () => {
               break
             }
           specialOrderFreeze = false
-
           resolveTurn()
           updateData()
         } else {
@@ -2232,6 +2242,7 @@ const PlayPage = () => {
             'absolute bottom-0 left-72',
             'absolute bottom-0 left-48',
             'absolute bottom-0 left-24',
+            'absolute bottom-0 left-0',
           ]
         else if (area == 1)
           classStrings = [
@@ -2240,6 +2251,7 @@ const PlayPage = () => {
             'absolute bottom-36 right-48',
             'absolute bottom-36 right-72',
             'absolute bottom-36 right-96',
+            'absolute bottom-0 right-96',
             'absolute bottom-0 right-72',
             'absolute bottom-0 right-48',
             'absolute bottom-0 right-24',
@@ -2256,6 +2268,7 @@ const PlayPage = () => {
             'absolute bottom-36 right-72',
             'absolute bottom-36 right-48',
             'absolute bottom-36 right-24',
+            'absolute bottom-36 right-0',
           ]
         else
           classStrings = [
@@ -2268,6 +2281,7 @@ const PlayPage = () => {
             'absolute bottom-36 left-72',
             'absolute bottom-36 left-48',
             'absolute bottom-36 left-24',
+            'absolute bottom-36 left-0',
           ]
 
         // Group the cards by color for display
@@ -2400,9 +2414,9 @@ const PlayPage = () => {
         )
       else {
         const comparePlayers = (a, b) => {
-          if (a.score != b.score) return a.score - b.score
-          if (a.dessert != b.dessert) return a.dessert - b.dessert
-          return a.tiebreak - b.tiebreaker
+          if (a.score != b.score) return b.score - a.score
+          if (a.dessert != b.dessert) return b.dessert - a.dessert
+          return b.tiebreak - a.tiebreaker
         }
 
         let userDessertCount = userDessert
@@ -2469,26 +2483,69 @@ const PlayPage = () => {
         /* Display the players in order by score, gold for 1st,
            silver for 2nd, bronze for third, and regular for last */
         return (
-          <div className="flex h-screen flex-col justify-center">
+          <div className="flex h-screen flex-col items-center justify-center">
             <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
-              {displayInfo[3].name}: {displayInfo[3].score} (
-              {displayInfo[3].dessert})
-            </p>
-            <br></br>
-            <p className="text-center font-cal text-6xl text-[color:var(--color-silver)]">
-              {displayInfo[2].name}: {displayInfo[2].score} (
-              {displayInfo[2].dessert})
-            </p>
-            <br></br>
-            <p className="text-center font-cal text-6xl text-[color:var(--color-bronze)]">
-              {displayInfo[1].name}: {displayInfo[1].score} (
-              {displayInfo[1].dessert})
-            </p>
-            <br></br>
-            <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
               {displayInfo[0].name}: {displayInfo[0].score} (
               {displayInfo[0].dessert})
             </p>
+            <br />
+            <p className="text-center font-cal text-6xl text-[color:var(--color-silver)]">
+              {displayInfo[1].name}: {displayInfo[1].score} (
+              {displayInfo[1].dessert})
+            </p>
+            <br />
+            <p className="text-center font-cal text-6xl text-[color:var(--color-bronze)]">
+              {displayInfo[2].name}: {displayInfo[2].score} (
+              {displayInfo[2].dessert})
+            </p>
+            <br />
+            <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
+              {displayInfo[3].name}: {displayInfo[3].score} (
+              {displayInfo[3].dessert})
+            </p>
+            <br />
+            <Form className="flex flex-row">
+              <Label className="m-2">
+                <CheckboxField
+                  id="newgame"
+                  name="options"
+                  onChange={() => (window.location.href = '/play')}
+                />
+                <p
+                  name="newgame"
+                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+                >
+                  New Game
+                </p>
+              </Label>
+              <Label className="m-2">
+                <CheckboxField
+                  id="rematch"
+                  name="options"
+                  onChange={resetVars}
+                />
+                <p
+                  href="/play"
+                  name="rematch"
+                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+                >
+                  Rematch
+                </p>
+              </Label>
+              <Label className="m-2">
+                <CheckboxField
+                  id="home"
+                  name="options"
+                  onChange={() => (window.location.href = '/')}
+                />
+                <p
+                  name="home"
+                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+                >
+                  Home
+                </p>
+              </Label>
+            </Form>
           </div>
         )
       }
