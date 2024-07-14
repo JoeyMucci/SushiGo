@@ -71,7 +71,10 @@ import uramaki5 from 'web/public/uramaki(5).jpg'
 import uramaki from 'web/public/uramaki.jpg'
 import wasabi from 'web/public/wasabi.jpg'
 import wasabiguide from 'web/public/wasabiguide.jpg'
-import { pickComputerCard } from 'web/src/pages/PlayPage/ComputerActions.jsx'
+import {
+  pickComputerCard,
+  pickComputerSpoon,
+} from 'web/src/pages/PlayPage/ComputerActions.jsx'
 import {
   countCard,
   scoreNigiri,
@@ -931,9 +934,9 @@ const PlayPage = () => {
     let priority = 0
     let uramakiPoints = 8
     let usingChopsticks = false
-    let chopsticksOneActive = false
-    let chopsticksTwoActive = false
-    let chopsticksThreeActive = false
+    let activeChopsticksTypes = []
+    let usingSpoon = false
+    let activeSpoonTypes = []
     let usingMenu = false
     let savedHand = []
     let takeoutBoxFreeze = false
@@ -947,6 +950,7 @@ const PlayPage = () => {
       dessertPile: [],
       discardPile: [],
     }
+    let toastNotifications = [[], [], [], []]
 
     // players[0] is the user
     let players = [
@@ -1211,18 +1215,22 @@ const PlayPage = () => {
       }
 
       const resetChopsticks = () => {
-        chopsticksOneActive = false
-        chopsticksTwoActive = false
-        chopsticksThreeActive = false
+        activeChopsticksTypes = []
         for (let i = 0; i < players.length; i++) {
           players[i].utensilUsed = false
           for (let j = 0; j < players[i].stash.length; j++)
-            if (players[i].stash[j].type == cards.CHOPSTICKSONE.type)
-              chopsticksOneActive = true
-            else if (players[i].stash[j].type == cards.CHOPSTICKSTWO.type)
-              chopsticksTwoActive = true
-            else if (players[i].stash[j].type == cards.CHOPSTICKSTHREE.type)
-              chopsticksThreeActive = true
+            if (players[i].stash[j].color == cards.CHOPSTICKSONE.color)
+              activeChopsticksTypes.push(players[i].stash[j].type)
+        }
+      }
+
+      const resetSpoon = () => {
+        activeSpoonTypes = []
+        for (let i = 0; i < players.length; i++) {
+          players[i].utensilUsed = false
+          for (let j = 0; j < players[i].stash.length; j++)
+            if (players[i].stash[j].color == cards.SPOONFOUR.color)
+              activeSpoonTypes.push(players[i].stash[j].type)
         }
       }
 
@@ -1234,6 +1242,7 @@ const PlayPage = () => {
       const prepareNextTurn = () => {
         swapCards()
         if (spec.includes(guides.CHOPSTICKS.type.toString())) resetChopsticks()
+        if (spec.includes(guides.SPOON.type.toString())) resetSpoon()
         if (app.includes(guides.MISO.type.toString())) resetMiso()
         priority = 0
       }
@@ -1254,23 +1263,9 @@ const PlayPage = () => {
         ]
       }
 
-      // Display toast notifications, area corresponds to the player
-      const notify = (message, emoji, area) => {
-        let location
-        if (area == 0) location = 'bottom-left'
-        else if (area == 1) location = 'bottom-right'
-        else if (area == 2) location = 'top-right'
-        else location = 'top-left'
-
-        toast(message, {
-          icon: emoji,
-          position: location,
-          style: {
-            background: '#004', // nightwing
-            color: '#ff917d', // salmon
-          },
-          className: 'font-cal text-2xl hover:bg-sky-700',
-        })
+      // Queues toast notifications
+      const notify = (message, emoji, index) => {
+        toastNotifications[index].push({ message: message, emoji: emoji })
       }
 
       const priorityToCard = () => {
@@ -1571,12 +1566,46 @@ const PlayPage = () => {
         setCpuOneScore(players[1].score)
         setCpuTwoScore(players[2].score)
         setCpuThreeScore(players[3].score)
+
+        for (let i = 0; i < players.length; i++) {
+          let location
+          if (i == 0) location = 'bottom-left'
+          else if (i == 1) location = 'bottom-right'
+          else if (i == 2) location = 'top-right'
+          else location = 'top-left'
+
+          if (i == 0 || i == 1)
+            for (let j = 0; j < toastNotifications[i].length; j++)
+              toast(toastNotifications[i][j].message, {
+                icon: toastNotifications[i][j].emoji,
+                position: location,
+                style: {
+                  background: '#004', // nightwing
+                  color: '#ff917d', // salmon
+                },
+                className: 'font-cal text-2xl hover:bg-sky-700',
+              })
+          else
+            for (let j = toastNotifications[i].length - 1; j >= 0; j--)
+              toast(toastNotifications[i][j].message, {
+                icon: toastNotifications[i][j].emoji,
+                position: location,
+                style: {
+                  background: '#004', // nightwing
+                  color: '#ff917d', // salmon
+                },
+                className: 'font-cal text-2xl hover:bg-sky-700',
+              })
+        }
+
+        toastNotifications = [[], [], [], []]
       }
 
       const incrementRound = () => {
-        resetUramaki()
-        resetChopsticks()
-        resetMiso()
+        if (roll.includes(guides.URAMAKI.type.toString())) resetUramaki()
+        if (spec.includes(guides.CHOPSTICKS.type.toString())) resetChopsticks()
+        if (spec.includes(guides.SPOON.type.toString())) resetSpoon()
+        if (app.includes(guides.MISO.type.toString())) resetMiso()
         priority = 0
         round++
       }
@@ -1826,7 +1855,6 @@ const PlayPage = () => {
          5. Takeout Box (priority 10-12)
          6. Swap cards for next turn */
       const resolveTurn = () => {
-        // PRECONDITION: chopsticksCard is in the hand of the player at index
         const handleChopsticks = (index) => {
           // Can only use chopsticks/spoon once a turn and hand must not be empty
           if (!players[index].utensilUsed && players[index].hand.length > 0) {
@@ -1850,6 +1878,59 @@ const PlayPage = () => {
             playCard(choice, index, true)
 
             cleanupChopsticks(index)
+          }
+        }
+
+        const handleSpoon = (index) => {
+          // Can only use chopsticks/spoon once a turn and hand must not be empty
+          if (!players[index].utensilUsed && players[index].hand.length > 0) {
+            if (index == 0) {
+              usingSpoon = true
+              return
+            }
+
+            let choiceCard = pickComputerSpoon()
+
+            notify('Requested ' + choiceCard.text + ' with spoon', '🥄', index)
+
+            for (let i = 1; i < players.length; i++) {
+              let requesterIndex = index
+              let requesteeIndex = (index + i) % 4
+              if (countCard(players[requesteeIndex].hand, choiceCard) > 0) {
+                notify(
+                  'Gave ' +
+                    choiceCard.text +
+                    ' to ' +
+                    players[requesterIndex].name,
+                  '🥄',
+                  requesteeIndex
+                )
+                notify(
+                  'Received ' +
+                    choiceCard.text +
+                    ' from ' +
+                    players[requesteeIndex].name,
+                  '🥄',
+                  requesterIndex
+                )
+                // Put the spoon in requestee's ahnd at a random location
+                players[requesteeIndex].hand.splice(
+                  Math.floor(
+                    Math.random() * (players[requesteeIndex].hand.length + 1)
+                  ),
+                  0,
+                  removePriorityCard(requesterIndex)
+                )
+                players[index].hand.unshift(choiceCard)
+                playCard(0, index, true)
+                break
+              } else
+                notify(
+                  players[i].name + ' did not have ' + choiceCard.text,
+                  '🥄',
+                  index
+                )
+            }
           }
         }
 
@@ -1922,7 +2003,7 @@ const PlayPage = () => {
           case 1:
             for (let i = 0; i < players.length; i++)
               if (
-                chopsticksOneActive &&
+                activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
                 (i > 0 || userClickedType == priorityToCard().type)
               )
@@ -1932,7 +2013,7 @@ const PlayPage = () => {
           case 2:
             for (let i = 0; i < players.length; i++)
               if (
-                chopsticksTwoActive &&
+                activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
                 (i > 0 || userClickedType == priorityToCard().type)
               )
@@ -1942,7 +2023,7 @@ const PlayPage = () => {
           case 3:
             for (let i = 0; i < players.length; i++)
               if (
-                chopsticksThreeActive &&
+                activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
                 (i > 0 || userClickedType == priorityToCard().type)
               )
@@ -1950,10 +2031,34 @@ const PlayPage = () => {
             if (usingChopsticks) break
             priority++
           case 4:
+            for (let i = 0; i < players.length; i++)
+              if (
+                activeSpoonTypes.includes(priorityToCard().type) &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleSpoon(i)
+            if (usingSpoon) break
             priority++
           case 5:
+            for (let i = 0; i < players.length; i++)
+              if (
+                activeSpoonTypes.includes(priorityToCard().type) &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleSpoon(i)
+            if (usingSpoon) break
             priority++
           case 6:
+            for (let i = 0; i < players.length; i++)
+              if (
+                activeSpoonTypes.includes(priorityToCard().type) &&
+                countCard(players[i].stash, priorityToCard()) > 0 &&
+                (i > 0 || userClickedType == priorityToCard().type)
+              )
+                handleSpoon(i)
+            if (usingSpoon) break
             priority++
           case 7:
             for (let i = 0; i < players.length; i++)
@@ -2018,11 +2123,7 @@ const PlayPage = () => {
       }
 
       const handClick = (e) => {
-        // During special order or takeout box use, cannot play from hand
-        if (specialOrderFreeze || takeoutBoxFreeze) return
-
-        // User chopsticks handling
-        if (usingChopsticks) {
+        const userChopsticksHandling = () => {
           notify(
             'Played ' +
               players[0].hand[parseInt(e.target.name)].text +
@@ -2040,11 +2141,9 @@ const PlayPage = () => {
           }
 
           updateData()
-          return
         }
 
-        // User menu handling
-        if (usingMenu) {
+        const userMenuHandling = () => {
           let clicked = players[0].hand[parseInt(e.target.name)]
           if (clicked.color == cards.MENUSEVEN.color) {
             notify('Cannot play menu from menu', '📖', 0)
@@ -2062,36 +2161,32 @@ const PlayPage = () => {
           }
 
           updateData()
-          return
         }
 
-        // Probably going to change this but it checks for end of round press
-        if (players[0].hand[0].color == cards.NEXT.color) {
-          advanceRound()
-          return
-        }
+        const regularClick = () => {
+          // Have the computers make up their mind
+          for (let i = 1; i < players.length; i++)
+            players[i].willPlayIndex = pickComputerCard(
+              players[i].hand,
+              getOppsStashes(i),
+              round,
+              diff[0]
+            )
 
-        // REGULAR START
-        // Have the computers make up their mind
-        for (let i = 1; i < players.length; i++)
-          players[i].willPlayIndex = pickComputerCard(
-            players[i].hand,
-            getOppsStashes(i),
-            round,
-            diff[0]
-          )
+          // Play the user card
+          playCard(parseInt(e.target.name), 0, false)
 
-        // Play the user card
-        playCard(parseInt(e.target.name), 0, false)
+          if (!specialOrderFreeze) resolveTurn()
 
-        // Need to wait for user to pick card to copy before resolving turn
-        if (specialOrderFreeze) {
           updateData()
-          return
         }
 
-        resolveTurn()
-        updateData()
+        // During special order or takeout box use, cannot play from hand
+        if (specialOrderFreeze || takeoutBoxFreeze);
+        else if (usingChopsticks) userChopsticksHandling()
+        else if (usingMenu) userMenuHandling()
+        else if (players[0].hand[0].color == cards.NEXT.color) advanceRound()
+        else regularClick()
       }
 
       const stashClick = (e) => {
