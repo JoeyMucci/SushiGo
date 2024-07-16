@@ -33,6 +33,7 @@ import menu from 'web/public/menu.jpg'
 import misosoup from 'web/public/miso_soup.jpg'
 import misoguide from 'web/public/misoguide.jpg'
 import nextround from 'web/public/nextround.jpg'
+import nigiri from 'web/public/nigiri.jpg'
 import onigiricircle from 'web/public/onigiri(circle).jpg'
 import onigiriflat from 'web/public/onigiri(flat).jpg'
 import onigirisquare from 'web/public/onigiri(square).jpg'
@@ -100,113 +101,118 @@ import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
 export const guides = Object.freeze({
-  MAKI: {
+  NIGIRI: {
     type: 1,
+    picpath: nigiri,
+    text: 'nigiri',
+  },
+  MAKI: {
+    type: 2,
     picpath: maki,
     text: 'maki',
   },
   TEMAKI: {
-    type: 2,
+    type: 3,
     picpath: temakiguide,
     text: 'temaki',
   },
   URAMAKI: {
-    type: 3,
+    type: 4,
     picpath: uramaki,
     text: 'uramaki',
   },
   CHOPSTICKS: {
-    type: 4,
+    type: 5,
     picpath: chopsticks,
     text: 'chopsticks',
   },
   SPOON: {
-    type: 5,
+    type: 6,
     picpath: spoon,
     text: 'spoon',
   },
   MENU: {
-    type: 6,
+    type: 7,
     picpath: menu,
     text: 'menu',
   },
   TAKEOUT: {
-    type: 7,
+    type: 8,
     picpath: takeoutbox,
     text: 'takeout box',
   },
   TEA: {
-    type: 8,
+    type: 9,
     picpath: teaguide,
     text: 'tea',
   },
   WASABI: {
-    type: 9,
+    type: 10,
     picpath: wasabiguide,
     text: 'wasabi',
   },
   SOYSAUCE: {
-    type: 10,
+    type: 11,
     picpath: soysauceguide,
     text: 'soysauce',
   },
   SPECIALO: {
-    type: 11,
+    type: 12,
     picpath: specialguide,
     text: 'special order',
   },
   DUMPLING: {
-    type: 12,
+    type: 13,
     picpath: dumplingguide,
     text: 'dumpling',
   },
   TEMPURA: {
-    type: 13,
+    type: 14,
     picpath: tempuraguide,
     text: 'tempura',
   },
   SASHIMI: {
-    type: 14,
+    type: 15,
     picpath: sashimiguide,
     text: 'sashimi',
   },
   MISO: {
-    type: 15,
+    type: 16,
     picpath: misoguide,
     text: 'miso soup',
   },
   EDAMAME: {
-    type: 16,
+    type: 17,
     picpath: edamameguide,
     text: 'edamame',
   },
   EEL: {
-    type: 17,
+    type: 18,
     picpath: eelguide,
     text: 'eel',
   },
   TOFU: {
-    type: 18,
+    type: 19,
     picpath: tofuguide,
     text: 'tofu',
   },
   ONIGIRI: {
-    type: 19,
+    type: 20,
     picpath: onigiri,
     text: 'onigiri',
   },
   PUDDING: {
-    type: 20,
+    type: 21,
     picpath: puddingguide,
     text: 'pudding',
   },
   GTIC: {
-    type: 21,
+    type: 22,
     picpath: gticguide,
     text: 'green tea ice cream',
   },
   FRUIT: {
-    type: 22,
+    type: 23,
     picpath: fruit,
     text: 'fruit',
   },
@@ -561,9 +567,9 @@ const PlayPage = () => {
      info - the information about the actual card (text representation, source image, etc.)
      action - function to be called on click
      fullOpacity - shows the card at 50% opacity when false
-     fullDisplay - whether to show the entire card or just the top */
-  const Card = ({ numberName, info, action, fullOpacity, fullDisplay }) => {
-    if (fullDisplay)
+     displayFrac - whether to show the entire card or just the top */
+  const Card = ({ numberName, info, action, fullOpacity, displayFrac }) => {
+    if (parseInt(displayFrac) == 1)
       if (fullOpacity)
         return (
           // CSS shows cursor so it should be clear to user that this is an interactive element although it isn't technically
@@ -590,8 +596,34 @@ const PlayPage = () => {
             className="h-36 w-24 opacity-50"
           />
         )
-
-    if (fullOpacity)
+    else if (parseInt(displayFrac) == 3)
+      if (fullOpacity)
+        return (
+          // leaving clickableness for now
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <img
+            name={numberName}
+            src={info.picpath}
+            alt={info.text}
+            onClick={action}
+            onKeyDown={action}
+            className="h-12 w-24 object-cover object-top"
+          />
+        )
+      else
+        return (
+          // leaving clickableness for now
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <img
+            name={numberName}
+            src={info.picpath}
+            alt={info.text}
+            onClick={action}
+            onKeyDown={action}
+            className="h-12 w-24 object-cover object-top opacity-50"
+          />
+        )
+    else if (fullOpacity)
       return (
         // leaving clickableness for now
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -604,19 +636,19 @@ const PlayPage = () => {
           className="h-9 w-24 object-cover object-top"
         />
       )
-
-    return (
-      // leaving clickableness for now
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-      <img
-        name={numberName}
-        src={info.picpath}
-        alt={info.text}
-        onClick={action}
-        onKeyDown={action}
-        className="h-9 w-24 object-cover object-top opacity-50"
-      />
-    )
+    else
+      return (
+        // leaving clickableness for now
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+        <img
+          name={numberName}
+          src={info.picpath}
+          alt={info.text}
+          onClick={action}
+          onKeyDown={action}
+          className="h-9 w-24 object-cover object-top opacity-50"
+        />
+      )
   }
 
   // The screen where the user selects the cards to play with
@@ -685,7 +717,7 @@ const PlayPage = () => {
                 numberName={guides.MAKI.type}
                 action={clickRoll}
                 fullOpacity={roll.includes(guides.MAKI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -693,7 +725,7 @@ const PlayPage = () => {
                 numberName={guides.TEMAKI.type}
                 action={clickRoll}
                 fullOpacity={roll.includes(guides.TEMAKI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -701,7 +733,7 @@ const PlayPage = () => {
                 numberName={guides.URAMAKI.type}
                 action={clickRoll}
                 fullOpacity={roll.includes(guides.URAMAKI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
             </div>
             <div className="flex flex-row">
@@ -710,7 +742,7 @@ const PlayPage = () => {
                 numberName={guides.CHOPSTICKS.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.CHOPSTICKS.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -718,7 +750,7 @@ const PlayPage = () => {
                 numberName={guides.SPOON.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.SPOON.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -726,7 +758,7 @@ const PlayPage = () => {
                 numberName={guides.MENU.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.MENU.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -734,7 +766,7 @@ const PlayPage = () => {
                 numberName={guides.TAKEOUT.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.TAKEOUT.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -742,7 +774,7 @@ const PlayPage = () => {
                 numberName={guides.TEA.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.TEA.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -750,7 +782,7 @@ const PlayPage = () => {
                 numberName={guides.WASABI.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.WASABI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -758,7 +790,7 @@ const PlayPage = () => {
                 numberName={guides.SOYSAUCE.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.SOYSAUCE.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -766,7 +798,7 @@ const PlayPage = () => {
                 numberName={guides.SPECIALO.type}
                 action={clickSpec}
                 fullOpacity={spec.includes(guides.SPECIALO.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
             </div>
             <div className="flex flex-row">
@@ -775,7 +807,7 @@ const PlayPage = () => {
                 numberName={guides.DUMPLING.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.DUMPLING.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -783,7 +815,7 @@ const PlayPage = () => {
                 numberName={guides.TEMPURA.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.TEMPURA.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -791,7 +823,7 @@ const PlayPage = () => {
                 numberName={guides.SASHIMI.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.SASHIMI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -799,7 +831,7 @@ const PlayPage = () => {
                 numberName={guides.MISO.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.MISO.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -807,7 +839,7 @@ const PlayPage = () => {
                 numberName={guides.EDAMAME.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.EDAMAME.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -815,7 +847,7 @@ const PlayPage = () => {
                 numberName={guides.EEL.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.EEL.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -823,7 +855,7 @@ const PlayPage = () => {
                 numberName={guides.TOFU.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.TOFU.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -831,7 +863,7 @@ const PlayPage = () => {
                 numberName={guides.ONIGIRI.type}
                 action={clickApp}
                 fullOpacity={app.includes(guides.ONIGIRI.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
             </div>
             <div className="flex flex-row">
@@ -840,7 +872,7 @@ const PlayPage = () => {
                 numberName={guides.PUDDING.type}
                 action={clickDess}
                 fullOpacity={dess.includes(guides.PUDDING.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -848,7 +880,7 @@ const PlayPage = () => {
                 numberName={guides.GTIC.type}
                 action={clickDess}
                 fullOpacity={dess.includes(guides.GTIC.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
 
               <Card
@@ -856,7 +888,7 @@ const PlayPage = () => {
                 numberName={guides.FRUIT.type}
                 action={clickDess}
                 fullOpacity={dess.includes(guides.FRUIT.type.toString())}
-                fullDisplay={true}
+                displayFrac={'1'}
               />
             </div>
             <div className="flex flex-row">
@@ -2189,6 +2221,10 @@ const PlayPage = () => {
         else regularClick()
       }
 
+      const spoonClick = (e) => {
+        return e.target.name
+      }
+
       const stashClick = (e) => {
         // Ends the selection process for takeout box
         const takeoutPressed = () => {
@@ -2282,8 +2318,286 @@ const PlayPage = () => {
         }
       }
 
+      const SpoonHand = () => {
+        let index = 0
+
+        const typeToGuide = (identType) => {
+          for (let key in guides) {
+            console.log('bruh')
+            if (guides[key].type == parseInt(identType)) {
+              return guides[key]
+            }
+          }
+          console.log('failure')
+        }
+
+        const getNigiriLayout = () => {
+          return (
+            <>
+              <div className="flex flex-col">
+                <Card
+                  numberName={index++}
+                  info={cards.EGG}
+                  action={spoonClick}
+                  fullOpacity={true}
+                  displayFrac={'3'}
+                />
+                <Card
+                  numberName={index++}
+                  info={cards.SALMON}
+                  action={spoonClick}
+                  fullOpacity={true}
+                  displayFrac={'3'}
+                />
+                <Card
+                  numberName={index++}
+                  info={cards.SQUID}
+                  action={spoonClick}
+                  fullOpacity={true}
+                  displayFrac={'3'}
+                />
+              </div>
+              <Card
+                numberName={index++}
+                info={guides.NIGIRI}
+                action={spoonClick}
+                fullOpacity={true}
+                displayFrac={'1'}
+              />
+            </>
+          )
+        }
+
+        const getRollLayout = (rollType) => {
+          const getMultiple = () => {
+            if (parseInt(rollType) == guides.MAKI.type)
+              return (
+                <>
+                  <div className="flex flex-col">
+                    <Card
+                      numberName={index++}
+                      info={cards.MAKIONE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.MAKITWO}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.MAKITHREE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                  </div>
+                </>
+              )
+            else if (parseInt(rollType) == guides.URAMAKI.type)
+              return (
+                <>
+                  <div className="flex flex-col">
+                    <Card
+                      numberName={index++}
+                      info={cards.URAMAKITHREE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.URAMAKIFOUR}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.URAMAKIFIVE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                  </div>
+                </>
+              )
+          }
+
+          return (
+            <>
+              {getMultiple()}
+              <Card
+                numberName={index++}
+                info={typeToGuide(rollType)}
+                action={spoonClick}
+                fullOpacity={true}
+                displayFrac={'1'}
+              />
+            </>
+          )
+        }
+
+        const getSpecLayout = (specType) => {
+          return (
+            <Card
+              numberName={index++}
+              info={typeToGuide(specType)}
+              action={spoonClick}
+              fullOpacity={true}
+              displayFrac={'1'}
+            />
+          )
+        }
+
+        const getAppLayout = (appType) => {
+          const getMultiple = () => {
+            if (parseInt(appType) == guides.ONIGIRI.type)
+              return (
+                <>
+                  <div className="flex flex-col">
+                    <Card
+                      numberName={index++}
+                      info={cards.ONICIRCLE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'4'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.ONISQUARE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'4'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.ONITRI}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'4'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.ONIFLAT}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'4'}
+                    />
+                  </div>
+                </>
+              )
+          }
+
+          return (
+            <>
+              {getMultiple()}
+              <Card
+                numberName={index++}
+                info={typeToGuide(appType)}
+                action={spoonClick}
+                fullOpacity={true}
+                displayFrac={'1'}
+              />
+            </>
+          )
+        }
+
+        const getDessLayout = (dessType) => {
+          const getMultiple = () => {
+            if (parseInt(dessType) == guides.FRUIT.type)
+              return (
+                <>
+                  <div className="flex flex-col">
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITDUBWAT}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITDUBPINE}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITDUBO}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITWATERO}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITPINEO}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                    <Card
+                      numberName={index++}
+                      info={cards.FRUITPINEO}
+                      action={spoonClick}
+                      fullOpacity={true}
+                      displayFrac={'3'}
+                    />
+                  </div>
+                </>
+              )
+          }
+
+          return (
+            <>
+              {getMultiple()}
+              <Card
+                numberName={index++}
+                info={typeToGuide(dessType)}
+                action={spoonClick}
+                fullOpacity={true}
+                displayFrac={'1'}
+              />
+            </>
+          )
+        }
+
+        return (
+          <div className="flex flex-row justify-center">
+            {getNigiriLayout()}
+            {roll.map((rollType) => {
+              return getRollLayout(rollType)
+            })}
+            {spec.map((specType) => {
+              return getSpecLayout(specType)
+            })}
+            {app.map((appType) => {
+              return getAppLayout(appType)
+            })}
+            {dess.map((dessType) => {
+              return getDessLayout(dessType)
+            })}
+          </div>
+        )
+      }
+
       // selection - The cards in the hand
       const Hand = ({ selection }) => {
+        if (usingSpoon) return <SpoonHand />
         return (
           <div className="flex flex-row justify-center">
             {selection.map((card, i) => {
@@ -2295,7 +2609,7 @@ const PlayPage = () => {
                     info={card}
                     action={handClick}
                     fullOpacity={false}
-                    fullDisplay={true}
+                    displayFrac={'1'}
                   />
                 )
               else
@@ -2306,7 +2620,7 @@ const PlayPage = () => {
                     info={card}
                     action={handClick}
                     fullOpacity={true}
-                    fullDisplay={true}
+                    displayFrac={'1'}
                   />
                 )
             })}
@@ -2406,7 +2720,7 @@ const PlayPage = () => {
                           numberName={card.type}
                           info={card}
                           action={stashClick}
-                          fullDisplay={false}
+                          displayFrac={'4'}
                           fullOpacity={
                             (card.type == userClickedType &&
                               userHand.length > 1) ||
@@ -2421,7 +2735,7 @@ const PlayPage = () => {
                           key={j}
                           numberName={card.type}
                           info={card}
-                          fullDisplay={false}
+                          displayFrac={'4'}
                           fullOpacity={
                             card.color != cards.MENUSEVEN.color &&
                             card.color != cards.TAKEOUTTEN.color
