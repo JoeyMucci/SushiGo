@@ -557,6 +557,14 @@ export const cards = Object.freeze({
   },
 })
 
+const typeToCard = (identType) => {
+  for (let cardName in cards) {
+    if (cards[cardName].type == identType) {
+      return cards[cardName]
+    }
+  }
+}
+
 /* Return counts in the following order: watermelon, pineapple, orange
    fruitNumnber = watermelon*11^2+pineapple*11+orange */
 export const parseFruit = (fruitNumber) => {
@@ -1251,14 +1259,39 @@ const PlayPage = () => {
       // A cornerstone of SushiGO gameplay is that players swap hands clockwise after playing cards
       const swapCards = () => {
         let tempCards = players[3].hand
-        for (let i = 0; i < players.length - 1; i++)
-          players[i + 1].hand = players[i].hand
+        for (let i = players.length - 1; i >= 1; i--)
+          players[i].hand = players[i - 1].hand
         players[0].hand = tempCards
+
+        console.log(players[0].hand)
+        console.log(players[1].hand)
+        console.log(players[2].hand)
+        console.log(players[3].hand)
       }
 
       // When user elects to play again with same cards
       const resetVars = () => {
-        window.location.href = '/play'
+        round = 1
+        deck = {
+          pile: [],
+          dessertPile: [],
+          discardPile: [],
+        }
+        for (let i = 0; i < players.length; i++) {
+          players[i].score = 0
+          players[i].dessert = 0
+          players[i].stash = []
+        }
+
+        setShowResults(false)
+        buildDeck()
+        dealToPlayers()
+
+        setUserDessert(players[0].dessert)
+        setCpuOneDessert(players[1].dessert)
+        setCpuTwoDessert(players[2].dessert)
+        setCpuThreeDessert(players[3].dessert)
+        updateData()
       }
 
       const resetUramaki = () => {
@@ -1372,6 +1405,37 @@ const PlayPage = () => {
         players[index].utensilUsed = true
       }
 
+      const cleanupSpoon = (requesterIndex, requesteeIndex, cardIndex) => {
+        let card = players[requesteeIndex].hand[cardIndex]
+        notify(
+          'Gave ' + card.text + ' to ' + players[requesterIndex].name,
+          '🥄',
+          requesteeIndex
+        )
+        notify(
+          'Received ' + card.text + ' from ' + players[requesteeIndex].name,
+          '🥄',
+          requesterIndex
+        )
+
+        players[requesterIndex].hand.unshift(
+          players[requesteeIndex].hand.splice(cardIndex, 1)[0]
+        )
+        playCard(0, requesterIndex, true)
+
+        // Put the spoon in requestee's hand at a random location
+        players[requesteeIndex].hand.splice(
+          Math.floor(Math.random() * (players[requesteeIndex].hand.length + 1)),
+          0,
+          removePriorityCard(requesterIndex)
+        )
+        if (requesterIndex == 0) {
+          usingSpoon = false
+          setUserClickedType(-1)
+        }
+        players[requesterIndex].utensilUsed = true
+      }
+
       const cleanupMenu = (index) => {
         // Put the menu in the discard pile
         deck.discardPile.push(removePriorityCard(index))
@@ -1430,7 +1494,6 @@ const PlayPage = () => {
           5 * countCard(playerCards, cards.URAMAKIFIVE)
 
         for (let oppCards of oppsCards) {
-          console.log(oppCards)
           if (
             uramakiCount <
             3 * countCard(oppCards, cards.URAMAKITHREE) +
@@ -1559,8 +1622,6 @@ const PlayPage = () => {
 
         console.log('POST SPECIALS')
         console.log(runningScore)
-        console.log(app)
-        console.log(cards.TOFUGUIDE.type)
 
         // APPETIZERS
         if (app.includes(cards.DUMPLINGGUIDE.type))
@@ -1626,7 +1687,7 @@ const PlayPage = () => {
           else if (i == 2) location = 'top-right'
           else location = 'bottom-right'
 
-          if (i == 0 || i == 1)
+          if (i == 0 || i == 3)
             for (let j = 0; j < toastNotifications[i].length; j++)
               toast(toastNotifications[i][j].message, {
                 icon: toastNotifications[i][j].emoji,
@@ -1889,6 +1950,7 @@ const PlayPage = () => {
         if (round == NUMROUNDS) {
           scoreDesserts()
           updateData()
+          incrementRound()
           setShowResults(true)
         } else {
           dealToPlayers()
@@ -1933,55 +1995,33 @@ const PlayPage = () => {
 
         const handleSpoon = (index) => {
           // Can only use chopsticks/spoon once a turn and hand must not be empty
-          if (!players[index].utensilUsed && players[index].hand.length > 0) {
-            if (index == 0) {
-              usingSpoon = true
-              return
-            }
+          if (players[index].utensilUsed || players[index].hand.length == 0)
+            return
 
-            let choiceCard = pickComputerSpoon()
-
-            notify('Requested ' + choiceCard.text + ' with spoon', '🥄', index)
-
-            for (let i = 1; i < players.length; i++) {
-              let requesterIndex = index
-              let requesteeIndex = (index + i) % 4
-              if (countCard(players[requesteeIndex].hand, choiceCard) > 0) {
-                notify(
-                  'Gave ' +
-                    choiceCard.text +
-                    ' to ' +
-                    players[requesterIndex].name,
-                  '🥄',
-                  requesteeIndex
-                )
-                notify(
-                  'Received ' +
-                    choiceCard.text +
-                    ' from ' +
-                    players[requesteeIndex].name,
-                  '🥄',
-                  requesterIndex
-                )
-                // Put the spoon in requestee's ahnd at a random location
-                players[requesteeIndex].hand.splice(
-                  Math.floor(
-                    Math.random() * (players[requesteeIndex].hand.length + 1)
-                  ),
-                  0,
-                  removePriorityCard(requesterIndex)
-                )
-                players[index].hand.unshift(choiceCard)
-                playCard(0, index, true)
-                break
-              } else
-                notify(
-                  players[i].name + ' did not have ' + choiceCard.text,
-                  '🥄',
-                  index
-                )
-            }
+          if (index == 0) {
+            usingSpoon = true
+            return
           }
+
+          let choiceCard = pickComputerSpoon()
+          let seeking = choiceCard.eligibleTypes
+            ? choiceCard.eligibleTypes
+            : [choiceCard.type]
+
+          notify('Requested ' + choiceCard.text + ' with spoon', '🥄', index)
+
+          let requesterIndex = index
+          for (let i = 1; i < players.length; i++) {
+            let requesteeIndex = (index + i) % 4
+            for (let j = 0; j < players[requesteeIndex].hand.length; j++)
+              if (seeking.includes(players[requesteeIndex].hand[j].type)) {
+                cleanupSpoon(requesterIndex, requesteeIndex, j)
+                return
+              }
+            notify('Did not have ' + choiceCard.text, '🥄', requesteeIndex)
+          }
+          notify('Did not receive ' + choiceCard.text, '🥄', requesterIndex)
+          deck.discardPile.push(removePriorityCard(requesterIndex))
         }
 
         const handleMenu = (index) => {
@@ -2197,6 +2237,7 @@ const PlayPage = () => {
           let clicked = players[0].hand[parseInt(e.target.name)]
           if (clicked.color == cards.MENUSEVEN.color) {
             notify('Cannot play menu from menu', '📖', 0)
+            updateData()
             return
           }
 
@@ -2240,14 +2281,41 @@ const PlayPage = () => {
       }
 
       const spoonClick = (e) => {
-        return e.target.name
+        let seeking = typeToCard(parseInt(e.target.name)).eligibleTypes
+          ? typeToCard(parseInt(e.target.name)).eligibleTypes
+          : [parseInt(e.target.name)]
+
+        notify('Requested ' + e.target.alt + ' with spoon', '🥄', 0)
+
+        for (let i = 1; i < players.length; i++) {
+          for (let j = 0; j < players[i].hand.length; j++) {
+            console.log(players[i].hand[j].type)
+            if (seeking.includes(players[i].hand[j].type)) {
+              cleanupSpoon(0, i, j)
+
+              if (!specialOrderFreeze) {
+                priority++
+                resolveTurn()
+              }
+
+              updateData()
+              return
+            }
+          }
+          notify('Did not have ' + e.target.alt, '🥄', i)
+        }
+        notify('Did not receive ' + e.target.alt, '🥄', 0)
+        deck.discardPile.push(removePriorityCard(0))
+        usingSpoon = false
+        priority++
+        resolveTurn()
+        updateData()
       }
 
       const stashClick = (e) => {
         // Ends the selection process for takeout box
         const takeoutPressed = () => {
-          // Move takeout box to discard pile
-          deck.discardPile.push(players[0].stash.pop())
+          deck.discardPile.push(removePriorityCard(0))
           let itemString = takeoutCount == 1 ? ' item' : ' items'
           notify(
             'Took out ' + takeoutCount + itemString + ' with takeout box',
@@ -2262,14 +2330,7 @@ const PlayPage = () => {
         }
 
         if (takeoutBoxFreeze) {
-          if (
-            [
-              cards.TAKEOUTTEN.type,
-              cards.TAKEOUTELEVEN.type,
-              cards.TAKEOUTTWELVE.type,
-            ].includes(parseInt(e.target.name))
-          )
-            takeoutPressed()
+          if (priorityToCard().type == parseInt(e.target.name)) takeoutPressed()
           else {
             /* This code is for actually turning over a card
                Note: Cannot turn over an already turned over card
@@ -2283,9 +2344,16 @@ const PlayPage = () => {
                 players[0].stash[i] = cards.TOC
                 setUserStash(userStash.toSpliced(i, 1, cards.TOC))
                 takeoutCount++
+
                 // If there are no more cards to turn over automatically end selection
-                if (players[0].stash.length == takeoutCount + 1)
-                  takeoutPressed()
+                for (let card of players[0].stash)
+                  if (
+                    card.type != cards.TOC.type &&
+                    card.type != priorityToCard().type
+                  )
+                    return
+
+                takeoutPressed()
                 break
               }
           }
@@ -2302,6 +2370,7 @@ const PlayPage = () => {
             updateData()
             return
           }
+
           if (
             parseInt(e.target.name) == userClickedType &&
             [
@@ -2311,6 +2380,20 @@ const PlayPage = () => {
             ].includes(parseInt(e.target.name))
           ) {
             notify('Cannot copy chopsticks currently being used', '🌈', 0)
+            updateData()
+            return
+          }
+
+          if (
+            parseInt(e.target.name) == userClickedType &&
+            [
+              cards.SPOONFOUR.type,
+              cards.SPOONFIVE.type,
+              cards.SPOONSIX.type,
+            ].includes(parseInt(e.target.name))
+          ) {
+            notify('Cannot copy spoon currently being used', '🌈', 0)
+            updateData()
             return
           }
           for (let i = 0; i < players[0].stash.length; i++)
@@ -2330,21 +2413,13 @@ const PlayPage = () => {
           resolveTurn()
           updateData()
         } else {
-          if (!usingChopsticks)
+          if (priority == 0)
             if (e.target.name == userClickedType) setUserClickedType(-1)
             else setUserClickedType(parseInt(e.target.name))
         }
       }
 
       const SpoonHand = () => {
-        const typeToCard = (identType) => {
-          for (let cardName in cards) {
-            if (cards[cardName].type == identType) {
-              return cards[cardName]
-            }
-          }
-        }
-
         const getNigiriLayout = () => {
           return (
             <>
@@ -2865,7 +2940,7 @@ const PlayPage = () => {
 
         /* Change dessertCount to number of cards played for fruit
            For fruit dessert=watermelon*11^2+pineapple*11+orange */
-        if (dess[0] == 'fruit') {
+        if (dess.includes(cards.FRUITGUIDE.type)) {
           let userFruitCounts = parseFruit(userDessert)
           userDessertCount =
             (userFruitCounts[0] + userFruitCounts[1] + userFruitCounts[2]) / 2
