@@ -74,10 +74,11 @@ import wasabi from 'web/public/wasabi.jpg'
 import wasabiguide from 'web/public/wasabiguide.jpg'
 import {
   pickComputerCard,
+  pickComputerMenu,
   pickComputerSpoon,
+  pickComputerTakeout,
 } from 'web/src/pages/PlayPage/ComputerActions.jsx'
 import {
-  countCard,
   scoreNigiri,
   scoreMaki,
   scoreTemaki,
@@ -557,6 +558,16 @@ export const cards = Object.freeze({
   },
 })
 
+// Returns how many occurences of card are in cards
+export const countCard = (cards, card) => {
+  let count = 0
+  for (let i = 0; i < cards.length; i++) if (cards[i].type == card.type) count++
+  return count
+}
+
+export const MAXHANDCARDS = 9
+
+// Returns a card given the type
 const typeToCard = (identType) => {
   for (let cardName in cards) {
     if (cards[cardName].type == identType) {
@@ -593,7 +604,7 @@ const PlayPage = () => {
      info - the information about the actual card (text representation, source image, etc.)
      action - function to be called on click
      fullOpacity - shows the card at 50% opacity when false
-     displayFrac - whether to show the entire card or just the top */
+     displayFrac - how much of the card to show */
   const Card = ({ numberName, info, action, fullOpacity, displayFrac }) => {
     if (displayFrac == '1')
       if (fullOpacity)
@@ -985,7 +996,6 @@ const PlayPage = () => {
 
   // The screen where the user actually plays the game
   const GameScreen = () => {
-    const STARTCARDS = 9
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
@@ -993,6 +1003,7 @@ const PlayPage = () => {
 
     let round = 1
     let priority = 0
+    let cardsLeft = MAXHANDCARDS
     let uramakiPoints = 8
     let usingChopsticks = false
     let activeChopsticksTypes = []
@@ -1230,7 +1241,7 @@ const PlayPage = () => {
     }
 
     const dealToPlayers = () => {
-      for (let i = 0; i < STARTCARDS; i++)
+      for (let i = 0; i < MAXHANDCARDS; i++)
         for (let j = 0; j < players.length; j++)
           players[j].hand.push(deck.pile.pop())
     }
@@ -1262,11 +1273,6 @@ const PlayPage = () => {
         for (let i = players.length - 1; i >= 1; i--)
           players[i].hand = players[i - 1].hand
         players[0].hand = tempCards
-
-        console.log(players[0].hand)
-        console.log(players[1].hand)
-        console.log(players[2].hand)
-        console.log(players[3].hand)
       }
 
       // When user elects to play again with same cards
@@ -1331,6 +1337,7 @@ const PlayPage = () => {
         if (spec.includes(cards.SPOONGUIDE.type)) resetSpoon()
         if (app.includes(cards.MISOGUIDE.type)) resetMiso()
         priority = 0
+        cardsLeft--
       }
 
       const getOppsStashes = (excludedIndex) => {
@@ -1354,6 +1361,8 @@ const PlayPage = () => {
         toastNotifications[index].push({ message: message, emoji: emoji })
       }
 
+      /* Returns the card given by priority
+         (i.e. the special card currently in use) */
       const priorityToCard = () => {
         switch (priority) {
           case 1:
@@ -1385,6 +1394,7 @@ const PlayPage = () => {
         }
       }
 
+      // Removes the special card currenlty in use
       const removePriorityCard = (index) => {
         for (let i = players[index].stash.length - 1; i >= 0; i--)
           if (players[index].stash[i].type == priorityToCard().type)
@@ -1405,6 +1415,7 @@ const PlayPage = () => {
         players[index].utensilUsed = true
       }
 
+      // On successful spoon usage
       const cleanupSpoon = (requesterIndex, requesteeIndex, cardIndex) => {
         let card = players[requesteeIndex].hand[cardIndex]
         notify(
@@ -1485,7 +1496,7 @@ const PlayPage = () => {
         }
       }
 
-      // The player with the most uramaki left gets any unclaimed point
+      // The player with the most uramaki left gets any unclaimed points
       const scoreUramakiEnd = (playerCards, oppsCards) => {
         if (uramakiPoints < 2) return 0
         let uramakiCount =
@@ -1670,6 +1681,40 @@ const PlayPage = () => {
 
       // Updates display data, should be called excatly once for each click
       const updateData = () => {
+        const showToasts = () => {
+          for (let i = 0; i < players.length; i++) {
+            let location
+            if (i == 0) location = 'bottom-left'
+            else if (i == 1) location = 'top-left'
+            else if (i == 2) location = 'top-right'
+            else location = 'bottom-right'
+
+            if (i == 0 || i == 3)
+              for (let j = 0; j < toastNotifications[i].length; j++)
+                toast(toastNotifications[i][j].message, {
+                  icon: toastNotifications[i][j].emoji,
+                  position: location,
+                  style: {
+                    background: '#004', // nightwing
+                    color: '#ff917d', // salmon
+                  },
+                  className: 'font-cal text-2xl hover:bg-sky-700',
+                })
+            else
+              for (let j = toastNotifications[i].length - 1; j >= 0; j--)
+                toast(toastNotifications[i][j].message, {
+                  icon: toastNotifications[i][j].emoji,
+                  position: location,
+                  style: {
+                    background: '#004', // nightwing
+                    color: '#ff917d', // salmon
+                  },
+                  className: 'font-cal text-2xl hover:bg-sky-700',
+                })
+          }
+
+          toastNotifications = [[], [], [], []]
+        }
         setUserHand([...players[0].hand])
         setUserStash([...players[0].stash])
         setCpuOneStash([...players[1].stash])
@@ -1680,38 +1725,10 @@ const PlayPage = () => {
         setCpuTwoScore(players[2].score)
         setCpuThreeScore(players[3].score)
 
-        for (let i = 0; i < players.length; i++) {
-          let location
-          if (i == 0) location = 'bottom-left'
-          else if (i == 1) location = 'top-left'
-          else if (i == 2) location = 'top-right'
-          else location = 'bottom-right'
+        // Show results instead of game is round number exceeds actually number of rounds
+        setShowResults(round > NUMROUNDS)
 
-          if (i == 0 || i == 3)
-            for (let j = 0; j < toastNotifications[i].length; j++)
-              toast(toastNotifications[i][j].message, {
-                icon: toastNotifications[i][j].emoji,
-                position: location,
-                style: {
-                  background: '#004', // nightwing
-                  color: '#ff917d', // salmon
-                },
-                className: 'font-cal text-2xl hover:bg-sky-700',
-              })
-          else
-            for (let j = toastNotifications[i].length - 1; j >= 0; j--)
-              toast(toastNotifications[i][j].message, {
-                icon: toastNotifications[i][j].emoji,
-                position: location,
-                style: {
-                  background: '#004', // nightwing
-                  color: '#ff917d', // salmon
-                },
-                className: 'font-cal text-2xl hover:bg-sky-700',
-              })
-        }
-
-        toastNotifications = [[], [], [], []]
+        showToasts()
       }
 
       const incrementRound = () => {
@@ -1720,6 +1737,7 @@ const PlayPage = () => {
         if (spec.includes(cards.SPOONGUIDE.type)) resetSpoon()
         if (app.includes(cards.MISOGUIDE.type)) resetMiso()
         priority = 0
+        cardsLeft = MAXHANDCARDS
         round++
       }
 
@@ -1810,6 +1828,14 @@ const PlayPage = () => {
       /* If more than one miso soup is played all are removed
          PRECONDITION: Miso soup was played by player at index */
       const handleMiso = (index) => {
+        const removeMiso = (index) => {
+          for (let i = players[index].stash.length - 1; i >= 0; i--)
+            if (players[index].stash[i].type == cards.MISO.type) {
+              deck.discardPile.push(players[index].stash.splice(i, 1)[0])
+              notify('Gave up non-unique miso soup', '😩', index)
+              return
+            }
+        }
         /* If miso soup is allowed, do not remove but flag this player
            in case someone play miso soup later, when it would not be allowed */
         if (misoAllowed) {
@@ -1819,26 +1845,18 @@ const PlayPage = () => {
         }
 
         // Miso soup is not allowed, so remove the miso soup
-        deck.discardPile.push(players[index].stash.pop())
-        notify('Gave up non-unique miso soup', '😩', index)
+        removeMiso(index)
 
         // Remove the player who played the first miso soup if not done yet
         if (firstMisoIndex != -1) {
-          for (let i = players[firstMisoIndex].stash.length - 1; i >= 0; i--)
-            if (players[firstMisoIndex].stash[i].type == cards.MISO.type) {
-              deck.discardPile.push(
-                players[firstMisoIndex].stash.splice(i, 1)[0]
-              )
-              break
-            }
-          notify('Gave up non-unique miso soup', '😩', firstMisoIndex)
+          removeMiso(firstMisoIndex)
           firstMisoIndex = -1
         }
       }
 
       // Display message for successful usage and swap for display
       const handleWasabi = (index) => {
-        // Move on in if nigiri is not most recently played
+        // Move on if nigiri is not most recently played
         if (
           ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
             players[index].stash[players[index].stash.length - 1].type
@@ -1846,12 +1864,10 @@ const PlayPage = () => {
         )
           return
 
-        let wasabiLoc
-
         /* If an unclaimed wasabi is found, insert nigiri immediately after wasabi
            and display a toast message */
         for (
-          wasabiLoc = 0;
+          let wasabiLoc = 0;
           wasabiLoc < players[index].stash.length - 1;
           wasabiLoc++
         )
@@ -1947,16 +1963,11 @@ const PlayPage = () => {
         setCpuTwoDessert(players[2].dessert)
         setCpuThreeDessert(players[3].dessert)
 
-        if (round == NUMROUNDS) {
-          scoreDesserts()
-          updateData()
-          incrementRound()
-          setShowResults(true)
-        } else {
-          dealToPlayers()
-          updateData()
-          incrementRound()
-        }
+        if (round == NUMROUNDS) scoreDesserts()
+        else dealToPlayers()
+
+        incrementRound()
+        updateData()
       }
 
       /* Priority variable tracks what stage we are are
@@ -1977,7 +1988,9 @@ const PlayPage = () => {
 
             let choice = pickComputerCard(
               players[index].hand,
+              players[index].stash,
               getOppsStashes(index),
+              cardsLeft,
               round,
               diff[0]
             )
@@ -2042,7 +2055,7 @@ const PlayPage = () => {
           }
 
           players[index].hand = tempHand
-          let choice = pickComputerCard(
+          let choice = pickComputerMenu(
             players[index].hand,
             getOppsStashes(index),
             round,
@@ -2065,7 +2078,7 @@ const PlayPage = () => {
             notify('Took out 0 items with takeout box', '🥡', index)
 
             // Move takeout box to discard pile
-            deck.discardPile.push(players[index].stash.pop())
+            deck.discardPile.push(removePriorityCard(index))
             return
           }
 
@@ -2074,11 +2087,20 @@ const PlayPage = () => {
             return
           }
 
-          // Computer takeout behavior to be determined, just don't use for now
-          notify('Took out 0 items with takeout box', '🥡', index)
+          let takenOutCards = pickComputerTakeout()
+          let itemsString = takenOutCards.length == 1 ? 'item' : 'items'
+          notify(
+            'Took out ' +
+              takenOutCards.length +
+              ' ' +
+              itemsString +
+              ' with takeout box',
+            '🥡',
+            index
+          )
 
           // Move takeout box to discard pile
-          deck.discardPile.push(players[index].stash.pop())
+          deck.discardPile.push(removePriorityCard(index))
         }
 
         /* There is INTENTIONAL fall-through here, the idea is that priority
@@ -2259,7 +2281,9 @@ const PlayPage = () => {
           for (let i = 1; i < players.length; i++)
             players[i].willPlayIndex = pickComputerCard(
               players[i].hand,
+              players[i].stash,
               getOppsStashes(i),
+              cardsLeft,
               round,
               diff[0]
             )
@@ -2313,28 +2337,28 @@ const PlayPage = () => {
       }
 
       const stashClick = (e) => {
-        // Ends the selection process for takeout box
-        const takeoutPressed = () => {
-          deck.discardPile.push(removePriorityCard(0))
-          let itemString = takeoutCount == 1 ? ' item' : ' items'
-          notify(
-            'Took out ' + takeoutCount + itemString + ' with takeout box',
-            '🥡',
-            0
-          )
-          takeoutCount = 0
-          takeoutBoxFreeze = false
-          priority++
-          resolveTurn()
-          updateData()
-        }
+        const userTakeoutBoxHandling = (e) => {
+          // Ends the selection process for takeout box
+          const takeoutPressed = () => {
+            deck.discardPile.push(removePriorityCard(0))
+            let itemString = takeoutCount == 1 ? ' item' : ' items'
+            notify(
+              'Took out ' + takeoutCount + itemString + ' with takeout box',
+              '🥡',
+              0
+            )
+            takeoutCount = 0
+            takeoutBoxFreeze = false
+            priority++
+            resolveTurn()
+            updateData()
+          }
 
-        if (takeoutBoxFreeze) {
           if (priorityToCard().type == parseInt(e.target.name)) takeoutPressed()
           else {
             /* This code is for actually turning over a card
-               Note: Cannot turn over an already turned over card
-               Otherwise, turn the card over and record it to be reset correctly later */
+                 Note: Cannot turn over an already turned over card
+                 Otherwise, turn the card over and record it to be reset correctly later */
             for (let i = 0; i < players[0].stash.length; i++)
               if (
                 e.target.alt == players[0].stash[i].text &&
@@ -2357,20 +2381,22 @@ const PlayPage = () => {
                 break
               }
           }
-        } else if (specialOrderFreeze) {
+        }
+
+        const userSpecialOrderHandling = (e) => {
+          // If the user clicks special order, they elect not to use it
           if (e.target.name == cards.SPECIALO.type) {
             players[0].stash.pop() // Pop the special order from stash
-            // If the user clicks special order, they elect not to use it
             notify('Played special order without copying', '🌈', 0)
             deck.discardPile.push(cards.SPECIALO)
             specialOrderFreeze = false
 
-            // If not played from a menu, want to play computer cards
             resolveTurn()
             updateData()
             return
           }
 
+          // Cannot copy a utensil currently in use
           if (
             parseInt(e.target.name) == userClickedType &&
             [
@@ -2396,6 +2422,8 @@ const PlayPage = () => {
             updateData()
             return
           }
+
+          // Normal Special Order Usage
           for (let i = 0; i < players[0].stash.length; i++)
             if (e.target.name == players[0].stash[i].type) {
               players[0].stash.pop() // Pop the special order from stash
@@ -2412,13 +2440,18 @@ const PlayPage = () => {
           specialOrderFreeze = false
           resolveTurn()
           updateData()
-        } else {
+        }
+
+        if (takeoutBoxFreeze) userTakeoutBoxHandling(e)
+        else if (specialOrderFreeze) userSpecialOrderHandling()
+        else {
           if (priority == 0)
             if (e.target.name == userClickedType) setUserClickedType(-1)
             else setUserClickedType(parseInt(e.target.name))
         }
       }
 
+      // Display a selection of all possible spoon requests
       const SpoonHand = () => {
         const getNigiriLayout = () => {
           return (
@@ -2734,8 +2767,8 @@ const PlayPage = () => {
       }
 
       /* platter - The cards in the stash
-         alignLeft - True -> Align to left, False -> Align to right
-         interactable - Whether clicking on a card should do anything */
+         area - 0 to 3 value representing where the stash is situated (12)
+                                                                      (03) */
       const Stash = ({ platter, area }) => {
         const compareStacks = (a, b) => {
           return b.length - a.length
@@ -2809,6 +2842,7 @@ const PlayPage = () => {
             )
         }
 
+        // Display the most populated stacks first
         cardColumns.sort(compareStacks)
 
         // Displays only the top of cards and sorts them by color
@@ -2968,25 +3002,25 @@ const PlayPage = () => {
         let displayInfo = [
           {
             name: players[0].name,
-            score: userScore,
+            score: players[0].score,
             dessert: userDessertCount,
             tiebreak: 0,
           },
           {
             name: players[1].name,
-            score: cpuOneScore,
+            score: players[1].score,
             dessert: cpuOneDessertCount,
             tiebreak: 1,
           },
           {
             name: players[2].name,
-            score: cpuTwoScore,
+            score: players[2].score,
             dessert: cpuTwoDessertCount,
             tiebreak: 3,
           },
           {
             name: players[3].name,
-            score: cpuThreeScore,
+            score: players[3].score,
             dessert: cpuThreeDessertCount,
             tiebreak: 2,
           },

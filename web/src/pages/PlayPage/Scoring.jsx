@@ -1,11 +1,8 @@
-import { cards, parseFruit } from 'web/src/pages/PlayPage/PlayPage.jsx'
-
-// returns how many occurences of card are in cards
-export const countCard = (cards, card) => {
-  let count = 0
-  for (let i = 0; i < cards.length; i++) if (cards[i].type == card.type) count++
-  return count
-}
+import {
+  cards,
+  countCard,
+  parseFruit,
+} from 'web/src/pages/PlayPage/PlayPage.jsx'
 
 export const scoreNigiri = (playerCards) => {
   let points = 0
