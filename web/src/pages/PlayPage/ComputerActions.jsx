@@ -1,6 +1,7 @@
 import {
   cards,
   countCard,
+  NUMROUNDS,
   MAXHANDCARDS,
 } from 'web/src/pages/PlayPage/PlayPage.jsx'
 import {
@@ -9,95 +10,103 @@ import {
   scoreTea,
   scoreDumpling,
   scoreOnigiri,
+  scorePudding,
+  scoreFruit,
 } from 'web/src/pages/PlayPage/Scoring.jsx'
 
-// Returns the index of the card in playerHand to be played
+// Returns the index of the card in player.hand to be played
 export const pickComputerCard = (
-  playerHand,
-  playerStash,
-  oppsStashes,
+  player,
+  opps,
   cardsLeft,
   round,
   difficulty
 ) => {
-  /* Filters out cards that are objectively worse than other cards in hand
+  let oppsStashes = []
+  for (let i = 0; i < opps.length; i++) oppsStashes.push(opps[i].stash)
+
+  /* Filters out repeats and cards that are objectively worse than other cards in hand
      (e.g. Takes out egg nigiris from a hand with salmon nigiri)
-     Including action specials too even though they are mostly equivalent*/
-  const filterLow = () => {
+     Filtering includes action specials too even though they are mostly equivalent*/
+  const filter = () => {
     const isAllowed = (i) => {
-      if (playerHand[i].type == cards.EGG.type)
+      if (player.hand[i].type == cards.EGG.type)
         return (
-          countCard(playerHand, cards.SALMON) +
-            countCard(playerHand, cards.SQUID) ==
+          countCard(player.hand, cards.SALMON) +
+            countCard(player.hand, cards.SQUID) ==
           0
         )
-      if (playerHand[i].type == cards.SALMON.type)
-        return countCard(playerHand, cards.SQUID) == 0
-      if (playerHand[i].type == cards.MAKIONE.type)
+      if (player.hand[i].type == cards.SALMON.type)
+        return countCard(player.hand, cards.SQUID) == 0
+      if (player.hand[i].type == cards.MAKIONE.type)
         return (
-          countCard(playerHand, cards.MAKITWO) +
-            countCard(playerHand, cards.MAKITHREE) ==
+          countCard(player.hand, cards.MAKITWO) +
+            countCard(player.hand, cards.MAKITHREE) ==
           0
         )
-      if (playerHand[i].type == cards.MAKITWO.type)
-        return countCard(playerHand, cards.MAKITHREE) == 0
-      if (playerHand[i].type == cards.URAMAKITHREE.type)
+      if (player.hand[i].type == cards.MAKITWO.type)
+        return countCard(player.hand, cards.MAKITHREE) == 0
+      if (player.hand[i].type == cards.URAMAKITHREE.type)
         return (
-          countCard(playerHand, cards.URAMAKIFOUR) +
-            countCard(playerHand, cards.URAMAKIFIVE) ==
+          countCard(player.hand, cards.URAMAKIFOUR) +
+            countCard(player.hand, cards.URAMAKIFIVE) ==
           0
         )
-      if (playerHand[i].type == cards.URAMAKIFOUR.type)
-        return countCard(playerHand, cards.URAMAKIFIVE) == 0
-      if (playerHand[i].type == cards.CHOPSTICKSTHREE.type)
+      if (player.hand[i].type == cards.URAMAKIFOUR.type)
+        return countCard(player.hand, cards.URAMAKIFIVE) == 0
+      if (player.hand[i].type == cards.CHOPSTICKSTHREE.type)
         return (
-          countCard(playerHand, cards.CHOPSTICKSTWO) +
-            countCard(playerHand, cards.CHOPSTICKSONE) ==
+          countCard(player.hand, cards.CHOPSTICKSTWO) +
+            countCard(player.hand, cards.CHOPSTICKSONE) ==
           0
         )
-      if (playerHand[i].type == cards.CHOPSTICKSTWO.type)
-        return countCard(playerHand, cards.CHOPSTICKSONE) == 0
-      if (playerHand[i].type == cards.SPOONSIX.type)
+      if (player.hand[i].type == cards.CHOPSTICKSTWO.type)
+        return countCard(player.hand, cards.CHOPSTICKSONE) == 0
+      if (player.hand[i].type == cards.SPOONSIX.type)
         return (
-          countCard(playerHand, cards.SPOONFIVE) +
-            countCard(playerHand, cards.SPOONFOUR) ==
+          countCard(player.hand, cards.SPOONFIVE) +
+            countCard(player.hand, cards.SPOONFOUR) ==
           0
         )
-      if (playerHand[i].type == cards.SPOONFIVE.type)
-        return countCard(playerHand, cards.SPOONFOUR) == 0
-      if (playerHand[i].type == cards.MENUSEVEN.type)
+      if (player.hand[i].type == cards.SPOONFIVE.type)
+        return countCard(player.hand, cards.SPOONFOUR) == 0
+      if (player.hand[i].type == cards.MENUSEVEN.type)
         return (
-          countCard(playerHand, cards.MENUEIGHT) +
-            countCard(playerHand, cards.MENUNINE) ==
+          countCard(player.hand, cards.MENUEIGHT) +
+            countCard(player.hand, cards.MENUNINE) ==
           0
         )
-      if (playerHand[i].type == cards.MENUEIGHT.type)
-        return countCard(playerHand, cards.MENUNINE) == 0
-      if (playerHand[i].type == cards.TAKEOUTTEN.type)
+      if (player.hand[i].type == cards.MENUEIGHT.type)
+        return countCard(player.hand, cards.MENUNINE) == 0
+      if (player.hand[i].type == cards.TAKEOUTTEN.type)
         return (
-          countCard(playerHand, cards.TAKEOUTELEVEN) +
-            countCard(playerHand, cards.TAKEOUTTWELVE) ==
+          countCard(player.hand, cards.TAKEOUTELEVEN) +
+            countCard(player.hand, cards.TAKEOUTTWELVE) ==
           0
         )
-      if (playerHand[i].type == cards.TAKEOUTELEVEN.type)
-        return countCard(playerHand, cards.TAKEOUTTWELVE) == 0
+      if (player.hand[i].type == cards.TAKEOUTELEVEN.type)
+        return countCard(player.hand, cards.TAKEOUTTWELVE) == 0
       return true
     }
     let allowedIndices = []
-    for (let i = 0; i < playerHand.length; i++)
-      if (isAllowed(i)) allowedIndices.push(i)
+    let currentTypes = []
+    for (let i = 0; i < player.hand.length; i++)
+      if (isAllowed(i) && !currentTypes.includes(player.hand[i].type)) {
+        allowedIndices.push(i)
+        currentTypes.push(player.hand[i].type)
+      }
     return allowedIndices
   }
 
-  // Gets the expected value of playing playerCard given playerStash, oppsStashes, and round
+  // Gets the expected value of playing playerCard
   const getExpectedVal = (playerCard) => {
     const hasActiveWasabi = () => {
-      for (let wasabiLoc = 0; wasabiLoc < playerStash.length - 1; wasabiLoc++)
+      for (let wasabiLoc = 0; wasabiLoc < player.stash.length - 1; wasabiLoc++)
         if (
-          playerStash[wasabiLoc].type == cards.WASABI.type &&
-          (wasabiLoc == playerStash.length - 2 ||
+          player.stash[wasabiLoc].type == cards.WASABI.type &&
+          (wasabiLoc == player.stash.length - 2 ||
             ![cards.EGG.type, cards.SALMON.type, cards.SQUID.type].includes(
-              playerStash[wasabiLoc + 1].type
+              player.stash[wasabiLoc + 1].type
             ))
         )
           return true
@@ -105,7 +114,7 @@ export const pickComputerCard = (
     }
 
     // Use this when conducting mock scoring to get expected value
-    let newPlayerStash = [...playerStash, playerCard]
+    let newPlayerStash = [...player.stash, playerCard]
 
     /* NIGIRI - Straightforward, simply the number of points multiplied by three if there's a wasabi.
        There is a small disincentive to use egg nigiri on a wasabi early, because there is an opportunity
@@ -133,7 +142,7 @@ export const pickComputerCard = (
       return (
         (icons * cardsLeft) / MAXHANDCARDS +
         ((scoreMaki(newPlayerStash, oppsStashes) -
-          scoreMaki(playerStash, oppsStashes)) *
+          scoreMaki(player.stash, oppsStashes)) *
           (MAXHANDCARDS - cardsLeft)) /
           MAXHANDCARDS
       )
@@ -145,22 +154,85 @@ export const pickComputerCard = (
       return (
         (2.5 * cardsLeft) / MAXHANDCARDS +
         ((scoreTemaki(newPlayerStash, oppsStashes) -
-          scoreTemaki(playerStash, oppsStashes)) *
+          scoreTemaki(player.stash, oppsStashes)) *
           (MAXHANDCARDS - cardsLeft)) /
           MAXHANDCARDS
       )
     }
 
-    /* URAMAKI - I'll do it later LOL */
-    if (playerCard.color == cards.URAMAKITHREE.color) return 1.5
+    /* URAMAKI - Bit of a doozy here. If scores uramaki instantly exVal is just that
+       amount of points. Otherwise, as long as some points still on table, weight
+       between icon related value and marginalValue of playing it (for end of round scoring).
+       The marginalValue is weighted more as end of round approaches.  */
+    if (playerCard.color == cards.URAMAKITHREE.color) {
+      const scoresUramakiPoints = (playerCount) => {
+        let oppsCounts = []
+        for (let opp of opps)
+          oppsCounts.push(
+            3 * countCard(opp.stash, cards.URAMAKITHREE) +
+              4 * countCard(opp.stash, cards.URAMAKIFOUR) +
+              5 * countCard(opp.stash, cards.URAMAKIFIVE)
+          )
+
+        for (let oppCount of oppsCounts)
+          if (oppCount > playerCount) return false
+        return true
+      }
+      // Uramaki max points is 8, and it gets decreased by 3 for each score
+      let uramakiPoints = 8
+      for (let opp of opps) if (opp.uramakiScored) uramakiPoints -= 3
+
+      let uramakiCountBefore =
+        3 * countCard(player.stash, cards.URAMAKITHREE) +
+        4 * countCard(player.stash, cards.URAMAKIFOUR) +
+        5 * countCard(player.stash, cards.URAMAKIFIVE)
+
+      let uramakiCountAfter =
+        3 * countCard(newPlayerStash, cards.URAMAKITHREE) +
+        4 * countCard(newPlayerStash, cards.URAMAKIFOUR) +
+        5 * countCard(newPlayerStash, cards.URAMAKIFIVE)
+
+      // Player scores uramaki after reaching ten icons
+      if (
+        uramakiCountAfter >= 10 &&
+        !player.uramakiScored &&
+        uramakiPoints >= 2
+      )
+        return uramakiPoints
+
+      if (player.scoredUramaki) uramakiPoints -= 3
+
+      if (uramakiPoints < 2) return 0.1
+
+      // As this increases exVal decreases
+      let badMultiplier = 0
+      if (playerCard.type == cards.URAMAKIFOUR.type) badMultiplier = 1
+      else if (playerCard.type == cards.URAMAKITHREE.type) badMultiplier = 2
+
+      // Times devalued = (Uramaki max - current uramaki) / step
+      let timesDevalued = (8 - uramakiPoints) / 3
+
+      let marginalValue =
+        scoresUramakiPoints(uramakiCountAfter) &&
+        !scoresUramakiPoints(uramakiCountBefore)
+          ? uramakiPoints
+          : 0
+
+      return (
+        ((3.5 - timesDevalued - (1 - 0.25 * timesDevalued) * badMultiplier) *
+          cardsLeft) /
+          MAXHANDCARDS +
+        (marginalValue * (MAXHANDCARDS - cardsLeft)) / MAXHANDCARDS
+      )
+    }
 
     /* CHOPSTICKS - Assign a low value if there already is a chopsticks or it is late in
     the round, otherwise assign a value that decreases as the round progresses */
     if (playerCard.color == cards.CHOPSTICKSONE.color) {
       if (
-        countCard(playerStash, cards.CHOPSTICKSONE) +
-          countCard(playerStash, cards.CHOPSTICKSTWO) +
-          countCard(playerStash, cards.CHOPSTICKSTHREE) >
+        countCard(player.stash, cards.CHOPSTICKSONE) +
+          countCard(player.stash, cards.CHOPSTICKSTWO) +
+          countCard(player.stash, cards.CHOPSTICKSTHREE) >
         1
       )
         return 0.1
@@ -174,9 +246,9 @@ export const pickComputerCard = (
     the round, otherwise assign a value proportional to how much time is left in the round */
     if (playerCard.color == cards.SPOONFOUR.color) {
       if (
-        countCard(playerStash, cards.SPOONFOUR) +
-          countCard(playerStash, cards.SPOONFIVE) +
-          countCard(playerStash, cards.SPOONSIX) >
+        countCard(player.stash, cards.SPOONFOUR) +
+          countCard(player.stash, cards.SPOONFIVE) +
+          countCard(player.stash, cards.SPOONSIX) >
         1
       )
         return 0.1
@@ -203,7 +275,7 @@ export const pickComputerCard = (
 
     // TEA - Value of playing the card
     if (playerCard.type == cards.TEA.type)
-      return scoreTea(newPlayerStash) - scoreTea(playerStash)
+      return scoreTea(newPlayerStash) - scoreTea(player.stash)
 
     /* SOYSAUCE - Correlated to how many colors player has ahead of the competition. The farther
        ahead (or less far behind), the higher the value */
@@ -238,26 +310,36 @@ export const pickComputerCard = (
       else return 4
     }
 
-    // SPECIAL ORDER - LATER
-    if (playerCard.type == cards.SPECIALO.type) return 2.5
+    /* SPECIAL ORDER - Very low value if there are no cards to copy. Otherwise take the max expected value
+       available from the cards that can be copied (the stash) */
+    if (playerCard.type == cards.SPECIALO.type) {
+      if (player.stash.length == 0) return 0.1
+
+      let maxVal = 0.1
+      for (let i = 0; i < player.stash.length; i++)
+        if (getExpectedVal(player.stash[i]) > maxVal)
+          maxVal = getExpectedVal(player.stash[i])
+
+      return maxVal
+    }
 
     /* DUMPLING - Value of playing the card plus a small bonus earlier
        in the round since dumpling is more of an investment card */
     if (playerCard.type == cards.DUMPLING.type)
       return (
         scoreDumpling(newPlayerStash) -
-        scoreDumpling(playerStash) +
+        scoreDumpling(player.stash) +
         cardsLeft / 4
       )
 
     // TEMPURA - 5 if it completes the set, otherwise value declines as round progresses
     if (playerCard.type == cards.TEMPURA.type)
-      return countCard(playerStash, cards.TEMPURA) % 2 ? 5 : cardsLeft / 3.5
+      return countCard(player.stash, cards.TEMPURA) % 2 ? 5 : cardsLeft / 3.5
 
     /* SASHIMI - 10 if it completes the set, otherwise value declines as round progresses.
        If set is partial completed there is a big expected value bump */
     if (playerCard.type == cards.SASHIMI.type) {
-      let sashimiCount = countCard(playerStash, cards.SASHIMI) % 3
+      let sashimiCount = countCard(player.stash, cards.SASHIMI) % 3
 
       if (sashimiCount == 0) return cardsLeft > 2 ? cardsLeft / 2.8 : 0.1
       if (sashimiCount == 1) return cardsLeft > 1 ? 3.33 + cardsLeft / 2.8 : 0.1
@@ -280,7 +362,7 @@ export const pickComputerCard = (
     /* EEL - 10 points for completing set (-3 to 7). Small value for any after set completed.
        Before any played, decrease value as time in round increases */
     if (playerCard.type == cards.EEL.type)
-      switch (countCard(playerStash, cards.EEL)) {
+      switch (countCard(player.stash, cards.EEL)) {
         case 0:
           return cardsLeft / 3.5
         case 1:
@@ -291,9 +373,9 @@ export const pickComputerCard = (
 
     /* TOFU - 2 (face value) + bonus for large opportunity of completing set for first play.
        4 for completing the set (2 to 6), very small value for third since it is -6.
-       For beyond third slightly more since no longer losing points. */
+       For beyond third slightly more since no longer losing points  */
     if (playerCard.type == cards.TOFU.type)
-      switch (countCard(playerStash, cards.EEL)) {
+      switch (countCard(player.stash, cards.EEL)) {
         case 0:
           return 2 + cardsLeft / 6
         case 1:
@@ -305,10 +387,10 @@ export const pickComputerCard = (
       }
 
     /* ONIGIRI - Face value + upside for the potential high payoff proportional to how much time their is
-       to achieve it. The upside is dramatically decreased if the shape is not unique in the players stash. */
+       to achieve it. The upside is dramatically decreased if the shape is not unique in the players stash  */
     if (playerCard.color == cards.ONICIRCLE.color) {
-      let newShape = countCard(playerStash, playerCard) == 0
-      let diff = scoreOnigiri(newPlayerStash) - scoreOnigiri(playerStash)
+      let newShape = countCard(player.stash, playerCard) == 0
+      let diff = scoreOnigiri(newPlayerStash) - scoreOnigiri(player.stash)
 
       if (diff == 7) return 7
 
@@ -316,8 +398,79 @@ export const pickComputerCard = (
       else return diff + cardsLeft / 15
     }
 
-    /* Dessert not right now */
-    return 2.25
+    /* PUDDING - Weighted avergae between 3 and the marginal value of playing it for end of game scoring.
+       The marginal value piece is weighed more as the end of the game approaches */
+    if (playerCard.type == cards.PUDDING.type) {
+      let playerPuddingCountBefore =
+        player.dessert + countCard(player.stash, cards.PUDDING)
+      let playerPuddingCountAfter = playerPuddingCountBefore + 1
+
+      let oppsPuddingCounts = []
+      for (let opp of opps)
+        oppsPuddingCounts.push(
+          opps.dessert + countCard(opp.stash, cards.PUDDING)
+        )
+
+      let marginalValue =
+        scorePudding(playerPuddingCountAfter, oppsPuddingCounts) -
+        scorePudding(playerPuddingCountBefore, oppsPuddingCounts)
+
+      let trueCardsLeft = cardsLeft + (NUMROUNDS - round) * MAXHANDCARDS
+      let trueCardsMax = NUMROUNDS * MAXHANDCARDS
+
+      return (
+        (3 * trueCardsLeft) / trueCardsMax +
+        (marginalValue * (trueCardsMax - trueCardsLeft)) / trueCardsMax
+      )
+    }
+
+    /* GREEN TEA ICE CREAM - Pretty simple here, just a somewhat arbitrarily determined map. Number left to complete
+       set is inversely proportional to expected value while round remaining is directly proportional */
+    if (playerCard.type == cards.GTIC.type) {
+      let gticCount = (player.dessert + countCard(player.stash, cards.GTIC)) % 4
+      if (gticCount == 0)
+        if (round == 1) return 3
+        else if (round == 2) return 1.5
+        else return 0.25
+      else if (gticCount == 1)
+        if (round == 1) return 4.5
+        else if (round == 2) return 2.75
+        else return 0.75
+      else if (gticCount == 2)
+        if (round == 1) return 8
+        else if (round == 2) return 5
+        else return 2
+      else return 12
+    }
+
+    // FRUIT - Marginal value of playing the card
+    if (playerCard.color == cards.FRUITDUBWAT.color) {
+      // Fruit is stored in base 11 (watermelon * 11 * 11 + pineapple * 11 + orange)
+      const cardToFruitRepresentation = (fruitCard) => {
+        if (fruitCard.type == cards.FRUITDUBWAT.type) return 11 * 11 + 11 * 11
+        else if (fruitCard.type == cards.FRUITDUBPINE.type) return 11 + 11
+        else if (fruitCard.type == cards.FRUITDUBO.type) return 1 + 1
+        else if (fruitCard.type == cards.FRUITWATERO.type) return 11 * 11 + 1
+        else if (fruitCard.type == cards.FRUITPINEO.type) return 11 + 1
+        else if (fruitCard.type == cards.FRUITWATERPINE.type)
+          return 11 * 11 + 11
+      }
+
+      let fruitNumber = player.dessert
+
+      for (let i = 0; i < player.stash.length; i++)
+        if (player.stash[i].color == cards.FRUITDUBWAT.color)
+          fruitNumber += cardToFruitRepresentation(player.stash[i])
+
+      let oldScore = scoreFruit(fruitNumber)
+      fruitNumber += cardToFruitRepresentation(playerCard)
+      let newScore = scoreFruit(fruitNumber)
+
+      return newScore - oldScore
+    }
+
+    // Catch all case for some anomaly
+    return 2
   }
 
   /* Actually picks the card. Does not simply pick the highest expected value, that would limit variety.
@@ -347,20 +500,21 @@ export const pickComputerCard = (
     return 0
   }
 
-  if (difficulty == 'easy') return Math.floor(Math.random() * playerHand.length)
+  if (difficulty == 'easy')
+    return Math.floor(Math.random() * player.hand.length)
 
   let expectedVals = []
-  let allowedIndices = filterLow(playerHand)
+  let allowedIndices = filter(player.hand)
 
-  for (let i = 0; i < playerHand.length; i++)
+  for (let i = 0; i < player.hand.length; i++)
     if (allowedIndices.includes(i))
       expectedVals.push(
-        getExpectedVal(playerHand[i], playerStash, oppsStashes, round)
+        getExpectedVal(player.hand[i], player.stash, oppsStashes, round)
       )
 
   let j = 0
   for (let allowedIndex of allowedIndices)
-    console.log(playerHand[allowedIndex].text + ': ' + expectedVals[j++])
+    console.log(player.hand[allowedIndex].text + ': ' + expectedVals[j++])
 
   return allowedIndices[chooseIndex(expectedVals)]
 }

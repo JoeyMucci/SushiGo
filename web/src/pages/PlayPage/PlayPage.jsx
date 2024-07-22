@@ -565,6 +565,7 @@ export const countCard = (cards, card) => {
   return count
 }
 
+export const NUMROUNDS = 3
 export const MAXHANDCARDS = 9
 
 // Returns a card given the type
@@ -999,7 +1000,6 @@ const PlayPage = () => {
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
-    const NUMROUNDS = 3
 
     let round = 1
     let priority = 0
@@ -1338,6 +1338,14 @@ const PlayPage = () => {
         if (app.includes(cards.MISOGUIDE.type)) resetMiso()
         priority = 0
         cardsLeft--
+      }
+
+      const getOpps = (excludedIndex) => {
+        return [
+          players[(excludedIndex + 1) % 4],
+          players[(excludedIndex + 2) % 4],
+          players[(excludedIndex + 3) % 4],
+        ]
       }
 
       const getOppsStashes = (excludedIndex) => {
@@ -1987,9 +1995,8 @@ const PlayPage = () => {
             }
 
             let choice = pickComputerCard(
-              players[index].hand,
-              players[index].stash,
-              getOppsStashes(index),
+              players[index],
+              getOpps(index),
               cardsLeft,
               round,
               diff[0]
@@ -2264,7 +2271,7 @@ const PlayPage = () => {
           }
 
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
-          playCard(parseInt(e.target.name), 0, true) // Play the card played
+          playCard(parseInt(e.target.name), 0, true) // Play the clicked card
 
           cleanupMenu(0)
 
@@ -2280,9 +2287,8 @@ const PlayPage = () => {
           // Have the computers make up their mind
           for (let i = 1; i < players.length; i++)
             players[i].willPlayIndex = pickComputerCard(
-              players[i].hand,
-              players[i].stash,
-              getOppsStashes(i),
+              players[i],
+              getOpps(i),
               cardsLeft,
               round,
               diff[0]
