@@ -74,8 +74,9 @@ import wasabi from 'web/public/wasabi.jpg'
 import wasabiguide from 'web/public/wasabiguide.jpg'
 import {
   pickComputerCard,
-  pickComputerMenu,
+  pickComputerSpecialOrder,
   pickComputerSpoon,
+  pickComputerMenu,
   pickComputerTakeout,
 } from 'web/src/pages/PlayPage/ComputerActions.jsx'
 import {
@@ -1311,7 +1312,10 @@ const PlayPage = () => {
         for (let i = 0; i < players.length; i++) {
           players[i].utensilUsed = false
           for (let j = 0; j < players[i].stash.length; j++)
-            if (players[i].stash[j].color == cards.CHOPSTICKSONE.color)
+            if (
+              players[i].stash[j].color == cards.CHOPSTICKSONE.color &&
+              !activeChopsticksTypes.includes(players[i].stash[j].type)
+            )
               activeChopsticksTypes.push(players[i].stash[j].type)
         }
       }
@@ -1321,7 +1325,10 @@ const PlayPage = () => {
         for (let i = 0; i < players.length; i++) {
           players[i].utensilUsed = false
           for (let j = 0; j < players[i].stash.length; j++)
-            if (players[i].stash[j].color == cards.SPOONFOUR.color)
+            if (
+              players[i].stash[j].color == cards.SPOONFOUR.color &&
+              !activeSpoonTypes.includes(players[i].stash[j].type)
+            )
               activeSpoonTypes.push(players[i].stash[j].type)
         }
       }
@@ -1410,12 +1417,21 @@ const PlayPage = () => {
       }
 
       const cleanupChopsticks = (index) => {
-        // Put the chopsticks back at a random location
-        players[index].hand.splice(
-          Math.floor(Math.random() * (players[index].hand.length + 1)),
-          0,
+        // Put the chopsticks back at a random location, restoring it to a special order if it was one
+        if (countCard(players[index].stash, priorityToCard()) > 1) {
           removePriorityCard(index)
-        )
+          players[index].hand.splice(
+            Math.floor(Math.random() * (players[index].hand.length + 1)),
+            0,
+            cards.SPECIALO
+          )
+        } else
+          players[index].hand.splice(
+            Math.floor(Math.random() * (players[index].hand.length + 1)),
+            0,
+            removePriorityCard(index)
+          )
+
         if (index == 0) {
           usingChopsticks = false
           setUserClickedType(-1)
@@ -1440,14 +1456,28 @@ const PlayPage = () => {
         players[requesterIndex].hand.unshift(
           players[requesteeIndex].hand.splice(cardIndex, 1)[0]
         )
+
+        // Put the spoon in requestee's hand at a random location, restoring it to a special order if it was one
+        if (countCard(players[requesterIndex].stash, priorityToCard()) > 1) {
+          removePriorityCard(requesterIndex)
+          players[requesteeIndex].hand.splice(
+            Math.floor(
+              Math.random() * (players[requesteeIndex].hand.length + 1)
+            ),
+            0,
+            cards.SPECIALO
+          )
+        } else
+          players[requesteeIndex].hand.splice(
+            Math.floor(
+              Math.random() * (players[requesteeIndex].hand.length + 1)
+            ),
+            0,
+            removePriorityCard(requesterIndex)
+          )
+
         playCard(0, requesterIndex, true)
 
-        // Put the spoon in requestee's hand at a random location
-        players[requesteeIndex].hand.splice(
-          Math.floor(Math.random() * (players[requesteeIndex].hand.length + 1)),
-          0,
-          removePriorityCard(requesterIndex)
-        )
         if (requesterIndex == 0) {
           usingSpoon = false
           setUserClickedType(-1)
@@ -1912,36 +1942,73 @@ const PlayPage = () => {
       const playCard = (cardIndex, playerIndex, checkUramaki) => {
         let card = players[playerIndex].hand.splice(cardIndex, 1)[0]
         players[playerIndex].stash.push(card)
-        if (card.type == cards.SPECIALO.type)
-          if (playerIndex == 0)
+        if (card.type == cards.SPECIALO.type) {
+          let canUseSpecialOrder = false
+          for (let i = 0; i < players[playerIndex].stash.length; i++)
             if (
-              players[0].stash.length == 1 ||
-              (players[0].stash.length == 2 &&
-                players[0].stash[0].type == userClickedType &&
-                [cards.CHOPSTICKSONE.color, cards.SPOONFOUR.color].includes(
+              players[playerIndex].stash[i].type != cards.SPECIALO.type &&
+              (players[playerIndex].stash[i].type != userClickedType ||
+                ![cards.CHOPSTICKSONE.color, cards.SPOONFOUR.color].includes(
                   players[0].stash[0].color
                 ))
-            ) {
-              notify('Played special order without copying', '🌈', 0)
-              deck.discardPile.push(players[0].stash.pop())
-            } else {
-              specialOrderFreeze = true
-              return
-            }
-          else if (players[playerIndex].stash.length == 1) {
-            notify('Played special order without copying', '🌈', playerIndex)
-            deck.discardPile.push(players[playerIndex].stash.pop())
-          } else {
-            notify(
-              'Copied ' +
-                players[playerIndex].stash[0].text +
-                ' with special order',
-              '🌈',
-              playerIndex
             )
-            players[playerIndex].stash[players[playerIndex].stash.length - 1] =
-              players[playerIndex].stash[0]
+              canUseSpecialOrder = true
+
+          if (!canUseSpecialOrder) {
+            notify('Played special order without copying', '🌈', playerIndex)
+            deck.discardPile.push(players[0].stash.pop())
+          } else if (playerIndex == 0) {
+            specialOrderFreeze = true
+            return
+          } else {
+            let choice = pickComputerSpecialOrder(
+              players[playerIndex],
+              getOpps(playerIndex),
+              cardsLeft,
+              round,
+              diff[0]
+            )
+
+            if (choice == -1) {
+              notify('Played special order without copying', '🌈', playerIndex)
+              deck.discardPile.push(players[playerIndex].stash.pop())
+            } else {
+              // Render copied utentsils unusable
+              if (
+                players[playerIndex].stash[choice].color ==
+                cards.CHOPSTICKSONE.color
+              ) {
+                let indexToRemove = activeChopsticksTypes.indexOf(
+                  players[playerIndex].stash[choice].type
+                )
+                if (indexToRemove != -1)
+                  activeChopsticksTypes.splice(indexToRemove, 1)
+              }
+
+              if (
+                players[playerIndex].stash[choice].color ==
+                cards.SPOONFOUR.color
+              ) {
+                let indexToRemove = activeSpoonTypes.indexOf(
+                  players[playerIndex].stash[choice].type
+                )
+                if (indexToRemove != -1)
+                  activeSpoonTypes.splice(indexToRemove, 1)
+              }
+
+              notify(
+                'Copied ' +
+                  players[playerIndex].stash[choice].text +
+                  ' with special order',
+                '🌈',
+                playerIndex
+              )
+              players[playerIndex].stash[
+                players[playerIndex].stash.length - 1
+              ] = players[playerIndex].stash[choice]
+            }
           }
+        }
 
         if (roll.includes(cards.MAKIGUIDE.type)) reorderMaki(playerIndex)
 
@@ -2002,14 +2069,14 @@ const PlayPage = () => {
               diff[0]
             )
 
+            cleanupChopsticks(index)
+
             notify(
               'Played ' + players[index].hand[choice].text + ' with chopsticks',
               '🥢',
               index
             )
             playCard(choice, index, true)
-
-            cleanupChopsticks(index)
           }
         }
 
@@ -2449,7 +2516,7 @@ const PlayPage = () => {
         }
 
         if (takeoutBoxFreeze) userTakeoutBoxHandling(e)
-        else if (specialOrderFreeze) userSpecialOrderHandling()
+        else if (specialOrderFreeze) userSpecialOrderHandling(e)
         else {
           if (priority == 0)
             if (e.target.name == userClickedType) setUserClickedType(-1)
@@ -2851,6 +2918,9 @@ const PlayPage = () => {
         // Display the most populated stacks first
         cardColumns.sort(compareStacks)
 
+        // Used so only one card glows when special order duplicates a utentsil
+        let glow = 0
+
         // Displays only the top of cards and sorts them by color
         return (
           <div>
@@ -2867,10 +2937,20 @@ const PlayPage = () => {
                           action={stashClick}
                           displayFrac={'4'}
                           fullOpacity={
-                            (card.type == userClickedType &&
-                              userHand.length > 1) ||
-                            (card.color != cards.CHOPSTICKSONE.color &&
-                              card.color != cards.SPOONFOUR.color)
+                            ![
+                              cards.CHOPSTICKSONE.color,
+                              cards.SPOONFOUR.color,
+                              cards.MENUSEVEN.color,
+                              cards.TAKEOUTTEN.color,
+                            ].includes(card.color) ||
+                            (priority >= 1 &&
+                              priority <= 12 &&
+                              priorityToCard().type == card.type &&
+                              !glow++) ||
+                            (priority == 0 &&
+                              card.type == userClickedType &&
+                              userHand.length > 1 &&
+                              !glow++)
                           }
                         />
                       )
@@ -2882,8 +2962,15 @@ const PlayPage = () => {
                           info={card}
                           displayFrac={'4'}
                           fullOpacity={
-                            card.color != cards.MENUSEVEN.color &&
-                            card.color != cards.TAKEOUTTEN.color
+                            ![
+                              cards.CHOPSTICKSONE.color,
+                              cards.SPOONFOUR.color,
+                              cards.MENUSEVEN.color,
+                              cards.TAKEOUTTEN.color,
+                            ].includes(card.color) ||
+                            (priority >= 1 &&
+                              priority <= 12 &&
+                              priorityToCard().type == card.type)
                           }
                         />
                       )
