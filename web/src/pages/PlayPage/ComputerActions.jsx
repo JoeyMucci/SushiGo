@@ -1,6 +1,7 @@
 import {
   cards,
   countCard,
+  typeToCard,
   NUMROUNDS,
   MAXHANDCARDS,
 } from 'web/src/pages/PlayPage/PlayPage.jsx'
@@ -153,7 +154,7 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
 
     if (cardsLeft <= 2) return 0.1
 
-    return (cardsLeft / 2.8) * (0.7 - 0.05 * (MAXHANDCARDS - cardsLeft))
+    return cardsLeft / 2.8
   }
 
   /* SPOON - Assign a low value if there already is a spoon or it is late in
@@ -177,8 +178,15 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
     return 2 + 0.1 * (MAXHANDCARDS - cardsLeft)
   }
 
-  // TAKEOUT BOX - Yea im doing this later
-  if (playerCard.color == cards.TAKEOUTTEN.color) return 1.5
+  // TAKEOUT BOX - Made a whole function for this
+  if (playerCard.color == cards.TAKEOUTTEN.color) {
+    console.log(player.stash)
+    let originalStash = [...player.stash]
+    let exVal = workTakeout(player, opps, cardsLeft, round)[0]
+    player.stash = [...originalStash]
+    console.log(player.stash)
+    return Math.max(0.1, exVal)
+  }
 
   /* WASABI - Assign a low value if there already a wasabi that is unused, otherwise assign
      a value proportional to how much time is left in the round */
@@ -294,7 +302,7 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
      4 for completing the set (2 to 6), very small value for third since it is -6.
      For beyond third slightly more since no longer losing points  */
   if (playerCard.type == cards.TOFU.type)
-    switch (countCard(player.stash, cards.EEL)) {
+    switch (countCard(player.stash, cards.TOFU)) {
       case 0:
         return 2 + cardsLeft / 6
       case 1:
@@ -385,23 +393,444 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
     return newScore - oldScore
   }
 
-  // Catch all case for some anomaly
-  return 2
+  // Now entering spoon which is aggregated stuff
+
+  let sum = 0
+  for (let eligibleType of playerCard.eligibleTypes)
+    sum += getExpectedVal(
+      typeToCard(eligibleType),
+      player,
+      opps,
+      cardsLeft,
+      round
+    )
+
+  return sum / playerCard.eligibleTypes.length
+}
+
+const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
+  // Return a value 0-1 representative of how likely the requested card is to be found in general
+  const getProbability = () => {
+    if (
+      [cards.SQUID.type, cards.MAKITHREE.type, cards.URAMAKIFIVE.type].includes(
+        playerCard.type
+      )
+    )
+      return cardsLeft > 6 ? 0.9 - 0.15 * (MAXHANDCARDS - cardsLeft) : 0
+
+    if (
+      [cards.SALMON.type, cards.MAKITWO.type, cards.URAMAKIFOUR.type].includes(
+        playerCard.type
+      )
+    )
+      return cardsLeft <= 6 && cardsLeft > 3 ? 0.9 - 0.1 * (6 - cardsLeft) : 0
+
+    if (
+      [cards.SALMON.type, cards.MAKITWO.type, cards.URAMAKIFOUR.type].includes(
+        playerCard.type
+      )
+    )
+      return cardsLeft <= 6 && cardsLeft > 3 ? 0.9 - 0.1 * (6 - cardsLeft) : 0
+
+    if (playerCard.type == cards.TEMAKIGUIDE.type)
+      return cardsLeft >= 6
+        ? 1 - 0.05 * (MAXHANDCARDS - cardsLeft)
+        : 0.75 - 0.1 * (5 - cardsLeft)
+
+    if (playerCard.type == cards.CHOPSTICKSGUIDE.type)
+      return 0.7 - 0.05 * (MAXHANDCARDS - cardsLeft)
+
+    if (playerCard.type == cards.SPOONGUIDE.type) return 0
+
+    if (playerCard.type == cards.MENUGUIDE.type)
+      if (cardsLeft >= 7) return 0.75 - 0.05 * (9 - cardsLeft)
+      else if (cardsLeft >= 5) return 0.55 - 0.1 * (6 - cardsLeft)
+      else if (cardsLeft >= 3) return 0.3 - 0.15 * (4 - cardsLeft)
+      else return 0.1
+
+    if (playerCard.type == cards.TAKEOUTGUIDE.type)
+      return cardsLeft >= 7 ? 0.75 : 0.7 - 0.1 * (6 - cardsLeft)
+
+    if (
+      [
+        cards.WASABI.type,
+        cards.TEA.type,
+        cards.SOYSAUCE.type,
+        cards.SPECIALORDER.type,
+        cards.PUDDINGGUIDE.type,
+        cards.GTICGUIDE.type,
+        cards.FRUITGUIDE.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft / 13.5
+
+    if (
+      [
+        cards.DUMPLINGGUIDE.type,
+        cards.TEMPURAGUIDE.type,
+        cards.SASHIMIGUIDE.type,
+        cards.MISOUGIDE.type,
+        cards.EDAMAMEGUIDE.type,
+        cards.EELGUIDE.type,
+        cards.TOFUGUIDE.type,
+        cards.ONIGIRIGUIDE.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft / MAXHANDCARDS
+
+    if (
+      [
+        cards.NIGIRIGUIDE.type,
+        cards.MAKIGUIDE.type,
+        cards.URAMAKIGUIDE.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft <= 3 ? 0.9 - 0.15 * (3 - cardsLeft) : 0
+
+    if (
+      [
+        cards.ONICIRCLE.type,
+        cards.ONISQUARE.type,
+        cards.ONITRIANGLE.type,
+        cards.ONIFLAT.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft / 18
+
+    if (
+      [
+        cards.FRUITWATERO.type,
+        cards.FRUITPINEO.type,
+        cards.FRUITWATERPINE.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft / 22.5
+
+    if (
+      [
+        cards.FRUITDUBWAT.type,
+        cards.FRUITDUBPINE.type,
+        cards.FRUITDUBO.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft / 27
+  }
+
+  return (
+    getExpectedVal(
+      typeToCard(playerCard.type),
+      player,
+      opps,
+      cardsLeft,
+      round
+    ) * getProbability()
+  )
+}
+
+// Returns an array: 0 -> exVal; 1-> cards taken out to get that exVal
+const workTakeout = (player, opps, cardsLeft, round) => {
+  let takeoutCards = []
+
+  const turnToTakeout = (searchCard, num) => {
+    if (num == 0) return
+    for (let i = 0; i < player.stash.length; i++)
+      if (player.stash[i].type == searchCard.type) {
+        takeoutCards.push(player.stash[i])
+        player.stash[i] = cards.TOC
+        if (--num == 0) break
+      }
+  }
+
+  const getMockStash = (removeCard) => {
+    for (let i = 0; i < player.stash.length; i++)
+      if (player.stash[i].type == removeCard.type)
+        return player.stash.toSpliced(i, 1)
+  }
+
+  const removeAnalysis = (card) => {
+    if (countCard(player.stash, card) > 0) {
+      let originalStash = [...player.stash]
+      let takeouts = 0
+      while (countCard(player.stash, card) > 1) {
+        player.stash = getMockStash(card)
+        if (getExpectedVal(card, player, opps, cardsLeft, round) < 2) takeouts++
+        addedValue += 2 - getExpectedVal(card, player, opps, cardsLeft, round)
+      }
+      player.stash = [...originalStash]
+      turnToTakeout(card, takeouts)
+    }
+  }
+
+  // No value in playing a second takeout (i.e. from chopsticks)
+  if (
+    countCard(cards.TAKEOUTTEN) +
+      countCard(cards.TAKEOUTELEVEN) +
+      countCard(cards.TAKEOUTTWELVE) >
+    1
+  )
+    return 0.1
+
+  const multiplier = (MAXHANDCARDS - cardsLeft + 1) / MAXHANDCARDS
+  const dessertMultiplier =
+    (NUMROUNDS * MAXHANDCARDS -
+      (NUMROUNDS - round) * MAXHANDCARDS -
+      cardsLeft +
+      1) /
+    (NUMROUNDS * MAXHANDCARDS)
+  let addedValue = 0
+
+  // WASABI - Remove all inactive wasabis, and wasabis with egg nigiri (but don't add value there)
+  if (countCard(player.stash, cards.WASABI) > 0) {
+    let takeouts = 0
+    for (let i = 0; i < player.stash.length; i++)
+      if (
+        player.stash[i].type == cards.WASABI.type &&
+        (i == player.stash.length - 1 ||
+          ![cards.SALMON.type, cards.SQUID.type].includes(player.stash[i + 1]))
+      ) {
+        takeouts++
+        addedValue += 2
+        if (
+          i != player.stash.length - 1 &&
+          player.stash[i + 1].type == cards.EGG.type
+        )
+          addedValue -= 2
+      }
+    turnToTakeout(cards.WASABI, takeouts)
+  }
+
+  // NIGIRI - Remove all eggs and give + 1 value (1 -> 2). Even on wasabi, that step accounts for egg on wasabi value loss.
+  addedValue += countCard(player.stash, cards.EGG)
+  turnToTakeout(cards.EGG, -1)
+
+  // MAKI
+  removeAnalysis(cards.MAKIONE)
+  removeAnalysis(cards.MAKITWO)
+  removeAnalysis(cards.MAKITHREE)
+
+  // TEMAKI
+  removeAnalysis(cards.TEMAKI)
+
+  // URAMAKI
+  removeAnalysis(cards.URAMAKITHREE)
+  removeAnalysis(cards.URAMAKIFOUR)
+  removeAnalysis(cards.URAMAKIFIVE)
+
+  // CHOPSTICKS
+  removeAnalysis(cards.CHOPSTICKSONE)
+  removeAnalysis(cards.CHOPSTICKSTWO)
+  removeAnalysis(cards.CHOPSTICKSTHREE)
+
+  // SPOON
+  removeAnalysis(cards.SPOONFOUR)
+  removeAnalysis(cards.SPOONFIVE)
+  removeAnalysis(cards.SPOONSIX)
+
+  // MENU - Impossible to be in stash
+
+  // TAKEOUT BOX - Handled at start, very low incentive to play a second when one is already in stash
+
+  // WASABI - Done earlier
+
+  // TEA - Remove if there is only one tea and it is scoring one
+  if (countCard(player.stash, cards.TEA) == 1 && scoreTea(player.stash) == 1) {
+    addedValue += 1
+    turnToTakeout(cards.TEA, 1)
+  }
+
+  // SOYSAUCE
+  removeAnalysis(cards.SOYSAUCE)
+
+  // SPECIAL ORDER - Impossible to be in stash
+
+  // DUMPLING - Turn over if <= 2 (each has 1.5 value)
+  if ([1, 2].includes(countCard(player.stash, cards.DUMPLING) <= 2)) {
+    turnToTakeout(cards.DUMPLING, -1)
+    addedValue += 1
+  }
+
+  // TEMPURA - Turn over any odd one out tempura (has 0 value)
+  if (countCard(player.stash, cards.TEMPURA) % 2 == 1) {
+    turnToTakeout(cards.TEMPURA, 1)
+    addedValue += 2
+  }
+
+  // SASHIMI - Turn over any ones not part of a set (have o value)
+  if (countCard(player.stash, cards.SASHIMI) % 3 != 0) {
+    addedValue += 2 * (countCard(player.stash, cards.SASHIMI) % 3)
+    turnToTakeout(cards.SASHIMI, countCard(player.stash, cards.SASHIMI) % 3)
+  }
+
+  // MISO SOUP - Never turn over (has 3 value)
+
+  /* EDAMAME - Turn over all if expected value lost on net is less than .5
+     (assumed benefit from reducing others' scores) */
+  if (countCard(player.stash, cards.EDAMAME) > 0) {
+    let marginalValue =
+      (2 - getExpectedVal(cards.EDAMAME, player, opps, cardsLeft, round)) *
+      countCard(player.stash, cards.EDAMAME)
+    marginalValue += 0.5
+
+    if (marginalValue > 0) {
+      turnToTakeout(cards.EDAMAME, -1)
+      addedValue += marginalValue
+    }
+  }
+
+  // EEL - Turn over if there is only one (-3 value), and any over two (0 value) */
+  if (![0, 2].includes(countCard(player.stash, cards.EEL))) {
+    if (countCard(player.stash, cards.EEL) == 1) addedValue += 5
+    else addedValue += 2 * (countCard(player.stash, cards.EEL) - 2)
+    turnToTakeout(cards.EEL, countCard(player.stash, cards.EEL) - 2)
+  }
+
+  // TOFU - Turn over any over two (-6 value)
+  if (countCard(player.stash, cards.TOFU) > 2) {
+    addedValue += 6 + 2 * (countCard(player.stash, cards.EEL) - 2)
+    turnToTakeout(cards.TOFU, countCard(player.stash, cards.EEL) - 2)
+  }
+
+  // ONIGIRI - Turn over any that count for one (only of its kind)
+  if (countCard(player.stash, cards.ONICIRCLE) > 0) {
+    let maxOthers = Math.max(
+      countCard(player.stash, cards.ONISQUARE),
+      countCard(player.stash, cards.ONITRI),
+      countCard(player.stash, cards.ONIFLAT)
+    )
+
+    if (countCard(player.stash, cards.ONICIRCLE) > maxOthers) {
+      addedValue += countCard(player.stash, cards.ONICIRCLE) - maxOthers
+      turnToTakeout(
+        cards.TOFU,
+        countCard(player.stash, cards.ONICIRCLE) - maxOthers
+      )
+    }
+  }
+
+  if (countCard(player.stash, cards.ONISQUARE) > 0) {
+    let maxOthers = Math.max(
+      countCard(player.stash, cards.ONICIRCLE),
+      countCard(player.stash, cards.ONITRI),
+      countCard(player.stash, cards.ONIFLAT)
+    )
+
+    if (countCard(player.stash, cards.ONISQUARE) > maxOthers) {
+      addedValue += countCard(player.stash, cards.ONISQUARE) - maxOthers
+      turnToTakeout(
+        cards.TOFU,
+        countCard(player.stash, cards.ONISQUARE) - maxOthers
+      )
+    }
+  }
+
+  if (countCard(player.stash, cards.ONITRI) > 0) {
+    let maxOthers = Math.max(
+      countCard(player.stash, cards.ONICIRCLE),
+      countCard(player.stash, cards.ONISQUARE),
+      countCard(player.stash, cards.ONIFLAT)
+    )
+
+    addedValue += countCard(player.stash, cards.ONITRI) - maxOthers
+    if (countCard(player.stash, cards.ONITRI) > maxOthers) {
+      turnToTakeout(
+        cards.TOFU,
+        countCard(player.stash, cards.ONITRI) - maxOthers
+      )
+    }
+  }
+
+  if (countCard(player.stash, cards.ONIFLAT) > 0) {
+    let maxOthers = Math.max(
+      countCard(player.stash, cards.ONICIRCLE),
+      countCard(player.stash, cards.ONISQUARE),
+      countCard(player.stash, cards.ONITRI)
+    )
+
+    addedValue += countCard(player.stash, cards.ONIFLAT) - maxOthers
+    if (countCard(player.stash, cards.ONIFLAT) > maxOthers) {
+      turnToTakeout(
+        cards.TOFU,
+        countCard(player.stash, cards.ONIFLAT) - maxOthers
+      )
+    }
+  }
+
+  // Before desserts apply non dessert multiplier
+  let nonDessertValue = addedValue * multiplier
+  addedValue = 0
+
+  // PUDDING - Use expected value analysis
+  removeAnalysis(cards.PUDDING)
+
+  // GREEN TEA ICE CREAM - Remove any one not part of a set (0 value )
+  if (countCard(player.stash, cards.GTIC) > 0) {
+    addedValue +=
+      (2 * (player.dessert + countCard(player.stash, cards.GTIC))) % 4
+    turnToTakeout(
+      cards.GTIC,
+      (player.dessert + countCard(player.stash, cards.GTIC)) % 4
+    )
+  }
+
+  // FRUIT - If expected value is less than 2 turn it over
+  for (let fruitCard of [
+    cards.FRUITDUBWAT,
+    cards.FRUITDUBPINE,
+    cards.FRUITDUBO,
+    cards.FRUITWATERO,
+    cards.FRUITGUIDE,
+    cards.FRUITWATERPINE,
+  ])
+    removeAnalysis(fruitCard)
+
+  let dessertValue = addedValue * dessertMultiplier
+  return [nonDessertValue + dessertValue, takeoutCards]
+}
+
+/* Actually picks the card. Does not simply pick the highest expected value, that would limit variety.
+     The implementation is somewhat jank but the idea is that the higher the expected value the higher the
+     probability that the card is played. For harder difficulties, the probabilities are more skewed towards
+     the higher expected values */
+const chooseIndex = (expectedVals, cardsLeft, difficulty) => {
+  let sum = 0
+
+  // Increase power (which skews towards higher exVals) as stashes differentiate, as redundancy is matters less
+  let pow = 2.4 + 0.24 * (MAXHANDCARDS - cardsLeft)
+
+  if (difficulty == 'normal') pow /= 2
+  else if (difficulty == 'toxic') pow *= 2
+
+  for (let i = 0; i < expectedVals.length; i++)
+    sum += Math.pow(expectedVals[i], pow)
+
+  let choice = Math.random() * sum
+
+  for (let i = 0; i < expectedVals.length; i++) {
+    choice -= Math.pow(expectedVals[i], pow)
+    if (choice <= 0) return i
+  }
+
+  // In case due to rounding a card is nor already selected
+  return Math.floor(Math.random() * expectedVals.length)
 }
 
 // Returns the index of the card in player.hand to be played
-export const pickComputerCard = (
+const pickComputerCardFull = (
   player,
   opps,
   cardsLeft,
   round,
-  difficulty
+  difficulty,
+  fromMenu
 ) => {
   /* Filters out repeats and cards that are objectively worse than other cards in hand
      (e.g. Takes out egg nigiris from a hand with salmon nigiri)
      Filtering includes action specials too even though they are mostly equivalent*/
   const filter = () => {
     const isAllowed = (i) => {
+      // Cannot play menu from menu
+      if (fromMenu && player.hand[i].color == cards.MENUSEVEN.color)
+        return false
       if (player.hand[i].type == cards.EGG.type)
         return (
           countCard(player.hand, cards.SALMON) +
@@ -470,33 +899,6 @@ export const pickComputerCard = (
     return allowedIndices
   }
 
-  /* Actually picks the card. Does not simply pick the highest expected value, that would limit variety.
-     The implementation is somewhat jank but the idea is that the higher the expected value the higher the
-     probability that the card is played. For harder difficulties, the probabilities are more skewed towards
-     the higher expected values */
-  const chooseIndex = (expectedVals) => {
-    let sum = 0
-
-    // Increase power (which skews towards higher exVals) as stashes differentiate, as redundancy is matters less
-    let pow = 2.4 + 0.24 * (MAXHANDCARDS - cardsLeft)
-
-    if (difficulty == 'normal') pow /= 2
-    else if (difficulty == 'toxic') pow *= 2
-
-    for (let i = 0; i < expectedVals.length; i++)
-      sum += Math.pow(expectedVals[i], pow)
-
-    let choice = Math.random() * sum
-
-    for (let i = 0; i < expectedVals.length; i++) {
-      choice -= Math.pow(expectedVals[i], pow)
-      if (choice <= 0) return i
-    }
-
-    // In case due to rounding a card is nor already selected
-    return 0
-  }
-
   if (difficulty == 'easy')
     return Math.floor(Math.random() * player.hand.length)
 
@@ -515,7 +917,17 @@ export const pickComputerCard = (
 
   console.log('--------------')
 
-  return allowedIndices[chooseIndex(expectedVals)]
+  return allowedIndices[chooseIndex(expectedVals, cardsLeft, difficulty)]
+}
+
+export const pickComputerCard = (
+  player,
+  opps,
+  cardsLeft,
+  round,
+  difficulty
+) => {
+  return pickComputerCardFull(player, opps, cardsLeft, round, difficulty, false)
 }
 
 export const pickComputerSpecialOrder = (
@@ -544,13 +956,75 @@ export const pickComputerSpecialOrder = (
   return maxIndex
 }
 
-export const pickComputerSpoon = () => {
-  return cards.EGG
+export const pickComputerSpoon = (
+  player,
+  opps,
+  cardsLeft,
+  round,
+  difficulty,
+  info
+) => {
+  let spoonCards = []
+  for (let i = 0; i < info.length; i++)
+    for (let type of info[i]) {
+      let eligibleTypes = typeToCard(type).eligibleTypes
+      for (let i = 0; i < eligibleTypes.length; i++)
+        spoonCards.push(typeToCard(eligibleTypes[i]))
+      if (eligibleTypes.length > 1) spoonCards.push(typeToCard(type))
+    }
+
+  console.log(spoonCards)
+
+  if (difficulty == 'easy')
+    return spoonCards[Math.floor(Math.random() * spoonCards.length)]
+
+  let expectedVals = []
+
+  for (let i = 0; i < spoonCards.length; i++)
+    expectedVals.push(
+      getExpectedValSpoon(spoonCards[i], player, opps, cardsLeft, round)
+    )
+
+  for (let j = 0; j < spoonCards.length; j++)
+    console.log(spoonCards[j].text + ': ' + expectedVals[j])
+
+  console.log('--------------')
+
+  return spoonCards[chooseIndex(expectedVals, cardsLeft, difficulty)]
 }
 
-export const pickComputerMenu = () => {}
+export const pickComputerMenu = (
+  player,
+  opps,
+  cardsLeft,
+  round,
+  difficulty
+) => {
+  return pickComputerCardFull(player, opps, cardsLeft, round, difficulty, true)
+}
 
 // Return a list of cards that were taken out
-export const pickComputerTakeout = () => {}
+export const pickComputerTakeout = (
+  player,
+  opps,
+  cardsLeft,
+  round,
+  difficulty
+) => {
+  let takeoutCards = []
+
+  if (difficulty == 'easy') {
+    for (let i = 0; i < player.stash.length; i++)
+      if (
+        player.stash[i].color != cards.TAKEOUTTEN.color &&
+        Math.random() > 0.5
+      ) {
+        takeoutCards.push(player.stash[i])
+        player.stash[i] = cards.TOC
+      }
+  } else takeoutCards = workTakeout(player, opps, cardsLeft, round)[1]
+
+  return takeoutCards
+}
 
 // ADD FILTER FN

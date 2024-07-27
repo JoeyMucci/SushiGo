@@ -559,6 +559,15 @@ export const cards = Object.freeze({
   },
 })
 
+// Returns a card given the type
+export const typeToCard = (identType) => {
+  for (let cardName in cards) {
+    if (cards[cardName].type == identType) {
+      return cards[cardName]
+    }
+  }
+}
+
 // Returns how many occurences of card are in cards
 export const countCard = (cards, card) => {
   let count = 0
@@ -568,15 +577,6 @@ export const countCard = (cards, card) => {
 
 export const NUMROUNDS = 3
 export const MAXHANDCARDS = 9
-
-// Returns a card given the type
-const typeToCard = (identType) => {
-  for (let cardName in cards) {
-    if (cards[cardName].type == identType) {
-      return cards[cardName]
-    }
-  }
-}
 
 /* Return counts in the following order: watermelon, pineapple, orange
    fruitNumnber = watermelon*11^2+pineapple*11+orange */
@@ -1013,8 +1013,8 @@ const PlayPage = () => {
     let usingMenu = false
     let savedHand = []
     let takeoutBoxFreeze = false
-    let takeoutCount = 0
     let takeoutCards = []
+    let usedTakeout = false
     let specialOrderFreeze = false
     let misoAllowed = true
     let firstMisoIndex = -1
@@ -1624,6 +1624,7 @@ const PlayPage = () => {
           for (let i = 0; i < allFruitCounts.length; i++)
             for (let j = 0; j < allFruitCounts[i].length; j++)
               sum += allFruitCounts[i][j]
+          sum /= 2
           console.log(deck.pile.length + deck.dessertPile.length + sum)
         } else
           console.log(
@@ -2090,7 +2091,14 @@ const PlayPage = () => {
             return
           }
 
-          let choiceCard = pickComputerSpoon()
+          let choiceCard = pickComputerSpoon(
+            players[index],
+            getOpps(index),
+            cardsLeft,
+            round,
+            diff[0],
+            [roll, spec, app, dess]
+          )
           let seeking = choiceCard.eligibleTypes
             ? choiceCard.eligibleTypes
             : [choiceCard.type]
@@ -2130,8 +2138,9 @@ const PlayPage = () => {
 
           players[index].hand = tempHand
           let choice = pickComputerMenu(
-            players[index].hand,
-            getOppsStashes(index),
+            players[index],
+            getOpps(index),
+            cardsLeft,
             round,
             diff[0]
           )
@@ -2161,17 +2170,26 @@ const PlayPage = () => {
             return
           }
 
-          let takenOutCards = pickComputerTakeout()
-          let itemsString = takenOutCards.length == 1 ? 'item' : 'items'
-          notify(
-            'Took out ' +
-              takenOutCards.length +
-              ' ' +
-              itemsString +
-              ' with takeout box',
-            '🥡',
-            index
+          let takenOutCards = pickComputerTakeout(
+            players[index],
+            getOpps(index),
+            cardsLeft,
+            round,
+            diff[0]
           )
+
+          if (takenOutCards.length == 0)
+            notify('Took out 0 items with takeout box', '🥡', index)
+
+          for (let i = 0; i < takenOutCards.length; i++)
+            notify(
+              'Took out ' + takenOutCards[i].text + ' with takeout box',
+              '🥡',
+              index
+            )
+
+          for (let i = 0; i < takenOutCards.length; i++)
+            takeoutCards.push(takenOutCards[i])
 
           // Move takeout box to discard pile
           deck.discardPile.push(removePriorityCard(index))
@@ -2414,15 +2432,11 @@ const PlayPage = () => {
           // Ends the selection process for takeout box
           const takeoutPressed = () => {
             deck.discardPile.push(removePriorityCard(0))
-            let itemString = takeoutCount == 1 ? ' item' : ' items'
-            notify(
-              'Took out ' + takeoutCount + itemString + ' with takeout box',
-              '🥡',
-              0
-            )
-            takeoutCount = 0
             takeoutBoxFreeze = false
             priority++
+            if (!usedTakeout)
+              notify('Took out 0 items with takeout box', '🥡', 0)
+            usedTakeout = false
             resolveTurn()
             updateData()
           }
@@ -2438,9 +2452,14 @@ const PlayPage = () => {
                 e.target.alt != 'turned over card'
               ) {
                 takeoutCards.push(players[0].stash[i])
+                notify(
+                  'Took out ' + players[0].stash[i].text + ' with takeout box',
+                  '🥡',
+                  0
+                )
+                usedTakeout = true
                 players[0].stash[i] = cards.TOC
                 setUserStash(userStash.toSpliced(i, 1, cards.TOC))
-                takeoutCount++
 
                 // If there are no more cards to turn over automatically end selection
                 for (let card of players[0].stash)
