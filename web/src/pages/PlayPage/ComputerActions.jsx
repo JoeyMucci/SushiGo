@@ -256,7 +256,7 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
     return (
       scoreDumpling(newPlayerStash) -
       scoreDumpling(player.stash) +
-      cardsLeft / 4
+      ((cardsLeft / 4) * (5 - countCard(newPlayerStash, cards.DUMPLING))) / 5
     )
 
   // TEMPURA - 5 if it completes the set, otherwise value declines as round progresses
@@ -426,13 +426,22 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
       return cardsLeft <= 6 && cardsLeft > 3 ? 0.9 - 0.1 * (6 - cardsLeft) : 0
 
     if (
-      [cards.SALMON.type, cards.MAKITWO.type, cards.URAMAKIFOUR.type].includes(
+      [
+        cards.NIGIRIGUIDE.type,
+        cards.MAKIGUIDE.type,
+        cards.URAMAKIGUIDE.type,
+      ].includes(playerCard.type)
+    )
+      return cardsLeft <= 3 ? 0.9 - 0.15 * (3 - cardsLeft) : 0
+
+    if (
+      [cards.EGG.type, cards.MAKIONE.type, cards.URAMAKITHREE.type].includes(
         playerCard.type
       )
     )
-      return cardsLeft <= 6 && cardsLeft > 3 ? 0.9 - 0.1 * (6 - cardsLeft) : 0
+      return 0
 
-    if (playerCard.type == cards.TEMAKIGUIDE.type)
+    if (playerCard.type == cards.TEMAKI.type)
       return cardsLeft >= 6
         ? 1 - 0.05 * (MAXHANDCARDS - cardsLeft)
         : 0.75 - 0.1 * (5 - cardsLeft)
@@ -456,9 +465,9 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
         cards.WASABI.type,
         cards.TEA.type,
         cards.SOYSAUCE.type,
-        cards.SPECIALORDER.type,
-        cards.PUDDINGGUIDE.type,
-        cards.GTICGUIDE.type,
+        cards.SPECIALO.type,
+        cards.PUDDING.type,
+        cards.GTIC.type,
         cards.FRUITGUIDE.type,
       ].includes(playerCard.type)
     )
@@ -466,13 +475,13 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
 
     if (
       [
-        cards.DUMPLINGGUIDE.type,
-        cards.TEMPURAGUIDE.type,
-        cards.SASHIMIGUIDE.type,
-        cards.MISOUGIDE.type,
-        cards.EDAMAMEGUIDE.type,
-        cards.EELGUIDE.type,
-        cards.TOFUGUIDE.type,
+        cards.DUMPLING.type,
+        cards.TEMPURA.type,
+        cards.SASHIMI.type,
+        cards.MISO.type,
+        cards.EDAMAME.type,
+        cards.EEL.type,
+        cards.TOFU.type,
         cards.ONIGIRIGUIDE.type,
       ].includes(playerCard.type)
     )
@@ -491,7 +500,7 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
       [
         cards.ONICIRCLE.type,
         cards.ONISQUARE.type,
-        cards.ONITRIANGLE.type,
+        cards.ONITRI.type,
         cards.ONIFLAT.type,
       ].includes(playerCard.type)
     )
@@ -516,14 +525,11 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
       return cardsLeft / 27
   }
 
+  console.log('Spoon probability: ' + playerCard.text + '=' + getProbability())
+
   return (
-    getExpectedVal(
-      typeToCard(playerCard.type),
-      player,
-      opps,
-      cardsLeft,
-      round
-    ) * getProbability()
+    getExpectedVal(playerCard, player, opps, cardsLeft, round) *
+    getProbability()
   )
 }
 
@@ -969,7 +975,15 @@ export const pickComputerSpoon = (
     for (let type of info[i]) {
       let eligibleTypes = typeToCard(type).eligibleTypes
       for (let i = 0; i < eligibleTypes.length; i++)
-        spoonCards.push(typeToCard(eligibleTypes[i]))
+        if (
+          ![
+            cards.CHOPSTICKSONE.color,
+            cards.SPOONFOUR.color,
+            cards.MENUSEVEN.color,
+            cards.TAKEOUTTEN.color,
+          ].includes(typeToCard(eligibleTypes[i]).color)
+        )
+          spoonCards.push(typeToCard(eligibleTypes[i]))
       if (eligibleTypes.length > 1) spoonCards.push(typeToCard(type))
     }
 
@@ -991,6 +1005,48 @@ export const pickComputerSpoon = (
   console.log('--------------')
 
   return spoonCards[chooseIndex(expectedVals, cardsLeft, difficulty)]
+}
+
+export const pickComputerBeingSpooned = (
+  requester,
+  requesterOpps,
+  requestee,
+  allowedTypes,
+  cardsLeft,
+  round,
+  difficulty
+) => {
+  let allowedIndices = []
+  for (let i = 0; i < requestee.hand.length; i++)
+    if (allowedTypes.includes(requestee.hand[i].type)) allowedIndices.push(i)
+
+  if (difficulty == 'easy')
+    return allowedIndices[Math.floor(Math.random() * allowedIndices.length)]
+
+  let worstIndex = -1
+  let worstExVal = 999
+
+  for (let i = 0; i < allowedIndices.length; i++)
+    if (
+      getExpectedVal(
+        requestee.hand[allowedIndices[i]],
+        requester,
+        requesterOpps,
+        cardsLeft,
+        round
+      ) < worstExVal
+    ) {
+      worstExVal = getExpectedVal(
+        requestee.hand[allowedIndices[i]],
+        requester,
+        requesterOpps,
+        cardsLeft,
+        round
+      )
+      worstIndex = i
+    }
+
+  return allowedIndices[worstIndex]
 }
 
 export const pickComputerMenu = (

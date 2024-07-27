@@ -76,6 +76,7 @@ import {
   pickComputerCard,
   pickComputerSpecialOrder,
   pickComputerSpoon,
+  pickComputerBeingSpooned,
   pickComputerMenu,
   pickComputerTakeout,
 } from 'web/src/pages/PlayPage/ComputerActions.jsx'
@@ -1009,6 +1010,9 @@ const PlayPage = () => {
     let usingChopsticks = false
     let activeChopsticksTypes = []
     let usingSpoon = false
+    let beingSpooned = false
+    let spoonAsker = -1
+    let requestedTypes = []
     let activeSpoonTypes = []
     let usingMenu = false
     let savedHand = []
@@ -1416,32 +1420,52 @@ const PlayPage = () => {
             return players[index].stash.splice(i, 1)[0]
       }
 
-      const cleanupChopsticks = (index) => {
-        // Put the chopsticks back at a random location, restoring it to a special order if it was one
-        if (countCard(players[index].stash, priorityToCard()) > 1) {
-          removePriorityCard(index)
-          players[index].hand.splice(
-            Math.floor(Math.random() * (players[index].hand.length + 1)),
-            0,
-            cards.SPECIALO
-          )
+      const cleanupChopsticks = (playerIndex, pickedIndex) => {
+        // Put the chopsticks back after the card to be played location, restoring it to a special order if it was one
+        if (countCard(players[playerIndex].stash, priorityToCard()) > 1) {
+          removePriorityCard(playerIndex)
+          players[playerIndex].hand.splice(pickedIndex + 1, 0, cards.SPECIALO)
         } else
-          players[index].hand.splice(
-            Math.floor(Math.random() * (players[index].hand.length + 1)),
+          players[playerIndex].hand.splice(
+            pickedIndex + 1,
             0,
-            removePriorityCard(index)
+            removePriorityCard(playerIndex)
           )
 
-        if (index == 0) {
+        if (playerIndex == 0) {
           usingChopsticks = false
           setUserClickedType(-1)
         }
-        players[index].utensilUsed = true
+        players[playerIndex].utensilUsed = true
       }
 
-      // On successful spoon usage
-      const cleanupSpoon = (requesterIndex, requesteeIndex, cardIndex) => {
+      /* On successful spoon usage (i.e. player[requesteeIndex] has 1+ card with an allowedType)
+         cardIndex will not be supplied unless the user is being spooned */
+      const cleanupSpoon = (
+        requesterIndex,
+        requesteeIndex,
+        allowedTypes,
+        cardIndex
+      ) => {
+        if (requesteeIndex == 0 && !beingSpooned) {
+          beingSpooned = true
+          spoonAsker = requesterIndex
+          requestedTypes = allowedTypes
+          return
+        }
+
+        if (!beingSpooned)
+          cardIndex = pickComputerBeingSpooned(
+            players[requesterIndex],
+            getOpps(requesterIndex),
+            players[requesteeIndex],
+            allowedTypes,
+            cardsLeft,
+            round,
+            diff[0]
+          )
         let card = players[requesteeIndex].hand[cardIndex]
+
         notify(
           'Gave ' + card.text + ' to ' + players[requesterIndex].name,
           '🥄',
@@ -1481,7 +1505,12 @@ const PlayPage = () => {
         if (requesterIndex == 0) {
           usingSpoon = false
           setUserClickedType(-1)
+        } else if (requesteeIndex == 0) {
+          beingSpooned = false
+          spoonAsker = -1
+          requestedTypes = []
         }
+
         players[requesterIndex].utensilUsed = true
       }
 
@@ -1950,14 +1979,18 @@ const PlayPage = () => {
               players[playerIndex].stash[i].type != cards.SPECIALO.type &&
               (players[playerIndex].stash[i].type != userClickedType ||
                 ![cards.CHOPSTICKSONE.color, cards.SPOONFOUR.color].includes(
-                  players[0].stash[0].color
+                  players[playerIndex].stash[i].color
                 ))
             )
               canUseSpecialOrder = true
 
           if (!canUseSpecialOrder) {
-            notify('Played special order without copying', '🌈', playerIndex)
-            deck.discardPile.push(players[0].stash.pop())
+            notify(
+              'Could not copy anything with special order',
+              '🌈',
+              playerIndex
+            )
+            deck.discardPile.push(players[playerIndex].stash.pop())
           } else if (playerIndex == 0) {
             specialOrderFreeze = true
             return
@@ -1970,7 +2003,10 @@ const PlayPage = () => {
               diff[0]
             )
 
-            if (choice == -1) {
+            if (
+              choice == -1 ||
+              players[playerIndex].stash[choice].type == cards.SPECIALO.type
+            ) {
               notify('Played special order without copying', '🌈', playerIndex)
               deck.discardPile.push(players[playerIndex].stash.pop())
             } else {
@@ -2070,7 +2106,7 @@ const PlayPage = () => {
               diff[0]
             )
 
-            cleanupChopsticks(index)
+            cleanupChopsticks(index, choice)
 
             notify(
               'Played ' + players[index].hand[choice].text + ' with chopsticks',
@@ -2110,7 +2146,7 @@ const PlayPage = () => {
             let requesteeIndex = (index + i) % 4
             for (let j = 0; j < players[requesteeIndex].hand.length; j++)
               if (seeking.includes(players[requesteeIndex].hand[j].type)) {
-                cleanupSpoon(requesterIndex, requesteeIndex, j)
+                cleanupSpoon(requesterIndex, requesteeIndex, seeking)
                 return
               }
             notify('Did not have ' + choiceCard.text, '🥄', requesteeIndex)
@@ -2242,7 +2278,7 @@ const PlayPage = () => {
                 (i > 0 || userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
-            if (usingSpoon) break
+            if (usingSpoon || beingSpooned) break
             priority++
           case 5:
             for (let i = 0; i < players.length; i++)
@@ -2252,7 +2288,7 @@ const PlayPage = () => {
                 (i > 0 || userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
-            if (usingSpoon) break
+            if (usingSpoon || beingSpooned) break
             priority++
           case 6:
             for (let i = 0; i < players.length; i++)
@@ -2262,7 +2298,7 @@ const PlayPage = () => {
                 (i > 0 || userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
-            if (usingSpoon) break
+            if (usingSpoon || beingSpooned) break
             priority++
           case 7:
             for (let i = 0; i < players.length; i++)
@@ -2328,6 +2364,8 @@ const PlayPage = () => {
 
       const handClick = (e) => {
         const userChopsticksHandling = () => {
+          cleanupChopsticks(0, parseInt(e.target.name))
+
           notify(
             'Played ' +
               players[0].hand[parseInt(e.target.name)].text +
@@ -2337,13 +2375,36 @@ const PlayPage = () => {
           )
           playCard(parseInt(e.target.name), 0, true)
 
-          cleanupChopsticks(0)
-
           if (!specialOrderFreeze) {
             priority++
             resolveTurn()
           }
 
+          updateData()
+        }
+
+        const userBeingSpoonedHandling = () => {
+          if (
+            !requestedTypes.includes(
+              players[0].hand[parseInt(e.target.name)].type
+            )
+          ) {
+            notify(
+              players[0].hand[parseInt(e.target.name)].text
+                .substr(0, 1)
+                .toUpperCase() +
+                players[0].hand[parseInt(e.target.name)].text.substr(1) +
+                ' was not requested',
+              '🥄',
+              0
+            )
+            updateData()
+            return
+          }
+
+          cleanupSpoon(spoonAsker, 0, requestedTypes, parseInt(e.target.name))
+          priority++
+          resolveTurn()
           updateData()
         }
 
@@ -2390,6 +2451,7 @@ const PlayPage = () => {
         // During special order or takeout box use, cannot play from hand
         if (specialOrderFreeze || takeoutBoxFreeze);
         else if (usingChopsticks) userChopsticksHandling()
+        else if (beingSpooned) userBeingSpoonedHandling()
         else if (usingMenu) userMenuHandling()
         else if (players[0].hand[0].color == cards.NEXT.color) advanceRound()
         else regularClick()
@@ -2406,7 +2468,7 @@ const PlayPage = () => {
           for (let j = 0; j < players[i].hand.length; j++) {
             console.log(players[i].hand[j].type)
             if (seeking.includes(players[i].hand[j].type)) {
-              cleanupSpoon(0, i, j)
+              cleanupSpoon(0, i, seeking)
 
               if (!specialOrderFreeze) {
                 priority++
@@ -2839,6 +2901,17 @@ const PlayPage = () => {
                     info={card}
                     action={handClick}
                     fullOpacity={false}
+                    displayFrac={'1'}
+                  />
+                )
+              else if (beingSpooned)
+                return (
+                  <Card
+                    key={i}
+                    numberName={i}
+                    info={card}
+                    action={handClick}
+                    fullOpacity={requestedTypes.includes(card.type)}
                     displayFrac={'1'}
                   />
                 )
