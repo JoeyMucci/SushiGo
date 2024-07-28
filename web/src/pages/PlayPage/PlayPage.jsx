@@ -75,6 +75,7 @@ import wasabiguide from 'web/public/wasabiguide.jpg'
 import {
   pickComputerCard,
   pickComputerSpecialOrder,
+  pickComputerUsingUtensil,
   pickComputerSpoon,
   pickComputerBeingSpooned,
   pickComputerMenu,
@@ -541,7 +542,7 @@ export const cards = Object.freeze({
   },
   TOC: {
     type: 69,
-    text: 'turned over card',
+    text: 'leftovers',
     picpath: turnedovercard,
     color: null,
     count: 0,
@@ -1380,6 +1381,41 @@ const PlayPage = () => {
         toastNotifications[index].push({ message: message, emoji: emoji })
       }
 
+      // Toast notifications for scoring
+      const reportScore = (playerCards, score, card, area) => {
+        let emoji = ''
+        if (score >= 6) emoji = '😁'
+        else if (score > 0) emoji = '🙂'
+        else if (score == 0) emoji = '😑'
+        else emoji = '😦'
+
+        let pointsString = score == 1 ? 'point' : 'points'
+
+        // Always display dessert and temaki scoring toast
+        if (playerCards == null || card.type == cards.TEMAKIGUIDE.type) {
+          notify(
+            'Scored ' + score + ' ' + pointsString + ' from ' + card.text,
+            emoji,
+            area
+          )
+          return score
+        }
+
+        let seeking = card.eligibleTypes ? card.eligibleTypes : [card.type]
+
+        for (let type of seeking)
+          for (let i = 0; i < playerCards.length; i++)
+            if (type == playerCards[i].type) {
+              notify(
+                'Scored ' + score + ' ' + pointsString + ' from ' + card.text,
+                emoji,
+                area
+              )
+              return score
+            }
+        return score
+      }
+
       /* Returns the card given by priority
          (i.e. the special card currently in use) */
       const priorityToCard = () => {
@@ -1585,7 +1621,7 @@ const PlayPage = () => {
 
       // Dessert does not go back into deck and is tracked to score at end
       const setAsideDessert = () => {
-        for (let i = 0; i < players.length; i++)
+        for (let i = 0; i < players.length; i++) {
           for (let j = players[i].stash.length - 1; j >= 0; j--) {
             let removedCard = players[i].stash.pop()
             if (
@@ -1600,6 +1636,47 @@ const PlayPage = () => {
               else players[i].dessert++
             else players[i].stash.unshift(removedCard)
           }
+
+          let dessertDifference = players[i].dessert
+          if (i == 0) dessertDifference -= userDessert
+          else if (i == 1) dessertDifference -= cpuOneDessert
+          else if (i == 2) dessertDifference -= cpuTwoDessert
+          else dessertDifference -= cpuThreeDessert
+
+          if (dessertDifference == 0) continue
+
+          if (dess.includes(cards.FRUITGUIDE.type)) {
+            let fruitCounts = parseFruit(dessertDifference)
+            let waterString = fruitCounts[0] == 1 ? 'watermelon' : 'watermelons'
+            let pineString = fruitCounts[1] == 1 ? 'pineapple' : 'pineapples'
+            let orangeString = fruitCounts[2] == 1 ? 'orange' : 'oranges'
+            notify(
+              'Stocked ' +
+                fruitCounts[0] +
+                ' ' +
+                waterString +
+                ', ' +
+                fruitCounts[1] +
+                ' ' +
+                pineString +
+                ', and ' +
+                fruitCounts[2] +
+                ' ' +
+                orangeString,
+              '🤤',
+              i
+            )
+            continue
+          }
+
+          let baseString = dess.includes(cards.PUDDINGGUIDE.type)
+            ? 'pudding'
+            : 'green tea ice cream'
+          let pluralString =
+            dessertDifference == 1 ? baseString : baseString + 's'
+
+          notify('Stocked ' + dessertDifference + ' ' + pluralString, '🤤', i)
+        }
       }
 
       // Changes turned over cards back
@@ -1670,55 +1747,131 @@ const PlayPage = () => {
 
       /* Scores a player's cards, only accounts for end of turn
          (i.e. no uramaki reaching 10 or dessert) */
-      const scoreRegular = (playerCards, oppsCards) => {
+      const scoreRegular = (playerCards, oppsCards, area) => {
         console.log('SCORING START')
         console.log(playerCards)
         let runningScore = 0
 
         // NIGIRI
-        runningScore += scoreNigiri(playerCards)
+        runningScore += reportScore(
+          playerCards,
+          scoreNigiri(playerCards),
+          cards.NIGIRIGUIDE,
+          area
+        )
 
         console.log('POST NIGIRI')
         console.log(runningScore)
 
         // ROLLS
         if (roll.includes(cards.MAKIGUIDE.type))
-          runningScore += scoreMaki(playerCards, oppsCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreMaki(playerCards, oppsCards),
+            cards.MAKIGUIDE,
+            area
+          )
         else if (roll.includes(cards.TEMAKIGUIDE.type))
-          runningScore += scoreTemaki(playerCards, oppsCards)
-        else runningScore += scoreUramakiEnd(playerCards, oppsCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreTemaki(playerCards, oppsCards),
+            cards.TEMAKIGUIDE,
+            area
+          )
+        else
+          runningScore += reportScore(
+            playerCards,
+            scoreUramakiEnd(playerCards, oppsCards),
+            cards.URAMAKIGUIDE,
+            area
+          )
 
         console.log('POST ROLLS')
         console.log(runningScore)
 
         // SPECIALS
         if (spec.includes(cards.TAKEOUTGUIDE.type))
-          runningScore += scoreLeftovers(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreLeftovers(playerCards),
+            cards.TAKEOUTGUIDE,
+            area
+          )
         if (spec.includes(cards.TEAGUIDE.type))
-          runningScore += scoreTea(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreTea(playerCards),
+            cards.TEAGUIDE,
+            area
+          )
         if (spec.includes(cards.SOYSAUCEGUIDE.type))
-          runningScore += scoreSoysauce(playerCards, oppsCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreSoysauce(playerCards, oppsCards),
+            cards.SOYSAUCEGUIDE,
+            area
+          )
 
         console.log('POST SPECIALS')
         console.log(runningScore)
 
         // APPETIZERS
         if (app.includes(cards.DUMPLINGGUIDE.type))
-          runningScore += scoreDumpling(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreDumpling(playerCards),
+            cards.DUMPLINGGUIDE,
+            area
+          )
         if (app.includes(cards.TEMPURAGUIDE.type))
-          runningScore += scoreTempura(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreTempura(playerCards),
+            cards.TEMPURAGUIDE,
+            area
+          )
         if (app.includes(cards.SASHIMIGUIDE.type))
-          runningScore += scoreSashimi(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreSashimi(playerCards),
+            cards.SASHIMIGUIDE,
+            area
+          )
         if (app.includes(cards.MISOGUIDE.type))
-          runningScore += scoreMiso(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreMiso(playerCards),
+            cards.MISOGUIDE,
+            area
+          )
         if (app.includes(cards.EDAMAMEGUIDE.type))
-          runningScore += scoreEdamame(playerCards, oppsCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreEdamame(playerCards, oppsCards),
+            cards.EDAMAMEGUIDE,
+            area
+          )
         if (app.includes(cards.EELGUIDE.type))
-          runningScore += scoreEel(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreEel(playerCards),
+            cards.EELGUIDE,
+            area
+          )
         if (app.includes(cards.TOFUGUIDE.type))
-          runningScore += scoreTofu(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreTofu(playerCards),
+            cards.TOFUGUIDE,
+            area
+          )
         if (app.includes(cards.ONIGIRIGUIDE.type))
-          runningScore += scoreOnigiri(playerCards)
+          runningScore += reportScore(
+            playerCards,
+            scoreOnigiri(playerCards),
+            cards.ONIGIRIGUIDE,
+            area
+          )
 
         console.log('POST APPS')
         console.log(runningScore)
@@ -1726,24 +1879,45 @@ const PlayPage = () => {
         return runningScore
       }
 
-      const scoreDessert = (playerDessert, oppsDessert) => {
+      const scoreDessert = (playerDessert, oppsDessert, area) => {
         if (dess.includes(cards.PUDDINGGUIDE.type))
-          return scorePudding(playerDessert, oppsDessert)
+          return reportScore(
+            null,
+            scorePudding(playerDessert, oppsDessert),
+            cards.PUDDINGGUIDE,
+            area
+          )
         else if (dess.includes(cards.GTICGUIDE.type))
-          return scoreGTIC(playerDessert)
-        else return scoreFruit(playerDessert)
+          return reportScore(
+            null,
+            scoreGTIC(playerDessert),
+            cards.GTICGUIDE,
+            area
+          )
+        else
+          return reportScore(
+            null,
+            scoreFruit(playerDessert),
+            cards.FRUITGUIDE,
+            area
+          )
       }
 
       const scoreRound = () => {
         for (let i = 0; i < players.length; i++)
-          players[i].score += scoreRegular(players[i].stash, getOppsStashes(i))
+          players[i].score += scoreRegular(
+            players[i].stash,
+            getOppsStashes(i),
+            i
+          )
       }
 
       const scoreDesserts = () => {
         for (let i = 0; i < players.length; i++)
           players[i].score += scoreDessert(
             players[i].dessert,
-            getOppsDesserts(i)
+            getOppsDesserts(i),
+            i
           )
       }
 
@@ -1766,7 +1940,7 @@ const PlayPage = () => {
                     background: '#004', // nightwing
                     color: '#ff917d', // salmon
                   },
-                  className: 'font-cal text-2xl hover:bg-sky-700',
+                  className: 'font-cal text-base hover:bg-sky-700',
                 })
             else
               for (let j = toastNotifications[i].length - 1; j >= 0; j--)
@@ -1777,7 +1951,7 @@ const PlayPage = () => {
                     background: '#004', // nightwing
                     color: '#ff917d', // salmon
                   },
-                  className: 'font-cal text-2xl hover:bg-sky-700',
+                  className: 'font-cal text-base hover:bg-sky-700',
                 })
           }
 
@@ -2092,29 +2266,30 @@ const PlayPage = () => {
       const resolveTurn = () => {
         const handleChopsticks = (index) => {
           // Can only use chopsticks/spoon once a turn and hand must not be empty
-          if (!players[index].utensilUsed && players[index].hand.length > 0) {
-            if (index == 0) {
-              usingChopsticks = true
-              return
-            }
+          if (players[index].utensilUsed || players[index].hand.length == 0)
+            return
 
-            let choice = pickComputerCard(
-              players[index],
-              getOpps(index),
-              cardsLeft,
-              round,
-              diff[0]
-            )
-
-            cleanupChopsticks(index, choice)
-
-            notify(
-              'Played ' + players[index].hand[choice].text + ' with chopsticks',
-              '🥢',
-              index
-            )
-            playCard(choice, index, true)
+          if (index == 0) {
+            usingChopsticks = true
+            return
           }
+
+          let choice = pickComputerCard(
+            players[index],
+            getOpps(index),
+            cardsLeft,
+            round,
+            diff[0]
+          )
+
+          cleanupChopsticks(index, choice)
+
+          notify(
+            'Played ' + players[index].hand[choice].text + ' with chopsticks',
+            '🥢',
+            index
+          )
+          playCard(choice, index, true)
         }
 
         const handleSpoon = (index) => {
@@ -2193,8 +2368,17 @@ const PlayPage = () => {
 
         const handleTakeout = (index) => {
           // Cannot use takeout box if there are no cards to turn over
-          if (players[index].stash.length == 1) {
-            notify('Took out 0 items with takeout box', '🥡', index)
+          let canUseTakeoutBox = false
+
+          for (let card of players[index].stash)
+            if (
+              card.type != cards.TOC.type &&
+              card.type != priorityToCard().type
+            )
+              canUseTakeoutBox = true
+
+          if (!canUseTakeoutBox) {
+            notify('Could not takeout anything with takeout box', '🥡', index)
 
             // Move takeout box to discard pile
             deck.discardPile.push(removePriorityCard(index))
@@ -2245,7 +2429,13 @@ const PlayPage = () => {
               if (
                 activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleChopsticks(i)
             if (usingChopsticks) break
@@ -2255,7 +2445,13 @@ const PlayPage = () => {
               if (
                 activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleChopsticks(i)
             if (usingChopsticks) return
@@ -2265,7 +2461,13 @@ const PlayPage = () => {
               if (
                 activeChopsticksTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleChopsticks(i)
             if (usingChopsticks) break
@@ -2275,7 +2477,13 @@ const PlayPage = () => {
               if (
                 activeSpoonTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
             if (usingSpoon || beingSpooned) break
@@ -2285,7 +2493,13 @@ const PlayPage = () => {
               if (
                 activeSpoonTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
             if (usingSpoon || beingSpooned) break
@@ -2295,7 +2509,13 @@ const PlayPage = () => {
               if (
                 activeSpoonTypes.includes(priorityToCard().type) &&
                 countCard(players[i].stash, priorityToCard()) > 0 &&
-                (i > 0 || userClickedType == priorityToCard().type)
+                ((i > 0 &&
+                  pickComputerUsingUtensil(
+                    players[i].stash,
+                    cardsLeft,
+                    diff[0]
+                  )) ||
+                  userClickedType == priorityToCard().type)
               )
                 handleSpoon(i)
             if (usingSpoon || beingSpooned) break

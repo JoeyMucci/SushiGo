@@ -669,17 +669,22 @@ const workTakeout = (player, opps, cardsLeft, round) => {
 
   // MISO SOUP - Never turn over (has 3 value)
 
-  /* EDAMAME - Turn over all if expected value lost on net is less than .5
-     (assumed benefit from reducing others' scores) */
+  /* EDAMAME - Turn over all if currenlty scoring two or less,
+     add opponent's loss to expected value */
   if (countCard(player.stash, cards.EDAMAME) > 0) {
-    let marginalValue =
-      (2 - getExpectedVal(cards.EDAMAME, player, opps, cardsLeft, round)) *
-      countCard(player.stash, cards.EDAMAME)
-    marginalValue += 0.5
+    let oppsWithEda = 0
+    let totalEdas = 0
+    for (let opp of opps)
+      if (countCard(opp.stash, cards.EDAMAME) > 0) {
+        oppsWithEda++
+        totalEdas += countCard(opp.stash, cards.EDAMAME)
+      }
 
-    if (marginalValue > 0) {
+    if (oppsWithEda < 3) {
+      addedValue +=
+        (2 - oppsWithEda) * countCard(player.stash, cards.EDAMAME) +
+        totalEdas / 3
       turnToTakeout(cards.EDAMAME, -1)
-      addedValue += marginalValue
     }
   }
 
@@ -960,6 +965,33 @@ export const pickComputerSpecialOrder = (
     }
 
   return maxIndex
+}
+
+export const pickComputerUsingUtensil = (
+  playerCards,
+  cardsLeft,
+  difficulty
+) => {
+  if (difficulty == 'easy') return false
+
+  if (difficulty == 'normal') return cardsLeft == 2 ? true : Math.random() > 0.5
+
+  let usesAvailable = cardsLeft - 1
+
+  let utensilsToUse = 0
+  for (let card of [
+    cards.CHOPSTICKSONE,
+    cards.CHOPSTICKSTWO,
+    cards.CHOPSTICKSTHREE,
+    cards.SPOONFOUR,
+    cards.SPOONFIVE,
+    cards.SPOONSIX,
+  ])
+    utensilsToUse += countCard(playerCards, card)
+
+  let leeway = Math.max(usesAvailable - utensilsToUse, 0)
+
+  return leeway == 0 ? true : Math.random() > 0.5
 }
 
 export const pickComputerSpoon = (
