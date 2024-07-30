@@ -2741,7 +2741,7 @@ const PlayPage = () => {
                 )
                 usedTakeout = true
                 players[0].stash[i] = cards.TOC
-                setUserStash(userStash.toSpliced(i, 1, cards.TOC))
+                updateData()
 
                 // If there are no more cards to turn over automatically end selection
                 for (let card of players[0].stash)
@@ -3135,6 +3135,17 @@ const PlayPage = () => {
                     displayFrac={'1'}
                   />
                 )
+              else if (usingMenu)
+                return (
+                  <Card
+                    key={i}
+                    numberName={i}
+                    info={card}
+                    action={handClick}
+                    fullOpacity={card.color != cards.MENUSEVEN.color}
+                    displayFrac={'1'}
+                  />
+                )
               else
                 return (
                   <Card
@@ -3323,10 +3334,39 @@ const PlayPage = () => {
       /* If not showing results, then display one hand in each corner and the user hand
        in the middle with the scores. Otherwise, show the results screen, which has the
        player's and their scores sorted to determine the winner. */
-      if (!showResults)
+      if (!showResults) {
+        const getActionSpecialTip = () => {
+          let message = ''
+          if (usingChopsticks)
+            message = 'Chopsticks: Play another card from hand'
+          else if (usingSpoon)
+            message =
+              'Spoon: Pick a card to request from above. If card has multiple types click its guide to request all types simultaneously'
+          else if (beingSpooned)
+            message = 'Spoon: Pick an applicable card to give to requester'
+          else if (usingMenu)
+            message = 'Menu: Pick a card from new hand to play'
+          else if (takeoutBoxFreeze)
+            message =
+              'Takeout Box: Click a card from your played cards to turn it over. Click Takeout Box to end'
+          else if (specialOrderFreeze)
+            message =
+              'Special Order: Click a card from your played cards to copy. Click Special Order to not copy any card'
+          else return
+
+          return (
+            <>
+              <br />
+              <span className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 text-center font-cal text-2xl text-[color:var(--color-salmon)]">
+                {message}
+              </span>
+            </>
+          )
+        }
+
         return (
           <>
-            <div className="flex h-screen flex-col">
+            <div className="flex h-screen flex-col text-center">
               <div className="relative basis-2/5">
                 <Stash platter={cpuOneStash} area={3} />
                 <Stash platter={cpuTwoStash} area={2} />
@@ -3358,6 +3398,7 @@ const PlayPage = () => {
                   />
                 </div>
               </div>
+              <div className="">{getActionSpecialTip()}</div>
               <div className="relative basis-2/5">
                 <Stash platter={userStash} area={0} />
                 <Stash platter={cpuThreeStash} area={1} />
@@ -3365,7 +3406,7 @@ const PlayPage = () => {
             </div>
           </>
         )
-      else {
+      } else {
         const comparePlayers = (a, b) => {
           if (a.score != b.score) return b.score - a.score
           if (a.dessert != b.dessert) return b.dessert - a.dessert
