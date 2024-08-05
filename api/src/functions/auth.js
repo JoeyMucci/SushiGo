@@ -61,7 +61,7 @@ export const handler = async (event, context) => {
 
     errors: {
       usernameOrPasswordMissing: 'Both username and password are required',
-      usernameNotFound: 'Username ${username} not found',
+      usernameNotFound: 'Email ${username} not found',
       // For security reasons you may want to make this the same as the
       // usernameNotFound error so that a malicious user can't use the error
       // to narrow down if it's the username or password that's incorrect
@@ -120,10 +120,10 @@ export const handler = async (event, context) => {
     }) => {
       return db.user.create({
         data: {
-          name: username,
+          email: username,
           hashedPassword: hashedPassword,
           salt: salt,
-          email: _userAttributes.email,
+          name: _userAttributes.name,
         },
       })
     },
@@ -138,7 +138,7 @@ export const handler = async (event, context) => {
     errors: {
       // `field` will be either "username" or "password"
       fieldMissing: '${field} is required',
-      usernameTaken: 'Username `${username}` already in use',
+      usernameTaken: 'Email `${username}` already in use',
     },
   }
 
@@ -166,7 +166,7 @@ export const handler = async (event, context) => {
     // client when invoking a handler that returns a user (like forgotPassword
     // and signup). This list should be as small as possible to be sure not to
     // leak any sensitive information to the client.
-    allowedUserFields: ['id', 'email'],
+    allowedUserFields: ['id', 'name', 'email'],
 
     // Specifies attributes on the cookie that dbAuth sets in order to remember
     // who is logged in. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies

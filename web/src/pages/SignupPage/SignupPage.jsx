@@ -17,15 +17,15 @@ const SignupPage = () => {
   }, [isAuthenticated])
 
   // focus on username box on page load
-  const usernameRef = useRef(null)
+  const emailRef = useRef(null)
   useEffect(() => {
-    usernameRef.current?.focus()
+    emailRef.current?.focus()
   }, [])
 
   const onSubmit = async (data) => {
     const response = await signUp({
-      username: data.username,
-      email: data.email,
+      username: data.email,
+      name: data.nickname,
       password: data.password,
     })
 
@@ -49,22 +49,10 @@ const SignupPage = () => {
         onSubmit={onSubmit}
         className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
       >
-        <Label name="username">Username</Label>
-        <TextField
-          name="username"
-          autoComplete="username"
-          ref={usernameRef}
-          validation={{
-            required: {
-              value: true,
-              message: 'Username is required',
-            },
-          }}
-        />
-        <br />
         <Label name="email">Email</Label>
         <TextField
           name="email"
+          ref={emailRef}
           validation={{
             required: {
               value: true,
@@ -73,6 +61,18 @@ const SignupPage = () => {
           }}
         />
         <br />
+        <Label name="nickname">Name</Label>
+        <TextField
+          name="nickname"
+          validation={{
+            required: {
+              value: true,
+              message: 'Name is required',
+            },
+          }}
+        />
+        <br />
+
         <Label name="password">Password</Label>
         <PasswordField
           name="password"

@@ -5,7 +5,7 @@ import { Link, routes } from '@redwoodjs/router'
 import { useAuth } from 'src/auth'
 
 const RollLayout = ({ children }) => {
-  const { isAuthenticated, currentUser, logOut } = useAuth()
+  const { logOut, isAuthenticated, currentUser } = useAuth()
 
   return (
     <>
@@ -49,25 +49,36 @@ const RollLayout = ({ children }) => {
                 Leaderboard
               </Link>
             </li>
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <li>
                 <Link
                   className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
                   to={routes.account()}
                 >
-                  Account
-                </Link>
-              </li>
-            ) : (
-              <li>
-                <Link
-                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
-                  to={routes.login()}
-                >
-                  Log In
+                  {currentUser.name}
                 </Link>
               </li>
             )}
+            <li>
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    logOut()
+                    window.location.href = '/'
+                  }}
+                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                >
+                  Log Out
+                </button>
+              ) : (
+                <button
+                  onClick={() => (window.location.href = '/login')}
+                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                >
+                  Log In
+                </button>
+              )}
+            </li>
           </ul>
         </nav>
       </header>
