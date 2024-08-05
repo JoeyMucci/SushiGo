@@ -1,16 +1,8 @@
 import { useRef } from 'react'
 import { useEffect } from 'react'
 
-import {
-  Form,
-  Label,
-  TextField,
-  PasswordField,
-  FieldError,
-  Submit,
-} from '@redwoodjs/forms'
+import { Form, Label, TextField, PasswordField, Submit } from '@redwoodjs/forms'
 import { Link, navigate, routes } from '@redwoodjs/router'
-import { Metadata } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import { useAuth } from 'src/auth'
@@ -33,8 +25,11 @@ const SignupPage = () => {
   const onSubmit = async (data) => {
     const response = await signUp({
       username: data.username,
+      email: data.email,
       password: data.password,
     })
+
+    console.log(response)
 
     if (response.message) {
       toast(response.message)
@@ -46,6 +41,82 @@ const SignupPage = () => {
     }
   }
 
+  return (
+    <>
+      <br />
+      <br />
+      <Form
+        onSubmit={onSubmit}
+        className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
+      >
+        <Label name="username">Username</Label>
+        <TextField
+          name="username"
+          autoComplete="username"
+          ref={usernameRef}
+          validation={{
+            required: {
+              value: true,
+              message: 'Username is required',
+            },
+          }}
+        />
+        <br />
+        <Label name="email">Email</Label>
+        <TextField
+          name="email"
+          validation={{
+            required: {
+              value: true,
+              message: 'Email is required',
+            },
+          }}
+        />
+        <br />
+        <Label name="password">Password</Label>
+        <PasswordField
+          name="password"
+          autoComplete="new-password"
+          validation={{
+            required: {
+              value: true,
+              message: 'Password is required',
+            },
+          }}
+        />
+
+        <br />
+
+        <Label name="retype-password">Retype Password</Label>
+        <PasswordField
+          name="retypepassword"
+          validation={{
+            required: {
+              value: true,
+              message: 'Password is required',
+            },
+          }}
+        />
+
+        <br />
+
+        <Submit className="rounded bg-[color:var(--color-oak)] px-2 py-2 font-cal text-6xl text-[color:var(--color-nature)]">
+          Sign Up
+        </Submit>
+
+        <br />
+
+        <div className="text-center">
+          <Link className="rw-link" to={routes.login()}>
+            Already have an account?
+          </Link>
+        </div>
+      </Form>
+      <Toaster />
+    </>
+  )
+
+  /*
   return (
     <>
       <Metadata title="Signup" />
@@ -124,6 +195,7 @@ const SignupPage = () => {
       </main>
     </>
   )
+    */
 }
 
 export default SignupPage

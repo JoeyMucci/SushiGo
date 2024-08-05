@@ -2,7 +2,11 @@ import sk from 'web/public/sushiking.png'
 
 import { Link, routes } from '@redwoodjs/router'
 
+import { useAuth } from 'src/auth'
+
 const RollLayout = ({ children }) => {
+  const { isAuthenticated, currentUser, logOut } = useAuth()
+
   return (
     <>
       <header>
@@ -45,14 +49,25 @@ const RollLayout = ({ children }) => {
                 Leaderboard
               </Link>
             </li>
-            <li>
-              <Link
-                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
-                to={routes.account()}
-              >
-                Account
-              </Link>
-            </li>
+            {isAuthenticated ? (
+              <li>
+                <Link
+                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                  to={routes.account()}
+                >
+                  Account
+                </Link>
+              </li>
+            ) : (
+              <li>
+                <Link
+                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                  to={routes.login()}
+                >
+                  Log In
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </header>

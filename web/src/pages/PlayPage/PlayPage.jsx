@@ -1283,6 +1283,8 @@ const PlayPage = () => {
 
       // When user elects to play again with same cards
       const resetVars = () => {
+        toast.dismiss()
+
         round = 1
         deck = {
           pile: [],
@@ -1650,22 +1652,12 @@ const PlayPage = () => {
             let waterString = fruitCounts[0] == 1 ? 'watermelon' : 'watermelons'
             let pineString = fruitCounts[1] == 1 ? 'pineapple' : 'pineapples'
             let orangeString = fruitCounts[2] == 1 ? 'orange' : 'oranges'
-            notify(
-              'Stocked ' +
-                fruitCounts[0] +
-                ' ' +
-                waterString +
-                ', ' +
-                fruitCounts[1] +
-                ' ' +
-                pineString +
-                ', and ' +
-                fruitCounts[2] +
-                ' ' +
-                orangeString,
-              '🤤',
-              i
-            )
+            if (fruitCounts[0])
+              notify('Stocked ' + fruitCounts[0] + ' ' + waterString, '🤤', i)
+            if (fruitCounts[1])
+              notify('Stocked ' + fruitCounts[1] + ' ' + pineString, '🤤', i)
+            if (fruitCounts[2])
+              notify('Stocked ' + fruitCounts[2] + ' ' + orangeString, '🤤', i)
             continue
           }
 
@@ -1970,6 +1962,7 @@ const PlayPage = () => {
         // Show results instead of game is round number exceeds actually number of rounds
         setShowResults(round > NUMROUNDS)
 
+        toast.dismiss()
         showToasts()
       }
 
@@ -2236,6 +2229,7 @@ const PlayPage = () => {
 
       // Ends a round and moves to the next (or results screen)
       const advanceRound = () => {
+        console.log('advance round run ')
         players[0].hand = []
         scoreRound()
 
@@ -2575,10 +2569,7 @@ const PlayPage = () => {
             if (takeoutBoxFreeze) break
             priority++
           default:
-            if (players[0].hand.length == 0)
-              if (round < 3) players[0].hand.push(cards.NEXT)
-              else players[0].hand.push(cards.FINAL)
-            else prepareNextTurn()
+            prepareNextTurn()
         }
       }
 
@@ -2673,7 +2664,6 @@ const PlayPage = () => {
         else if (usingChopsticks) userChopsticksHandling()
         else if (beingSpooned) userBeingSpoonedHandling()
         else if (usingMenu) userMenuHandling()
-        else if (players[0].hand[0].color == cards.NEXT.color) advanceRound()
         else regularClick()
       }
 
@@ -3109,7 +3099,49 @@ const PlayPage = () => {
 
       // selection - The cards in the hand
       const Hand = ({ selection }) => {
+        // Special hand interface for when requesting with spoon
         if (usingSpoon) return <SpoonHand />
+
+        // Display button to progress round once out of cards
+        if (selection.length == 0) {
+          let buttonText = round == NUMROUNDS ? 'FINAL SCORE' : 'NEXT ROUND'
+          if (priority == 0)
+            return (
+              <Form>
+                <br />
+                <br />
+                <Label className="m-2">
+                  <CheckboxField
+                    id="advance"
+                    name="advanceButton"
+                    onChange={advanceRound}
+                  />
+                  <span className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-6xl text-[color:var(--color-salmon)]">
+                    {buttonText}
+                  </span>
+                </Label>
+                <br />
+                <br />
+              </Form>
+            )
+          else
+            return (
+              <Form>
+                <br />
+                <br />
+                <Label className="m-2">
+                  <CheckboxField id="advance" name="advanceButton" />
+                  <span className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-6xl text-[color:var(--color-salmon)] opacity-50">
+                    {buttonText}
+                  </span>
+                </Label>
+                <br />
+                <br />
+              </Form>
+            )
+        }
+
+        // Normal display
         return (
           <div className="flex flex-row justify-center">
             {selection.map((card, i) => {

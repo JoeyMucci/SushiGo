@@ -120,10 +120,10 @@ export const handler = async (event, context) => {
     }) => {
       return db.user.create({
         data: {
-          email: username,
+          name: username,
           hashedPassword: hashedPassword,
           salt: salt,
-          // name: userAttributes.name
+          email: _userAttributes.email,
         },
       })
     },

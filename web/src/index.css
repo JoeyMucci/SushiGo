@@ -41,6 +41,10 @@ img {
   cursor: pointer;
 }
 
+[type=checkbox] + span {
+  cursor: pointer;
+}
+
 
 /* Hide the actual checkbox */
 [type=checkbox] {
