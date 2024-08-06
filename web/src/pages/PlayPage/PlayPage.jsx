@@ -1932,7 +1932,7 @@ const PlayPage = () => {
                     background: '#004', // nightwing
                     color: '#ff917d', // salmon
                   },
-                  className: 'font-cal text-base hover:bg-sky-700',
+                  className: 'font-cal text-base',
                 })
             else
               for (let j = toastNotifications[i].length - 1; j >= 0; j--)
@@ -1943,7 +1943,7 @@ const PlayPage = () => {
                     background: '#004', // nightwing
                     color: '#ff917d', // salmon
                   },
-                  className: 'font-cal text-base hover:bg-sky-700',
+                  className: 'font-cal text-base',
                 })
           }
 

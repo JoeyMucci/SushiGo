@@ -76,11 +76,15 @@ const SignupPage = () => {
         <Label name="password">Password</Label>
         <PasswordField
           name="password"
-          autoComplete="new-password"
           validation={{
             required: {
               value: true,
               message: 'Password is required',
+            },
+            pattern: {
+              value: /^(?=.*[A-Z0-9])(?=.*[!@#$&*]).{8, }$/,
+              message:
+                'That password is too weak (8 characters minimum length, special character, uppercase character, and digit required',
             },
           }}
         />

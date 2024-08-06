@@ -1,7 +1,14 @@
 import { useRef } from 'react'
 import { useEffect } from 'react'
 
-import { Form, Label, TextField, PasswordField, Submit } from '@redwoodjs/forms'
+import {
+  Form,
+  Label,
+  TextField,
+  PasswordField,
+  Submit,
+  FieldError,
+} from '@redwoodjs/forms'
 import { Link, navigate, routes } from '@redwoodjs/router'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
@@ -28,11 +35,32 @@ const LoginPage = () => {
     })
 
     if (response.message) {
-      toast(response.message)
+      toast(response.message, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     } else if (response.error) {
-      toast.error(response.error)
+      toast.error(response.error, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     } else {
-      toast.success('Welcome back!')
+      toast.success('Welcome Back', {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     }
   }
 
@@ -53,13 +81,18 @@ const LoginPage = () => {
               value: true,
               message: 'Email is required',
             },
+            pattern: {
+              value: /^[^@]+@[^.]+\.(co|com|edu|org|net|int|mil|gov)$/,
+              message: 'Please enter a valid email address',
+            },
           }}
         />
+        <FieldError name="email" className="rw-field-error" />
+
         <br />
         <Label name="password">Password</Label>
         <PasswordField
           name="password"
-          autoComplete="current-password"
           validation={{
             required: {
               value: true,
@@ -67,6 +100,7 @@ const LoginPage = () => {
             },
           }}
         />
+        <FieldError name="password" className="rw-field-error" />
 
         <br />
 
