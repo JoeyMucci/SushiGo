@@ -52,15 +52,6 @@ const LoginPage = () => {
         },
         className: 'font-cal text-base',
       })
-    } else {
-      toast.success('Welcome Back', {
-        position: 'bottom-center',
-        style: {
-          background: '#004', // nightwing
-          color: '#ff917d', // salmon
-        },
-        className: 'font-cal text-base',
-      })
     }
   }
 
@@ -80,10 +71,6 @@ const LoginPage = () => {
             required: {
               value: true,
               message: 'Email is required',
-            },
-            pattern: {
-              value: /^[^@]+@[^.]+\.(co|com|edu|org|net|int|mil|gov)$/,
-              message: 'Please enter a valid email address',
             },
           }}
         />

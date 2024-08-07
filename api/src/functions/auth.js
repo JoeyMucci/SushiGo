@@ -139,6 +139,8 @@ export const handler = async (event, context) => {
       // `field` will be either "username" or "password"
       fieldMissing: '${field} is required',
       usernameTaken: 'Email `${username}` already in use',
+      PasswordValidationError:
+        'Password is too weak (8 characters minimum length, special character, uppercase character, and digit required)',
     },
   }
 

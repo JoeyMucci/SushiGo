@@ -19,7 +19,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 to={routes.play()}
               >
                 Play
@@ -27,7 +27,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                className=" m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 to={routes.instructions()}
               >
                 Instructions
@@ -35,7 +35,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 to={routes.achievements()}
               >
                 Achievements
@@ -43,7 +43,7 @@ const RollLayout = ({ children }) => {
             </li>
             <li>
               <Link
-                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 to={routes.leaderboard()}
               >
                 Leaderboard
@@ -52,7 +52,7 @@ const RollLayout = ({ children }) => {
             {isAuthenticated && (
               <li>
                 <Link
-                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                   to={routes.account()}
                 >
                   {currentUser.name}
@@ -66,14 +66,14 @@ const RollLayout = ({ children }) => {
                     logOut()
                     window.location.href = '/'
                   }}
-                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                  className="m-2 px-4 py-1 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 >
                   Log Out
                 </button>
               ) : (
                 <button
                   onClick={() => (window.location.href = '/login')}
-                  className="m-2 px-4 py-2 font-cal text-[color:var(--color-salmon)]"
+                  className="m-2 px-4 py-1 font-cal text-[color:var(--color-salmon)] transition duration-100 hover:bg-[color:var(--color-oak)] hover:text-[color:var(--color-nature)]"
                 >
                   Log In
                 </button>

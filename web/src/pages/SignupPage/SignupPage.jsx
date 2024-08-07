@@ -1,7 +1,14 @@
 import { useRef } from 'react'
 import { useEffect } from 'react'
 
-import { Form, Label, TextField, PasswordField, Submit } from '@redwoodjs/forms'
+import {
+  Form,
+  Label,
+  TextField,
+  PasswordField,
+  Submit,
+  FieldError,
+} from '@redwoodjs/forms'
 import { Link, navigate, routes } from '@redwoodjs/router'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
@@ -22,22 +29,35 @@ const SignupPage = () => {
     emailRef.current?.focus()
   }, [])
 
+  const passwordRef = useRef(null)
+
   const onSubmit = async (data) => {
+    console.log(passwordRef)
     const response = await signUp({
       username: data.email,
       name: data.nickname,
       password: data.password,
     })
 
-    console.log(response)
-
     if (response.message) {
+      toast(response.message, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
       toast(response.message)
     } else if (response.error) {
-      toast.error(response.error)
-    } else {
-      // user is signed in automatically
-      toast.success('Welcome!')
+      toast.error(response.error, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     }
   }
 
@@ -58,9 +78,16 @@ const SignupPage = () => {
               value: true,
               message: 'Email is required',
             },
+            pattern: {
+              value: /^[^@]+@[^.]+\.(co|com|edu|org|net|int|mil|gov)$/,
+              message: 'Please enter a valid email address',
+            },
           }}
         />
+        <FieldError name="email" className="rw-field-error" />
+
         <br />
+
         <Label name="nickname">Name</Label>
         <TextField
           name="nickname"
@@ -71,36 +98,43 @@ const SignupPage = () => {
             },
           }}
         />
+        <FieldError name="nickname" className="rw-field-error" />
+
         <br />
 
         <Label name="password">Password</Label>
         <PasswordField
           name="password"
+          ref={passwordRef}
           validation={{
             required: {
               value: true,
               message: 'Password is required',
             },
             pattern: {
-              value: /^(?=.*[A-Z0-9])(?=.*[!@#$&*]).{8, }$/,
+              value: /^(?=.*[A-Z0-9])(?=.*[!@#$%^&*]).{8,}$/,
               message:
-                'That password is too weak (8 characters minimum length, special character, uppercase character, and digit required',
+                'Password needs 8+ characters, special character, capital, digit',
             },
           }}
         />
+        <FieldError name="password" className="rw-field-error" />
 
         <br />
 
-        <Label name="retype-password">Retype Password</Label>
+        <Label name="retypepassword">Retype Password</Label>
         <PasswordField
           name="retypepassword"
           validation={{
             required: {
               value: true,
-              message: 'Password is required',
+              message: 'Retyped Password is required',
             },
+            validate: (value) =>
+              value == passwordRef.current.value || 'Passwords do not match',
           }}
         />
+        <FieldError name="retypepassword" className="rw-field-error" />
 
         <br />
 
