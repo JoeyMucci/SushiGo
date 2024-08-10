@@ -9,19 +9,38 @@ import {
   Submit,
   FieldError,
 } from '@redwoodjs/forms'
-import { Link, navigate, routes } from '@redwoodjs/router'
+import { Link, routes } from '@redwoodjs/router'
+import { useMutation } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import { useAuth } from 'src/auth'
 
+const CREATE_ACHIEVEMENTS = gql`
+  mutation CreateAchievementsMutation($input: String!) {
+    createAchievements(email: $input) {
+      id
+    }
+  }
+`
+
 const SignupPage = () => {
+  // eslint-disable-next-line no-unused-vars
+  const [createAchievements, { loading, error }] = useMutation(
+    CREATE_ACHIEVEMENTS,
+    {
+      onCompleted: () => {},
+    }
+  )
+
   const { isAuthenticated, signUp } = useAuth()
 
+  /*
   useEffect(() => {
     if (isAuthenticated) {
       navigate(routes.home())
     }
   }, [isAuthenticated])
+  */
 
   // focus on username box on page load
   const emailRef = useRef(null)
@@ -34,8 +53,10 @@ const SignupPage = () => {
   const onSubmit = async (data) => {
     console.log(passwordRef)
     const response = await signUp({
-      username: data.email,
-      name: data.nickname,
+      username: data.email.toLowerCase(),
+      name:
+        data.nickname.toUpperCase().substring(0, 1) +
+        data.nickname.toLowerCase().substring(1),
       password: data.password,
     })
 
@@ -50,13 +71,29 @@ const SignupPage = () => {
       })
       toast(response.message)
     } else if (response.error) {
-      toast.error(response.error, {
+      let message = response.error
+      if (
+        response.error.includes(
+          'Unique constraint failed on the fields: (`name`)'
+        )
+      )
+        message =
+          'Name ' +
+          data.nickname.toUpperCase().substring(0, 1) +
+          data.nickname.toLowerCase().substring(1) +
+          ' is already in use'
+      toast.error(message, {
         position: 'bottom-center',
         style: {
           background: '#004', // nightwing
           color: '#ff917d', // salmon
         },
         className: 'font-cal text-base',
+      })
+    } else {
+      console.log('flag')
+      await createAchievements({
+        variables: { input: data.email.toLowerCase() },
       })
     }
   }
@@ -95,6 +132,12 @@ const SignupPage = () => {
             required: {
               value: true,
               message: 'Name is required',
+            },
+            validate: (value) =>
+              value.toUpperCase() != 'GUEST' || "Cannot use name 'Guest'",
+            pattern: {
+              value: /^[^ ]{3,12}$/,
+              message: 'Name must be 3-12 characters without spaces',
             },
           }}
         />

@@ -8,12 +8,54 @@ generator client {
   binaryTargets = "native"
 }
 
+model Achievements {
+  id                 Int     @id @default(autoincrement())
+  userEmail          String
+  modestMaki         Boolean
+  longTermPlayer     Boolean
+  speedEater         Boolean
+  forkForgetter      Boolean
+  sushiThief         Boolean
+  demandingCustomer  Boolean
+  leftoverLover      Boolean
+  wasabiWarrior      Boolean
+  teaTime            Boolean
+  soysauceSavant     Boolean
+  goingForSeconds    Boolean
+  dumplingDisciple   Boolean
+  tempuraTitan       Boolean
+  sashimiSensei      Boolean
+  misoMaster         Boolean
+  edamameExpert      Boolean
+  unlikelyFriendship Boolean
+  onigiriGuru        Boolean
+  greenTeaEightCream Boolean
+  fruitFiend         Boolean
+  sushiLow           Boolean
+  flashOfBrilliance  Boolean
+  headChef           Boolean
+  seasonedCompetitor Boolean
+  maturePalate       Boolean
+  user               User    @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+}
+
 model User {
-  id                  Int       @id @default(autoincrement())
-  email               String    @unique
-  name                String    @unique
+  id                  Int            @id @default(autoincrement())
+  email               String         @unique
+  name                String         @unique
+  easyScore           Int?
+  easyDessert         Int?
+  normalScore         Int?
+  normalDessert       Int?
+  hardScore           Int?
+  hardDessert         Int?
+  toxicScore          Int?
+  toxicDessert        Int?
+  speedrunStart       DateTime       @default(now())
+  bestSpeedrun        DateTime?
   hashedPassword      String
   salt                String
   resetToken          String?
   resetTokenExpiresAt DateTime?
+  achievements        Achievements[]
 }

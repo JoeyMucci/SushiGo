@@ -104,6 +104,8 @@ import {
 import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
+import { useAuth } from 'src/auth'
+
 export const cards = Object.freeze({
   NIGIRIGUIDE: {
     type: 1,
@@ -1000,6 +1002,8 @@ const PlayPage = () => {
 
   // The screen where the user actually plays the game
   const GameScreen = () => {
+    const { isAuthenticated, currentUser } = useAuth()
+
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
@@ -1033,7 +1037,7 @@ const PlayPage = () => {
     // players[0] is the user
     let players = [
       {
-        name: 'Joey',
+        name: isAuthenticated ? currentUser.name : 'Guest',
         hand: [],
         stash: [],
         score: 0,
