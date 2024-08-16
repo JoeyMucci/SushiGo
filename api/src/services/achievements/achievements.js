@@ -1,7 +1,7 @@
 import { db } from 'src/lib/db'
 
-export const getResume = async ({ email }) => {
-  return db.achievements.findMany({
+export const getResume = ({ email }) => {
+  return db.achievements.findFirstOrThrow({
     where: { userEmail: email },
   })
 }

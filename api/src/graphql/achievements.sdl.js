@@ -30,7 +30,7 @@ export const schema = gql`
   }
 
   type Query {
-    getResume(email: String!): Achievements! @requireAuth
+    getResume(email: String!): Achievements! @skipAuth
   }
 
   type Mutation {

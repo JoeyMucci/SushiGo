@@ -7,7 +7,13 @@ import { navigate, routes } from '@redwoodjs/router'
 import { useAuth } from 'src/auth'
 
 const AchievementsPage = () => {
-  const { isAuthenticated, currentUser } = useAuth()
+  const { isAuthenticated, currentUser, loading } = useAuth()
+
+  if (loading) {
+    return <></>
+  }
+
+  let mailAddr = currentUser.email
 
   /*
   useEffect(() => {
@@ -19,7 +25,7 @@ const AchievementsPage = () => {
 
   return (
     <>
-      <ResumeCell email={currentUser.email} />
+      <ResumeCell email={mailAddr} />
     </>
   )
 }
