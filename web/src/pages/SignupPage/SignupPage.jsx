@@ -9,7 +9,7 @@ import {
   Submit,
   FieldError,
 } from '@redwoodjs/forms'
-import { Link, routes } from '@redwoodjs/router'
+import { Link, routes, navigate } from '@redwoodjs/router'
 import { useMutation } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
@@ -34,13 +34,11 @@ const SignupPage = () => {
 
   const { isAuthenticated, signUp } = useAuth()
 
-  /*
   useEffect(() => {
     if (isAuthenticated) {
       navigate(routes.home())
     }
   }, [isAuthenticated])
-  */
 
   // focus on username box on page load
   const emailRef = useRef(null)

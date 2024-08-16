@@ -12,6 +12,9 @@ module.exports = {
       gold: 'rgb(var(--color-gold) / 0.5)',
       silver: 'rgb(var(--color-silver) / 0.5)',
       bronze: 'rgb(var(--color-bronze) / 0.5)',
+
+      complete: 'rgb(var(--color-complete) / 0.5)',
+      incomplete: 'rgb(var(--color-incomplete) / 0.5)',
     },
     extend: {
       fontFamily: {

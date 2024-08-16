@@ -20,6 +20,9 @@
     --color-silver: rgb(192, 192, 192);
     --color-bronze: rgb(205, 127, 50);
 
+    --color-complete: rgb(0, 255, 0);
+    --color-incomplete: rgb(128, 128, 128);
+
     @font-face {
       font-family: 'Caveat';
       src: url("web/public/Caveat-SemiBold.ttf");
@@ -52,4 +55,12 @@ img {
   opacity: 0;
   width: 0;
   height: 0;
+}
+
+/* Colored dot for achievements display */
+.dot {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  display: inline-block;
 }

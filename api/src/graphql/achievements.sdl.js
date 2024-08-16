@@ -29,6 +29,10 @@ export const schema = gql`
     maturePalate: Boolean
   }
 
+  type Query {
+    getResume(email: String!): Achievements! @requireAuth
+  }
+
   type Mutation {
     createAchievements(email: String!): Achievements! @requireAuth
   }

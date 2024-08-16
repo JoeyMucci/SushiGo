@@ -1,20 +1,25 @@
-import { Link, routes } from '@redwoodjs/router'
-import { Metadata } from '@redwoodjs/web'
+import { useEffect } from 'react'
+
+import ResumeCell from 'web/src/components/ResumeCell/ResumeCell.jsx'
+
+import { navigate, routes } from '@redwoodjs/router'
+
+import { useAuth } from 'src/auth'
 
 const AchievementsPage = () => {
+  const { isAuthenticated, currentUser } = useAuth()
+
+  /*
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate(routes.home())
+    }
+  }, [isAuthenticated])
+  */
+
   return (
     <>
-      <Metadata title="Achievements" description="Achievements page" />
-
-      <h1>AchievementsPage</h1>
-      <p>
-        Find me in{' '}
-        <code>./web/src/pages/AchievementsPage/AchievementsPage.jsx</code>
-      </p>
-      <p>
-        My default route is named <code>achievements</code>, link to me with `
-        <Link to={routes.achievements()}>Achievements</Link>`
-      </p>
+      <ResumeCell email={currentUser.email} />
     </>
   )
 }

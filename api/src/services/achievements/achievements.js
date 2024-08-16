@@ -1,5 +1,11 @@
 import { db } from 'src/lib/db'
 
+export const getResume = async ({ email }) => {
+  return db.achievements.findMany({
+    where: { userEmail: email },
+  })
+}
+
 export const createAchievements = ({ email }) => {
   return db.achievements.create({
     data: {
