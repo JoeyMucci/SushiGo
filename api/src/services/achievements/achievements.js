@@ -1,8 +1,8 @@
 import { db } from 'src/lib/db'
 
-export const getResume = ({ email }) => {
+export const getResume = ({ id }) => {
   return db.user.findUnique({
-    where: { userEmail: email },
+    where: { id: id },
     select: {
       modestMaki: true,
       longTermPlayer: true,
@@ -27,15 +27,38 @@ export const getResume = ({ email }) => {
       sushiLow: true,
       flashOfBrilliance: true,
       headChef: true,
-      seasonedCompetitor: true,
-      maturePalate: true,
+      easyClear: true,
+      normalClear: true,
+      hardClear: true,
+      makiClear: true,
+      temakiClear: true,
+      uramakiClear: true,
+      chopsticksClear: true,
+      spoonClear: true,
+      menuClear: true,
+      takeoutBoxClear: true,
+      wasabiClear: true,
+      teaClear: true,
+      soysauceClear: true,
+      specialOrderClear: true,
+      dumplingClear: true,
+      tempuraClear: true,
+      sashimiClear: true,
+      misoSoupClear: true,
+      edamameClear: true,
+      eelClear: true,
+      tofuClear: true,
+      onigiriClear: true,
+      puddingClear: true,
+      gticClear: true,
+      fruitClear: true,
     },
   })
 }
 
-export const updateAchievements = ({ email, input }) => {
+export const updateAchievements = ({ id, input }) => {
   return db.user.update({
     data: input,
-    where: { userEmail: email },
+    where: { id: id },
   })
 }

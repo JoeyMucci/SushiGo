@@ -13,7 +13,7 @@ const AchievementsPage = () => {
     return <></>
   }
 
-  let mailAddr = currentUser.email
+  let currentId = currentUser.id
 
   /*
   useEffect(() => {
@@ -25,7 +25,7 @@ const AchievementsPage = () => {
 
   return (
     <>
-      <ResumeCell email={mailAddr} />
+      <ResumeCell id={currentId} />
     </>
   )
 }

@@ -1,5 +1,5 @@
 /* eslint-disable no-fallthrough */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
 import chopsticks2 from 'web/public/chopsticks(2).jpg'
@@ -594,55 +594,27 @@ export const parseFruit = (fruitNumber) => {
 }
 
 const UPDATE_ACHIEVEMENTS = gql`
-  mutation UpdateAchievementsMutation(
-    $email: String!
-    $input: UpdateAchievementsInput!
-  ) {
-    updateAchievements(email: $email, input: $input) {
+  mutation UpdateAchievementsMutation($id: Int!, $input: AchievementsInput!) {
+    updateAchievements(id: $id, input: $input) {
       modestMaki
-      longTermPlayer
-      speedEater
-      forkForgetter
-      sushiThief
-      demandingCustomer
-      leftoverLover
-      wasabiWarrior
-      teaTime
-      soysauceSavant
-      goingForSeconds
-      dumplingDisciple
-      tempuraTitan
-      sashimiSensei
-      misoMaster
-      edamameExpert
-      unlikelyFriendship
-      onigiriGuru
-      greenTeaEightCream
-      fruitFiend
-      sushiLow
-      flashOfBrilliance
-      headChef
-      seasonedCompetitor
-      maturePalate
     }
   }
 `
 
 const PlayPage = () => {
-  const [updateAchievements, { loadingAchievements, errorAchievements }] =
-    useMutation(UPDATE_ACHIEVEMENTS, {
-      onCompleted: () => {
-        toast('Achievements Updated', {
-          icon: '🏆',
-          position: 'top-center',
-          style: {
-            background: '#004', // nightwing
-            color: '#ff917d', // salmon
-          },
-          className: 'font-cal text-base',
-        })
-      },
-    })
+  const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
+    onCompleted: () => {
+      toast('Achievements Updated', {
+        icon: '🏆',
+        position: 'top-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
+    },
+  })
 
   // This information bridges the selection phase and the game phase so it is useful to have outside
   const [showGame, setShowGame] = useState(false)
@@ -1059,6 +1031,9 @@ const PlayPage = () => {
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
 
+    /* ACHIEVEMENT VARS */
+    let achievementsData = {}
+
     let round = 1
     let priority = 0
     let cardsLeft = MAXHANDCARDS
@@ -1327,6 +1302,18 @@ const PlayPage = () => {
       const [cpuOneDessert, setCpuOneDessert] = useState(players[1].dessert)
       const [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
       const [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
+
+      useEffect(() => {
+        async function updateProgress() {
+          await updateAchievements({
+            variables: {
+              id: currentUser.id,
+              input: achievementsData,
+            },
+          })
+        }
+        if (showResults) updateProgress()
+      }, [showResults])
 
       // A cornerstone of SushiGO gameplay is that players swap hands clockwise after playing cards
       const swapCards = () => {
@@ -1870,20 +1857,29 @@ const PlayPage = () => {
             cards.DUMPLINGGUIDE,
             area
           )
-        if (app.includes(cards.TEMPURAGUIDE.type))
-          runningScore += reportScore(
+        if (app.includes(cards.TEMPURAGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreTempura(playerCards),
             cards.TEMPURAGUIDE,
             area
           )
-        if (app.includes(cards.SASHIMIGUIDE.type))
-          runningScore += reportScore(
+          runningScore += points
+          if (area == 0 && points >= 15) {
+            achievementsData.tempuraTitan = true
+            notify('Tempura Titan Achieved!', '🏆', 4)
+          }
+        }
+        if (app.includes(cards.SASHIMIGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreSashimi(playerCards),
             cards.SASHIMIGUIDE,
             area
           )
+          runningScore += points
+          if (area == 0 && points >= 20) achievementsData.sashimiSensei = true
+        }
         if (app.includes(cards.MISOGUIDE.type))
           runningScore += reportScore(
             playerCards,
@@ -1968,7 +1964,7 @@ const PlayPage = () => {
           )
       }
 
-      // Updates display data, should be called excatly once for each click
+      // Updates display data, should be called exactly once for each click
       const updateData = async () => {
         const showToasts = () => {
           for (let i = 0; i < players.length; i++) {
@@ -1976,7 +1972,8 @@ const PlayPage = () => {
             if (i == 0) location = 'bottom-left'
             else if (i == 1) location = 'top-left'
             else if (i == 2) location = 'top-right'
-            else location = 'bottom-right'
+            else if (i == 3) location = 'bottom-right'
+            else location = 'top-center'
 
             if (i == 0 || i == 3)
               for (let j = 0; j < toastNotifications[i].length; j++)
@@ -2014,44 +2011,7 @@ const PlayPage = () => {
         setCpuTwoScore(players[2].score)
         setCpuThreeScore(players[3].score)
 
-        // Show results instead of game is round number exceeds actually number of rounds
         setShowResults(round > NUMROUNDS)
-
-        if (round > NUMROUNDS) {
-          setShowResults(true)
-          await updateAchievements({
-            variables: {
-              email: currentUser.email,
-              input: {
-                modestMaki: true,
-                longTermPlayer: true,
-                speedEater: true,
-                forkForgetter: true,
-                sushiThief: true,
-                demandingCustomer: true,
-                leftoverLover: true,
-                wasabiWarrior: true,
-                teaTime: true,
-                soysauceSavant: true,
-                goingForSeconds: true,
-                dumplingDisciple: true,
-                tempuraTitan: true,
-                sashimiSensei: true,
-                misoMaster: true,
-                edamameExpert: true,
-                unlikelyFriendship: true,
-                onigiriGuru: true,
-                greenTeaEightCream: true,
-                fruitFiend: true,
-                sushiLow: true,
-                flashOfBrilliance: true,
-                headChef: true,
-                seasonedCompetitor: true,
-                maturePalate: true,
-              },
-            },
-          })
-        }
 
         toast.dismiss()
         showToasts()

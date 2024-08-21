@@ -23,11 +23,34 @@ export const schema = gql`
     sushiLow: Boolean
     flashOfBrilliance: Boolean
     headChef: Boolean
-    seasonedCompetitor: Boolean
-    maturePalate: Boolean
+    easyClear: Boolean
+    normalClear: Boolean
+    hardClear: Boolean
+    makiClear: Boolean
+    temakiClear: Boolean
+    uramakiClear: Boolean
+    chopsticksClear: Boolean
+    spoonClear: Boolean
+    menuClear: Boolean
+    takeoutBoxClear: Boolean
+    wasabiClear: Boolean
+    teaClear: Boolean
+    soysauceClear: Boolean
+    specialOrderClear: Boolean
+    dumplingClear: Boolean
+    tempuraClear: Boolean
+    sashimiClear: Boolean
+    misoSoupClear: Boolean
+    edamameClear: Boolean
+    eelClear: Boolean
+    tofuClear: Boolean
+    onigiriClear: Boolean
+    puddingClear: Boolean
+    gticClear: Boolean
+    fruitClear: Boolean
   }
 
-  input UpdateAchievementsInput {
+  input AchievementsInput {
     modestMaki: Boolean
     longTermPlayer: Boolean
     speedEater: Boolean
@@ -51,18 +74,39 @@ export const schema = gql`
     sushiLow: Boolean
     flashOfBrilliance: Boolean
     headChef: Boolean
-    seasonedCompetitor: Boolean
-    maturePalate: Boolean
+    easyClear: Boolean
+    normalClear: Boolean
+    hardClear: Boolean
+    makiClear: Boolean
+    temakiClear: Boolean
+    uramakiClear: Boolean
+    chopsticksClear: Boolean
+    spoonClear: Boolean
+    menuClear: Boolean
+    takeoutBoxClear: Boolean
+    wasabiClear: Boolean
+    teaClear: Boolean
+    soysauceClear: Boolean
+    specialOrderClear: Boolean
+    dumplingClear: Boolean
+    tempuraClear: Boolean
+    sashimiClear: Boolean
+    misoSoupClear: Boolean
+    edamameClear: Boolean
+    eelClear: Boolean
+    tofuClear: Boolean
+    onigiriClear: Boolean
+    puddingClear: Boolean
+    gticClear: Boolean
+    fruitClear: Boolean
   }
 
   type Query {
-    getResume(email: String!): Achievements! @requireAuth
+    getResume(id: Int!): Achievements! @requireAuth
   }
 
   type Mutation {
-    updateAchievements(
-      email: String!
-      input: UpdateAchievementsInput!
-    ): Achievements! @requireAuth
+    updateAchievements(id: Int!, input: AchievementsInput!): Achievements!
+      @requireAuth
   }
 `

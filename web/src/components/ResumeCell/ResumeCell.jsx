@@ -1,8 +1,8 @@
 import Blinker from 'web/src/components/Blinker/Blinker.jsx'
 
 export const QUERY = gql`
-  query FindResumeQuery($email: String!) {
-    resume: getResume(email: $email) {
+  query FindResumeQuery($id: Int!) {
+    resume: getResume(id: $id) {
       modestMaki
       longTermPlayer
       speedEater
@@ -26,8 +26,31 @@ export const QUERY = gql`
       sushiLow
       flashOfBrilliance
       headChef
-      seasonedCompetitor
-      maturePalate
+      easyClear
+      normalClear
+      hardClear
+      makiClear
+      temakiClear
+      uramakiClear
+      chopsticksClear
+      spoonClear
+      menuClear
+      takeoutBoxClear
+      wasabiClear
+      teaClear
+      soysauceClear
+      specialOrderClear
+      dumplingClear
+      tempuraClear
+      sashimiClear
+      misoSoupClear
+      edamameClear
+      eelClear
+      tofuClear
+      onigiriClear
+      puddingClear
+      gticClear
+      fruitClear
     }
   }
 `
@@ -43,9 +66,64 @@ export const Failure = ({ error }) => (
 export const Success = ({ resume }) => {
   let progress = 0
 
+  // Seasoned competitor is achieved after winning on all three available difficulties
+  let seasonedCompetitor =
+    resume.easyClear && resume.normalClear && resume.hardClear
+
+  // Mature palate is achieved after winning with each card
+  let maturePalate =
+    resume.makiClear &&
+    resume.temakiClear &&
+    resume.uramakiClear &&
+    resume.chopsticksClear &&
+    resume.spoonClear &&
+    resume.menuClear &&
+    resume.takeoutBoxClear &&
+    resume.wasabiClear &&
+    resume.teaClear &&
+    resume.soysauceClear &&
+    resume.specialOrderClear &&
+    resume.dumplingClear &&
+    resume.tempuraClear &&
+    resume.sashimiClear &&
+    resume.misoSoupClear &&
+    resume.edamameClear &&
+    resume.eelClear &&
+    resume.tofuClear &&
+    resume.onigiriClear &&
+    resume.puddingClear &&
+    resume.gticClear &&
+    resume.fruitClear
+
   // 25 achievements, so each achievement counts for 4% towards completion
-  for (const bool in resume)
-    if (bool != '__typename' && resume[bool]) progress += 4
+  for (let bool of [
+    resume.modestMaki,
+    resume.longTermPlayer,
+    resume.speedEater,
+    resume.forkForgetter,
+    resume.sushiThief,
+    resume.demandingCustomer,
+    resume.leftoverLover,
+    resume.wasabiWarrior,
+    resume.teaTime,
+    resume.soysauceSavant,
+    resume.goingForSeconds,
+    resume.dumplingDisciple,
+    resume.tempuraTitan,
+    resume.sashimiSensei,
+    resume.misoMaster,
+    resume.edamameExpert,
+    resume.unlikelyFriendship,
+    resume.onigiriGuru,
+    resume.greenTeaEightCream,
+    resume.fruitFiend,
+    resume.sushiLow,
+    resume.flashOfBrilliance,
+    resume.headChef,
+    seasonedCompetitor,
+    maturePalate,
+  ])
+    if (bool) progress += 4
 
   return (
     <>
@@ -187,12 +265,12 @@ export const Success = ({ resume }) => {
       <Blinker
         achName="Seasoned Competitor"
         achDescription="Win on easy, normal, and hard difficulty"
-        isCompleted={resume.seasonedCompetitor}
+        isCompleted={seasonedCompetitor}
       />
       <Blinker
         achName="Mature Palate"
-        achDescription="Win with every card on hard difficulty"
-        isCompleted={resume.maturePalate}
+        achDescription="Win with every card on any difficulty"
+        isCompleted={maturePalate}
       />
     </>
   )
