@@ -13,14 +13,6 @@ import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import { useAuth } from 'src/auth'
 
-const UPDATE_ACHIEVEMENTS = gql`
-  mutation UpdateAchievementsMutation($input: String!) {
-    createAchievements(email: $input) {
-      id
-    }
-  }
-`
-
 const LoginPage = () => {
   const { isAuthenticated, logIn } = useAuth()
 

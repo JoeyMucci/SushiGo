@@ -8,41 +8,9 @@ generator client {
   binaryTargets = "native"
 }
 
-model Achievements {
-  id                 Int     @id @default(autoincrement())
-  userEmail          String
-  modestMaki         Boolean
-  longTermPlayer     Boolean
-  speedEater         Boolean
-  forkForgetter      Boolean
-  sushiThief         Boolean
-  demandingCustomer  Boolean
-  leftoverLover      Boolean
-  wasabiWarrior      Boolean
-  teaTime            Boolean
-  soysauceSavant     Boolean
-  goingForSeconds    Boolean
-  dumplingDisciple   Boolean
-  tempuraTitan       Boolean
-  sashimiSensei      Boolean
-  misoMaster         Boolean
-  edamameExpert      Boolean
-  unlikelyFriendship Boolean
-  onigiriGuru        Boolean
-  greenTeaEightCream Boolean
-  fruitFiend         Boolean
-  sushiLow           Boolean
-  flashOfBrilliance  Boolean
-  headChef           Boolean
-  seasonedCompetitor Boolean
-  maturePalate       Boolean
-  user               User    @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-}
-
 model User {
-  id                  Int            @id @default(autoincrement())
-  email               String         @unique
-  name                String         @unique
+  email               String    @id @unique
+  name                String    @unique
   easyScore           Int?
   easyDessert         Int?
   normalScore         Int?
@@ -51,11 +19,59 @@ model User {
   hardDessert         Int?
   toxicScore          Int?
   toxicDessert        Int?
-  speedrunStart       DateTime       @default(now())
+  speedrunStart       DateTime  @default(now())
   bestSpeedrun        DateTime?
   hashedPassword      String
   salt                String
   resetToken          String?
   resetTokenExpiresAt DateTime?
-  achievements        Achievements[]
+  modestMaki          Boolean   @default(false)
+  longTermPlayer      Boolean   @default(false)
+  speedEater          Boolean   @default(false)
+  forkForgetter       Boolean   @default(false)
+  sushiThief          Boolean   @default(false)
+  demandingCustomer   Boolean   @default(false)
+  leftoverLover       Boolean   @default(false)
+  wasabiWarrior       Boolean   @default(false)
+  teaTime             Boolean   @default(false)
+  soysauceSavant      Boolean   @default(false)
+  goingForSeconds     Boolean   @default(false)
+  dumplingDisciple    Boolean   @default(false)
+  tempuraTitan        Boolean   @default(false)
+  sashimiSensei       Boolean   @default(false)
+  misoMaster          Boolean   @default(false)
+  edamameExpert       Boolean   @default(false)
+  unlikelyFriendship  Boolean   @default(false)
+  onigiriGuru         Boolean   @default(false)
+  greenTeaEightCream  Boolean   @default(false)
+  fruitFiend          Boolean   @default(false)
+  sushiLow            Boolean   @default(false)
+  flashOfBrilliance   Boolean   @default(false)
+  headChef            Boolean   @default(false)
+  easyClear           Boolean   @default(false)
+  normalClear         Boolean   @default(false)
+  hardClear           Boolean   @default(false)
+  makiClear           Boolean   @default(false)
+  temakiClear         Boolean   @default(false)
+  uramakiClear        Boolean   @default(false)
+  chopsticksClear     Boolean   @default(false)
+  spoonClear          Boolean   @default(false)
+  menuClear           Boolean   @default(false)
+  takeoutBoxClear     Boolean   @default(false)
+  wasabiClear         Boolean   @default(false)
+  teaClear            Boolean   @default(false)
+  soysauceClear       Boolean   @default(false)
+  specialOrderClear   Boolean   @default(false)
+  dumplingClear       Boolean   @default(false)
+  tempuraClear        Boolean   @default(false)
+  sashimiClear        Boolean   @default(false)
+  misoSoupClear       Boolean   @default(false)
+  edamameClear        Boolean   @default(false)
+  eelClear            Boolean   @default(false)
+  tofuClear           Boolean   @default(false)
+  onigiriClear        Boolean   @default(false)
+  puddingClear        Boolean   @default(false)
+  gticClear           Boolean   @default(false)
+  fruitClear          Boolean   @default(false)
+  maturePalate        Boolean   @default(false)
 }

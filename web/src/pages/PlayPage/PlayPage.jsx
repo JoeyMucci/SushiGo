@@ -102,6 +102,7 @@ import {
 } from 'web/src/pages/PlayPage/Scoring.jsx'
 
 import { Label, Form, CheckboxField, Submit } from '@redwoodjs/forms'
+import { useMutation } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import { useAuth } from 'src/auth'
@@ -592,7 +593,57 @@ export const parseFruit = (fruitNumber) => {
   return [watermelon, pineapple, orange]
 }
 
+const UPDATE_ACHIEVEMENTS = gql`
+  mutation UpdateAchievementsMutation(
+    $email: String!
+    $input: UpdateAchievementsInput!
+  ) {
+    updateAchievements(email: $email, input: $input) {
+      modestMaki
+      longTermPlayer
+      speedEater
+      forkForgetter
+      sushiThief
+      demandingCustomer
+      leftoverLover
+      wasabiWarrior
+      teaTime
+      soysauceSavant
+      goingForSeconds
+      dumplingDisciple
+      tempuraTitan
+      sashimiSensei
+      misoMaster
+      edamameExpert
+      unlikelyFriendship
+      onigiriGuru
+      greenTeaEightCream
+      fruitFiend
+      sushiLow
+      flashOfBrilliance
+      headChef
+      seasonedCompetitor
+      maturePalate
+    }
+  }
+`
+
 const PlayPage = () => {
+  const [updateAchievements, { loadingAchievements, errorAchievements }] =
+    useMutation(UPDATE_ACHIEVEMENTS, {
+      onCompleted: () => {
+        toast('Achievements Updated', {
+          icon: '🏆',
+          position: 'top-center',
+          style: {
+            background: '#004', // nightwing
+            color: '#ff917d', // salmon
+          },
+          className: 'font-cal text-base',
+        })
+      },
+    })
+
   // This information bridges the selection phase and the game phase so it is useful to have outside
   const [showGame, setShowGame] = useState(false)
   const [roll, setRoll] = useState([])
@@ -1918,7 +1969,7 @@ const PlayPage = () => {
       }
 
       // Updates display data, should be called excatly once for each click
-      const updateData = () => {
+      const updateData = async () => {
         const showToasts = () => {
           for (let i = 0; i < players.length; i++) {
             let location
@@ -1965,6 +2016,42 @@ const PlayPage = () => {
 
         // Show results instead of game is round number exceeds actually number of rounds
         setShowResults(round > NUMROUNDS)
+
+        if (round > NUMROUNDS) {
+          setShowResults(true)
+          await updateAchievements({
+            variables: {
+              email: currentUser.email,
+              input: {
+                modestMaki: true,
+                longTermPlayer: true,
+                speedEater: true,
+                forkForgetter: true,
+                sushiThief: true,
+                demandingCustomer: true,
+                leftoverLover: true,
+                wasabiWarrior: true,
+                teaTime: true,
+                soysauceSavant: true,
+                goingForSeconds: true,
+                dumplingDisciple: true,
+                tempuraTitan: true,
+                sashimiSensei: true,
+                misoMaster: true,
+                edamameExpert: true,
+                unlikelyFriendship: true,
+                onigiriGuru: true,
+                greenTeaEightCream: true,
+                fruitFiend: true,
+                sushiLow: true,
+                flashOfBrilliance: true,
+                headChef: true,
+                seasonedCompetitor: true,
+                maturePalate: true,
+              },
+            },
+          })
+        }
 
         toast.dismiss()
         showToasts()
