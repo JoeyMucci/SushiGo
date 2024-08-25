@@ -1,5 +1,5 @@
 /* eslint-disable no-fallthrough */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
 import chopsticks2 from 'web/public/chopsticks(2).jpg'
@@ -602,22 +602,24 @@ const UPDATE_ACHIEVEMENTS = gql`
 `
 
 const PlayPage = () => {
-  const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
-    onCompleted: () => {
-      toast('Achievements Updated', {
-        icon: '🏆',
-        position: 'top-center',
-        style: {
-          background: '#004', // nightwing
-          color: '#ff917d', // salmon
-        },
-        className: 'font-cal text-base',
-      })
-    },
-  })
-
-  // This information bridges the selection phase and the game phase so it is useful to have outside
+  // This information bridges the selection/results phase and the game phase so it is useful to have outside
+  const { isAuthenticated, currentUser } = useAuth()
   const [showGame, setShowGame] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+
+  const [userScoreF, setUserScoreF] = useState(0)
+  const [cpuOneScoreF, setCpuOneScoreF] = useState(0)
+  const [cpuTwoScoreF, setCpuTwoScoreF] = useState(0)
+  const [cpuThreeScoreF, setCpuThreeScoreF] = useState(0)
+  const [userDessertF, setUserDessertF] = useState(0)
+  const [cpuOneDessertF, setCpuOneDessertF] = useState(0)
+  const [cpuTwoDessertF, setCpuTwoDessertF] = useState(0)
+  const [cpuThreeDessertF, setCpuThreeDessertF] = useState(0)
+
+  const [cpuOneName, setCpuOneName] = useState('cpu one')
+  const [cpuTwoName, setCpuTwoName] = useState('cpu two')
+  const [cpuThreeName, setCpuThreeName] = useState('cpu three')
+
   const [roll, setRoll] = useState([])
   const [spec, setSpec] = useState([])
   const [app, setApp] = useState([])
@@ -628,6 +630,142 @@ const PlayPage = () => {
   const APPCAP = 3
   const DESSCAP = 1
   const DIFFCAP = 1
+
+  const resetGame = () => {
+    toast.dismiss()
+    setShowResults(false)
+  }
+
+  if (showResults) {
+    const comparePlayers = (a, b) => {
+      if (a.score != b.score) return b.score - a.score
+      if (a.dessert != b.dessert) return b.dessert - a.dessert
+      return b.tiebreak - a.tiebreaker
+    }
+
+    let userDessertCount = userDessertF
+    let cpuOneDessertCount = cpuOneDessertF
+    let cpuTwoDessertCount = cpuTwoDessertF
+    let cpuThreeDessertCount = cpuThreeDessertF
+
+    /* Change dessertCount to number of cards played for fruit
+       For fruit dessert=watermelon*11^2+pineapple*11+orange */
+    if (dess.includes(cards.FRUITGUIDE.type)) {
+      let userFruitCounts = parseFruit(userDessertF)
+      userDessertCount =
+        (userFruitCounts[0] + userFruitCounts[1] + userFruitCounts[2]) / 2
+      let cpuOneFruitCounts = parseFruit(cpuOneDessertF)
+      cpuOneDessertCount =
+        (cpuOneFruitCounts[0] + cpuOneFruitCounts[1] + cpuOneFruitCounts[2]) / 2
+      let cpuTwoFruitCounts = parseFruit(cpuTwoDessertF)
+      cpuTwoDessertCount =
+        (cpuTwoFruitCounts[0] + cpuTwoFruitCounts[1] + cpuTwoFruitCounts[2]) / 2
+      let cpuThreeFruitCounts = parseFruit(cpuThreeDessertF)
+      cpuThreeDessertCount =
+        (cpuThreeFruitCounts[0] +
+          cpuThreeFruitCounts[1] +
+          cpuThreeFruitCounts[2]) /
+        2
+    }
+
+    // Tiebreak is cpuTwo > cpuThree > cpuOne > user
+    let displayInfo = [
+      {
+        name: isAuthenticated ? currentUser.name : 'Guest',
+        score: userScoreF,
+        dessert: userDessertCount,
+        tiebreak: 0,
+      },
+      {
+        name: cpuOneName,
+        score: cpuOneScoreF,
+        dessert: cpuOneDessertCount,
+        tiebreak: 1,
+      },
+      {
+        name: cpuTwoName,
+        score: cpuTwoScoreF,
+        dessert: cpuTwoDessertCount,
+        tiebreak: 3,
+      },
+      {
+        name: cpuThreeName,
+        score: cpuThreeScoreF,
+        dessert: cpuThreeDessertCount,
+        tiebreak: 2,
+      },
+    ]
+
+    displayInfo.sort(comparePlayers)
+
+    /* Display the players in order by score, gold for 1st,
+       silver for 2nd, bronze for third, and regular for last */
+    return (
+      <>
+        <div className="flex h-screen flex-col items-center justify-center">
+          <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
+            {displayInfo[0].name}: {displayInfo[0].score} (
+            {displayInfo[0].dessert})
+          </p>
+          <br />
+          <p className="text-center font-cal text-6xl text-[color:var(--color-silver)]">
+            {displayInfo[1].name}: {displayInfo[1].score} (
+            {displayInfo[1].dessert})
+          </p>
+          <br />
+          <p className="text-center font-cal text-6xl text-[color:var(--color-bronze)]">
+            {displayInfo[2].name}: {displayInfo[2].score} (
+            {displayInfo[2].dessert})
+          </p>
+          <br />
+          <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
+            {displayInfo[3].name}: {displayInfo[3].score} (
+            {displayInfo[3].dessert})
+          </p>
+          <br />
+          <Form className="flex flex-row">
+            <Label className="m-2">
+              <CheckboxField
+                id="newgame"
+                name="options"
+                onChange={() => (window.location.href = '/play')}
+              />
+              <p
+                name="newgame"
+                className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+              >
+                New Game
+              </p>
+            </Label>
+            <Label className="m-2">
+              <CheckboxField id="rematch" name="options" onChange={resetGame} />
+              <p
+                href="/play"
+                name="rematch"
+                className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+              >
+                Rematch
+              </p>
+            </Label>
+            <Label className="m-2">
+              <CheckboxField
+                id="home"
+                name="options"
+                onChange={() => (window.location.href = '/')}
+              />
+              <p
+                name="home"
+                className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
+              >
+                Home
+              </p>
+            </Label>
+          </Form>
+        </div>
+        <Toaster />
+      </>
+    )
+  }
 
   /* numberName - a number identifier
      info - the information about the actual card (text representation, source image, etc.)
@@ -1025,8 +1163,7 @@ const PlayPage = () => {
 
   // The screen where the user actually plays the game
   const GameScreen = () => {
-    const { isAuthenticated, currentUser } = useAuth()
-
+    console.log('GAME SCREEN RERENDER')
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
@@ -1058,12 +1195,11 @@ const PlayPage = () => {
       dessertPile: [],
       discardPile: [],
     }
-    let toastNotifications = [[], [], [], []]
+    let toastNotifications = [[], [], [], [], []]
 
     // players[0] is the user
     let players = [
       {
-        name: isAuthenticated ? currentUser.name : 'Guest',
         hand: [],
         stash: [],
         score: 0,
@@ -1287,7 +1423,7 @@ const PlayPage = () => {
 
     // Displays all the played cards, the user hand, and the scorelines
     const CardDisplay = () => {
-      const [showResults, setShowResults] = useState(false)
+      // const [showResults, setShowResults] = useState(false)
       const [userClickedType, setUserClickedType] = useState(-1)
       const [userHand, setUserHand] = useState(players[0].hand)
       const [userStash, setUserStash] = useState(players[0].stash)
@@ -1303,6 +1439,13 @@ const PlayPage = () => {
       const [cpuTwoDessert, setCpuTwoDessert] = useState(players[2].dessert)
       const [cpuThreeDessert, setCpuThreeDessert] = useState(players[3].dessert)
 
+      const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
+        onCompleted: async () => {
+          notify('Achievements Updated', '🏆', 4)
+        },
+      })
+
+      /*
       useEffect(() => {
         async function updateProgress() {
           await updateAchievements({
@@ -1314,6 +1457,7 @@ const PlayPage = () => {
         }
         if (showResults) updateProgress()
       }, [showResults])
+        */
 
       // A cornerstone of SushiGO gameplay is that players swap hands clockwise after playing cards
       const swapCards = () => {
@@ -1324,7 +1468,8 @@ const PlayPage = () => {
       }
 
       // When user elects to play again with same cards
-      const resetVars = () => {
+      /*
+      const resetGame = () => {
         toast.dismiss()
 
         round = 1
@@ -1349,6 +1494,7 @@ const PlayPage = () => {
         setCpuThreeDessert(players[3].dessert)
         updateData()
       }
+        */
 
       const resetUramaki = () => {
         uramakiPoints = 8
@@ -1865,7 +2011,12 @@ const PlayPage = () => {
             area
           )
           runningScore += points
-          if (area == 0 && points >= 15) {
+          if (
+            area == 0 &&
+            points >= 15 &&
+            currentUser &&
+            !currentUser.tempuraTitan
+          ) {
             achievementsData.tempuraTitan = true
             notify('Tempura Titan Achieved!', '🏆', 4)
           }
@@ -1878,7 +2029,15 @@ const PlayPage = () => {
             area
           )
           runningScore += points
-          if (area == 0 && points >= 20) achievementsData.sashimiSensei = true
+          if (
+            area == 0 &&
+            points >= 20 &&
+            currentUser &&
+            !currentUser.tempuraTitan
+          ) {
+            achievementsData.sashimiSensei = true
+            notify('Sashimi Sensei Achieved!', '🏆', 4)
+          }
         }
         if (app.includes(cards.MISOGUIDE.type))
           runningScore += reportScore(
@@ -1967,7 +2126,7 @@ const PlayPage = () => {
       // Updates display data, should be called exactly once for each click
       const updateData = async () => {
         const showToasts = () => {
-          for (let i = 0; i < players.length; i++) {
+          for (let i = 0; i < players.length + 1; i++) {
             let location
             if (i == 0) location = 'bottom-left'
             else if (i == 1) location = 'top-left'
@@ -1986,7 +2145,7 @@ const PlayPage = () => {
                   },
                   className: 'font-cal text-base',
                 })
-            else
+            else if (i == 1 || i == 2)
               for (let j = toastNotifications[i].length - 1; j >= 0; j--)
                 toast(toastNotifications[i][j].message, {
                   icon: toastNotifications[i][j].emoji,
@@ -1997,21 +2156,52 @@ const PlayPage = () => {
                   },
                   className: 'font-cal text-base',
                 })
+            else
+              for (let j = toastNotifications[i].length - 1; j >= 0; j--)
+                toast(toastNotifications[i][j].message, {
+                  icon: toastNotifications[i][j].emoji,
+                  position: location,
+                  style: {
+                    background: '#004', // nightwing
+                    color: '#ff917d', // salmon
+                  },
+                  className: 'font-cal text-2xl',
+                })
           }
 
-          toastNotifications = [[], [], [], []]
+          toastNotifications = [[], [], [], [], []]
         }
-        setUserHand([...players[0].hand])
-        setUserStash([...players[0].stash])
-        setCpuOneStash([...players[1].stash])
-        setCpuTwoStash([...players[2].stash])
-        setCpuThreeStash([...players[3].stash])
-        setUserScore(players[0].score)
-        setCpuOneScore(players[1].score)
-        setCpuTwoScore(players[2].score)
-        setCpuThreeScore(players[3].score)
 
-        setShowResults(round > NUMROUNDS)
+        if (round > NUMROUNDS) {
+          setUserScoreF(players[0].score)
+          setCpuOneScoreF(players[1].score)
+          setCpuTwoScoreF(players[2].score)
+          setCpuThreeScoreF(players[3].score)
+          setUserDessertF(players[0].dessert)
+          setCpuOneDessertF(players[1].dessert)
+          setCpuTwoDessertF(players[2].dessert)
+          setCpuThreeDessertF(players[3].dessert)
+          setCpuOneName('cpu one')
+          setCpuTwoName('cpu two')
+          setCpuThreeName('cpu three')
+          setShowResults(true)
+          await updateAchievements({
+            variables: {
+              id: currentUser.id,
+              input: achievementsData,
+            },
+          })
+        } else {
+          setUserHand([...players[0].hand])
+          setUserStash([...players[0].stash])
+          setCpuOneStash([...players[1].stash])
+          setCpuTwoStash([...players[2].stash])
+          setCpuThreeStash([...players[3].stash])
+          setUserScore(players[0].score)
+          setCpuOneScore(players[1].score)
+          setCpuTwoScore(players[2].score)
+          setCpuThreeScore(players[3].score)
+        }
 
         toast.dismiss()
         showToasts()
@@ -2280,7 +2470,7 @@ const PlayPage = () => {
 
       // Ends a round and moves to the next (or results screen)
       const advanceRound = () => {
-        console.log('advance round run ')
+        console.log('advance round run')
         players[0].hand = []
         scoreRound()
 
@@ -3470,7 +3660,7 @@ const PlayPage = () => {
                 <Hand selection={userHand} />
                 <div className="flex flex-row">
                   <Scoreline
-                    name={players[0].name}
+                    name={isAuthenticated ? currentUser.name : 'Guest'}
                     score={userScore}
                     dessert={userDessert}
                   />
@@ -3490,6 +3680,7 @@ const PlayPage = () => {
           </>
         )
       } else {
+        /*
         const comparePlayers = (a, b) => {
           if (a.score != b.score) return b.score - a.score
           if (a.dessert != b.dessert) return b.dessert - a.dessert
@@ -3502,7 +3693,7 @@ const PlayPage = () => {
         let cpuThreeDessertCount = cpuThreeDessert
 
         /* Change dessertCount to number of cards played for fruit
-           For fruit dessert=watermelon*11^2+pineapple*11+orange */
+           For fruit dessert=watermelon*11^2+pineapple*11+orange
         if (dess.includes(cards.FRUITGUIDE.type)) {
           let userFruitCounts = parseFruit(userDessert)
           userDessertCount =
@@ -3530,7 +3721,7 @@ const PlayPage = () => {
         // Tiebreak is cpuTwo > cpuThree > cpuOne > user
         let displayInfo = [
           {
-            name: players[0].name,
+            name: isAuthenticated ? currentUser.name : 'Guest',
             score: players[0].score,
             dessert: userDessertCount,
             tiebreak: 0,
@@ -3558,7 +3749,7 @@ const PlayPage = () => {
         displayInfo.sort(comparePlayers)
 
         /* Display the players in order by score, gold for 1st,
-           silver for 2nd, bronze for third, and regular for last */
+           silver for 2nd, bronze for third, and regular for last
         return (
           <div className="flex h-screen flex-col items-center justify-center">
             <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
@@ -3599,7 +3790,7 @@ const PlayPage = () => {
                 <CheckboxField
                   id="rematch"
                   name="options"
-                  onChange={resetVars}
+                  onChange={resetGame}
                 />
                 <p
                   href="/play"
@@ -3625,6 +3816,7 @@ const PlayPage = () => {
             </Form>
           </div>
         )
+        */
       }
     }
 

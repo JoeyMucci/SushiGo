@@ -5,11 +5,7 @@ import { Link, routes } from '@redwoodjs/router'
 import { useAuth } from 'src/auth'
 
 const RollLayout = ({ children }) => {
-  const { logOut, isAuthenticated, currentUser, loading } = useAuth()
-
-  if (loading) {
-    return <></>
-  }
+  const { logOut, isAuthenticated, currentUser } = useAuth()
 
   return (
     <>
