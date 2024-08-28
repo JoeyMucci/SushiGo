@@ -588,7 +588,6 @@ const UPDATE_ACHIEVEMENTS = gql`
 `
 
 const PlayPage = () => {
-  // This information bridges the selection/results phase and the game phase so it is useful to have outside
   const { isAuthenticated, currentUser } = useAuth()
   const [showGame, setShowGame] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -622,6 +621,7 @@ const PlayPage = () => {
     setShowResults(false)
   }
 
+  // Show the results screen
   if (showResults) {
     const comparePlayers = (a, b) => {
       if (a.score != b.score) return b.score - a.score
@@ -1449,8 +1449,16 @@ const PlayPage = () => {
 
       const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
         onCompleted: async () => {
-          console.log(achievementsData)
-          notify('Achievements Updated', '🏆', 4)
+          delete achievementsData['easyScore']
+          delete achievementsData['easyDessert']
+          delete achievementsData['normalScore']
+          delete achievementsData['normalDessert']
+          delete achievementsData['hardScore']
+          delete achievementsData['hardDessert']
+          delete achievementsData['toxicScore']
+          delete achievementsData['toxicDessert']
+          if (Object.keys(achievementsData).length > 0)
+            notify('Achievements Updated', '🏆', 4)
           achievementsData = {}
         },
       })
@@ -1751,10 +1759,10 @@ const PlayPage = () => {
 
               if (i == 0) roundPoints += uramakiPoints
 
-              if (i == 0 && cardsLeft == 8) speedEats++
-
               if (
-                speedEats == 3 &&
+                i == 0 &&
+                cardsLeft == 8 &&
+                ++speedEats == 3 &&
                 currentUser &&
                 !currentUser.speedEater &&
                 !achievementsData.speedEater
@@ -2275,6 +2283,7 @@ const PlayPage = () => {
         }
 
         if (round > NUMROUNDS) {
+          let userTrueDessert
           if (currentUser) {
             if (modestMaki && !currentUser.modestMaki) {
               achievementsData.modestMaki = true
@@ -2326,6 +2335,7 @@ const PlayPage = () => {
               let trueDessert = dess.includes(cards.FRUITGUIDE.type)
                 ? totalFruitCount / 2
                 : players[i].dessert
+              if (i == 0) userTrueDessert = trueDessert
               quickScores[i] = players[i].score + 0.05 * trueDessert
             }
 
@@ -2343,6 +2353,7 @@ const PlayPage = () => {
               currentUser.easyClear &&
               currentUser.normalClear &&
               currentUser.hardClear
+
             let maturePalateBefore =
               currentUser.makiClear &&
               currentUser.temakiClear &&
@@ -2422,9 +2433,9 @@ const PlayPage = () => {
                 achievementsData.menuClear = true
               if (
                 spec.includes(cards.TAKEOUTGUIDE.type) &&
-                !currentUser.takeoutClear
+                !currentUser.takeoutBoxClear
               )
-                achievementsData.takeoutClear = true
+                achievementsData.takeoutBoxClear = true
               if (
                 spec.includes(cards.WASABIGUIDE.type) &&
                 !currentUser.wasabiClear
@@ -2520,6 +2531,47 @@ const PlayPage = () => {
               )
                 notify('Mature Palate Achieved', '🏆', 4)
             }
+
+            if (diff.includes('easy'))
+              if (
+                !currentUser.easyScore ||
+                players[0].score > currentUser.easyScore ||
+                (players[0].score == currentUser.easyScore &&
+                  userTrueDessert > currentUser.easyDessert)
+              ) {
+                achievementsData.easyScore = players[0].score
+                achievementsData.easyDessert = userTrueDessert
+                notify('New High Score!', '🏆', 4)
+              } else if (diff.includes('normal'))
+                if (
+                  !currentUser.normalScore ||
+                  players[0].score > currentUser.normalScore ||
+                  (players[0].score == currentUser.normalScore &&
+                    userTrueDessert > currentUser.normalDessert)
+                ) {
+                  achievementsData.normalScore = players[0].score
+                  achievementsData.normalDessert = userTrueDessert
+                  notify('New High Score!', '🏆', 4)
+                } else if (diff.includes('hard'))
+                  if (
+                    !currentUser.hardScore ||
+                    players[0].score > currentUser.hardScore ||
+                    (players[0].score == currentUser.hardScore &&
+                      userTrueDessert > currentUser.hardDessert)
+                  ) {
+                    achievementsData.hardScore = players[0].score
+                    achievementsData.hardDessert = userTrueDessert
+                    notify('New High Score!', '🏆', 4)
+                  } else if (
+                    !currentUser.toxicScore ||
+                    players[0].score > currentUser.toxicScore ||
+                    (players[0].score == currentUser.toxicScore &&
+                      userTrueDessert > currentUser.toxicDessert)
+                  ) {
+                    achievementsData.toxicScore = players[0].score
+                    achievementsData.toxicDessert = userTrueDessert
+                    notify('New High Score!', '🏆', 4)
+                  }
           }
 
           setUserScoreF(players[0].score)

@@ -56,6 +56,106 @@ export const getResume = ({ id }) => {
   })
 }
 
+export const getStats = ({ difficulty }) => {
+  if (difficulty == 'easy')
+    return db.user.findMany({
+      select: {
+        name: true,
+        easyScore: true,
+        easyDessert: true,
+      },
+      orderBy: [
+        {
+          easyScore: 'desc',
+        },
+        {
+          easyDessert: 'desc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+      take: 100,
+    })
+  else if (difficulty == 'normal')
+    return db.user.findMany({
+      select: {
+        name: true,
+        normalScore: true,
+        normalDessert: true,
+      },
+      orderBy: [
+        {
+          normalScore: 'desc',
+        },
+        {
+          normalDessert: 'desc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+      take: 100,
+    })
+  else if (difficulty == 'hard') {
+    return db.user.findMany({
+      select: {
+        name: true,
+        hardScore: true,
+        hardDessert: true,
+      },
+      orderBy: [
+        {
+          hardScore: 'desc',
+        },
+        {
+          hardDessert: 'desc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+      take: 100,
+    })
+  } else if (difficulty == 'toxic') {
+    return db.user.findMany({
+      select: {
+        name: true,
+        toxicScore: true,
+        toxicDessert: true,
+      },
+      orderBy: [
+        {
+          toxicScore: 'desc',
+        },
+        {
+          toxicDessert: 'desc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+      take: 100,
+    })
+  } else {
+    return db.user.findMany({
+      select: {
+        name: true,
+        bestSpeedRun: true,
+      },
+      orderBy: [
+        {
+          bestSpeedrun: 'asc',
+        },
+        {
+          name: 'asc',
+        },
+      ],
+      take: 100,
+    })
+  }
+}
+
 export const updateAchievements = ({ id, input }) => {
   return db.user.update({
     data: input,

@@ -1,5 +1,13 @@
 export const schema = gql`
   type Achievements {
+    easyScore: Int
+    easyDessert: Int
+    normalScore: Int
+    normalDessert: Int
+    hardScore: Int
+    hardDessert: Int
+    toxicScore: Int
+    toxicDessert: Int
     modestMaki: Boolean
     longTermPlayer: Boolean
     speedEater: Boolean
@@ -51,6 +59,14 @@ export const schema = gql`
   }
 
   input AchievementsInput {
+    easyScore: Int
+    easyDessert: Int
+    normalScore: Int
+    normalDessert: Int
+    hardScore: Int
+    hardDessert: Int
+    toxicScore: Int
+    toxicDessert: Int
     modestMaki: Boolean
     longTermPlayer: Boolean
     speedEater: Boolean
@@ -101,8 +117,22 @@ export const schema = gql`
     fruitClear: Boolean
   }
 
+  type Stats {
+    name: String
+    easyScore: Int
+    easyDessert: Int
+    normalScore: Int
+    normalDessert: Int
+    hardScore: Int
+    hardDessert: Int
+    toxicScore: Int
+    toxicDessert: Int
+    bestSpeedrun: DateTime
+  }
+
   type Query {
     getResume(id: Int!): Achievements! @requireAuth
+    getStats(difficulty: String!): [Stats!]! @skipAuth
   }
 
   type Mutation {
