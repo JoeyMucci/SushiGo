@@ -12,7 +12,6 @@ import edamameguide from 'web/public/edamameguide.jpg'
 import eel from 'web/public/eel.jpg'
 import eelguide from 'web/public/eelguide.jpg'
 import eggnigiri from 'web/public/egg_nigiri.jpg'
-import finalscore from 'web/public/finalscore.jpg'
 import fruitdoubleorange from 'web/public/fruit(double_orange).jpg'
 import fruitdoublepineapple from 'web/public/fruit(double_pineapple).jpg'
 import fruitdoublewatermelon from 'web/public/fruit(double_watermelon).jpg'
@@ -32,7 +31,6 @@ import menu9 from 'web/public/menu(9).jpg'
 import menu from 'web/public/menu.jpg'
 import misosoup from 'web/public/miso_soup.jpg'
 import misoguide from 'web/public/misoguide.jpg'
-import nextround from 'web/public/nextround.jpg'
 import nigiri from 'web/public/nigiri.jpg'
 import onigiricircle from 'web/public/onigiri(circle).jpg'
 import onigiriflat from 'web/public/onigiri(flat).jpg'
@@ -549,18 +547,6 @@ export const cards = Object.freeze({
     picpath: turnedovercard,
     color: null,
     count: 0,
-  },
-  NEXT: {
-    type: -1,
-    text: 'next round',
-    picpath: nextround,
-    color: 'transparent',
-  },
-  FINAL: {
-    type: -2,
-    text: 'final score',
-    picpath: finalscore,
-    color: 'transparent',
   },
 })
 
@@ -1200,6 +1186,7 @@ const PlayPage = () => {
     // players[0] is the user
     let players = [
       {
+        name: isAuthenticated ? currentUser.name : 'Guest',
         hand: [],
         stash: [],
         score: 0,
@@ -1238,6 +1225,27 @@ const PlayPage = () => {
         utensilUsed: false,
       },
     ]
+
+    let modestMaki = roll.includes(cards.MAKIGUIDE.type)
+    let longTermPlayer =
+      roll.includes(cards.TEMAKIGUIDE.type) &&
+      dess.includes(cards.PUDDINGGUIDE.type)
+    let speedEats = 0
+    let forkForgets = 0
+    let sushiThiefs = 0
+    let badSushiThief = false
+    let menuUses = 0
+    let takeoutUses = 0
+    let wasabiNigiriPoints = 0
+    let specialOrders = []
+    let dumplingDisciple = app.includes(cards.DUMPLINGGUIDE.type)
+    let misoUses = 0
+    let badMiso = false
+    let unlikelyFriendship =
+      app.includes(cards.EELGUIDE.type) && app.includes(cards.TOFUGUIDE.type)
+    let onigiriGuru = app.includes(cards.ONIGIRIGUIDE.type)
+    let roundPoints = 0
+    let flashedBrilliantly = false
 
     // The following functions add the appropriate versions of the different card types
     const addNigiri = () => {
@@ -1359,7 +1367,7 @@ const PlayPage = () => {
         for (let i = 0; i < cards.FRUITPINEO.count; i++)
           deck.dessertPile.push(cards.FRUITPINEO)
         for (let i = 0; i < cards.FRUITWATERPINE.count; i++)
-          deck.dessertPile.push(cards.FRUITDUBO)
+          deck.dessertPile.push(cards.FRUITWATERPINE)
       }
     }
 
@@ -1441,23 +1449,11 @@ const PlayPage = () => {
 
       const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
         onCompleted: async () => {
+          console.log(achievementsData)
           notify('Achievements Updated', '🏆', 4)
+          achievementsData = {}
         },
       })
-
-      /*
-      useEffect(() => {
-        async function updateProgress() {
-          await updateAchievements({
-            variables: {
-              id: currentUser.id,
-              input: achievementsData,
-            },
-          })
-        }
-        if (showResults) updateProgress()
-      }, [showResults])
-        */
 
       // A cornerstone of SushiGO gameplay is that players swap hands clockwise after playing cards
       const swapCards = () => {
@@ -1466,35 +1462,6 @@ const PlayPage = () => {
           players[i].hand = players[i - 1].hand
         players[0].hand = tempCards
       }
-
-      // When user elects to play again with same cards
-      /*
-      const resetGame = () => {
-        toast.dismiss()
-
-        round = 1
-        deck = {
-          pile: [],
-          dessertPile: [],
-          discardPile: [],
-        }
-        for (let i = 0; i < players.length; i++) {
-          players[i].score = 0
-          players[i].dessert = 0
-          players[i].stash = []
-        }
-
-        setShowResults(false)
-        buildDeck()
-        dealToPlayers()
-
-        setUserDessert(players[0].dessert)
-        setCpuOneDessert(players[1].dessert)
-        setCpuTwoDessert(players[2].dessert)
-        setCpuThreeDessert(players[3].dessert)
-        updateData()
-      }
-        */
 
       const resetUramaki = () => {
         uramakiPoints = 8
@@ -1529,6 +1496,7 @@ const PlayPage = () => {
       }
 
       const resetMiso = () => {
+        if (firstMisoIndex == 0) misoUses++
         misoAllowed = true
         firstMisoIndex = -1
       }
@@ -1703,6 +1671,8 @@ const PlayPage = () => {
           requesterIndex
         )
 
+        if (requesterIndex == 0) sushiThiefs++
+
         players[requesterIndex].hand.unshift(
           players[requesteeIndex].hand.splice(cardIndex, 1)[0]
         )
@@ -1778,6 +1748,20 @@ const PlayPage = () => {
                 '😋',
                 i
               )
+
+              if (i == 0) roundPoints += uramakiPoints
+
+              if (i == 0 && cardsLeft == 8) speedEats++
+
+              if (
+                speedEats == 3 &&
+                currentUser &&
+                !currentUser.speedEater &&
+                !achievementsData.speedEater
+              ) {
+                achievementsData.speedEater = true
+                notify('Speed Eater Achieved!', '🏆', 4)
+              }
 
               /* It is not possible to score twice in a round by reaching 10+ rolls,
                However, it is possible to score uramaki again at the end of the round */
@@ -1928,6 +1912,27 @@ const PlayPage = () => {
       /* Scores a player's cards, only accounts for end of turn
          (i.e. no uramaki reaching 10 or dessert) */
       const scoreRegular = (playerCards, oppsCards, area) => {
+        const getWasabiNigiriPoints = () => {
+          if (
+            area != 0 ||
+            !currentUser ||
+            currentUser.wasabiWarrior ||
+            achievementsData.wasabiWarrior
+          )
+            return 0
+
+          let wnPoints = 0
+
+          for (let i = 0; i < playerCards.length - 1; i++)
+            if (playerCards[i].type == cards.WASABI.type)
+              if (playerCards[i + 1].type == cards.EGG.type) wnPoints += 3
+              else if (playerCards[i + 1].type == cards.SALMON.type)
+                wnPoints += 6
+              else wnPoints += 9
+
+          return wnPoints
+        }
+
         console.log('SCORING START')
         console.log(playerCards)
         let runningScore = 0
@@ -1940,25 +1945,38 @@ const PlayPage = () => {
           area
         )
 
+        if (spec.includes(cards.WASABIGUIDE.type))
+          wasabiNigiriPoints += getWasabiNigiriPoints()
+
+        if (wasabiNigiriPoints > 40) {
+          wasabiNigiriPoints = 0
+          achievementsData.wasabiWarrior = true
+          notify('Wasabi Warrior Achieved!', '🏆', 4)
+        }
+
         console.log('POST NIGIRI')
         console.log(runningScore)
 
         // ROLLS
-        if (roll.includes(cards.MAKIGUIDE.type))
-          runningScore += reportScore(
+        if (roll.includes(cards.MAKIGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreMaki(playerCards, oppsCards),
             cards.MAKIGUIDE,
             area
           )
-        else if (roll.includes(cards.TEMAKIGUIDE.type))
-          runningScore += reportScore(
+          runningScore += points
+          if (area == 0 && points != 3) modestMaki = false
+        } else if (roll.includes(cards.TEMAKIGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreTemaki(playerCards, oppsCards),
             cards.TEMAKIGUIDE,
             area
           )
-        else
+          runningScore += points
+          if (area == 0 && points != 4) longTermPlayer = false
+        } else
           runningScore += reportScore(
             playerCards,
             scoreUramakiEnd(playerCards, oppsCards),
@@ -1977,32 +1995,59 @@ const PlayPage = () => {
             cards.TAKEOUTGUIDE,
             area
           )
-        if (spec.includes(cards.TEAGUIDE.type))
-          runningScore += reportScore(
+        if (spec.includes(cards.TEAGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreTea(playerCards),
             cards.TEAGUIDE,
             area
           )
-        if (spec.includes(cards.SOYSAUCEGUIDE.type))
-          runningScore += reportScore(
+          runningScore += points
+          if (
+            area == 0 &&
+            points / countCard(playerCards, cards.TEA) >= 6 &&
+            currentUser &&
+            !currentUser.teaTime &&
+            !achievementsData.teaTime
+          ) {
+            achievementsData.teaTime = true
+            notify('Tea Time Achieved!', '🏆', 4)
+          }
+        }
+        if (spec.includes(cards.SOYSAUCEGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreSoysauce(playerCards, oppsCards),
             cards.SOYSAUCEGUIDE,
             area
           )
+          runningScore += points
+          if (
+            area == 0 &&
+            points >= 12 &&
+            currentUser &&
+            !currentUser.soysauceSavant &&
+            !achievementsData.soysauceSavant
+          ) {
+            achievementsData.soysauceSavant = true
+            notify('Soysauce Savant Achieved!', '🏆', 4)
+          }
+        }
 
         console.log('POST SPECIALS')
         console.log(runningScore)
 
         // APPETIZERS
-        if (app.includes(cards.DUMPLINGGUIDE.type))
-          runningScore += reportScore(
+        if (app.includes(cards.DUMPLINGGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreDumpling(playerCards),
             cards.DUMPLINGGUIDE,
             area
           )
+          runningScore += points
+          if (area == 0 && points < 15) dumplingDisciple = false
+        }
         if (app.includes(cards.TEMPURAGUIDE.type)) {
           let points = reportScore(
             playerCards,
@@ -2015,7 +2060,8 @@ const PlayPage = () => {
             area == 0 &&
             points >= 15 &&
             currentUser &&
-            !currentUser.tempuraTitan
+            !currentUser.tempuraTitan &&
+            !achievementsData.tempuraTitan
           ) {
             achievementsData.tempuraTitan = true
             notify('Tempura Titan Achieved!', '🏆', 4)
@@ -2033,7 +2079,8 @@ const PlayPage = () => {
             area == 0 &&
             points >= 20 &&
             currentUser &&
-            !currentUser.tempuraTitan
+            !currentUser.sashimiSensei &&
+            !achievementsData.sashimiSensei
           ) {
             achievementsData.sashimiSensei = true
             notify('Sashimi Sensei Achieved!', '🏆', 4)
@@ -2046,63 +2093,118 @@ const PlayPage = () => {
             cards.MISOGUIDE,
             area
           )
-        if (app.includes(cards.EDAMAMEGUIDE.type))
-          runningScore += reportScore(
+        if (app.includes(cards.EDAMAMEGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreEdamame(playerCards, oppsCards),
             cards.EDAMAMEGUIDE,
             area
           )
-        if (app.includes(cards.EELGUIDE.type))
-          runningScore += reportScore(
+          runningScore += points
+          if (
+            area == 0 &&
+            points >= 15 &&
+            currentUser &&
+            !currentUser.edamameExpert &&
+            !achievementsData.edamameExpert
+          ) {
+            achievementsData.edamameExpert = true
+            notify('Edamame Expert Achieved!', '🏆', 4)
+          }
+        }
+        if (app.includes(cards.EELGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreEel(playerCards),
             cards.EELGUIDE,
             area
           )
-        if (app.includes(cards.TOFUGUIDE.type))
-          runningScore += reportScore(
+          runningScore += points
+          if (area == 0 && points < 7) unlikelyFriendship = false
+        }
+        if (app.includes(cards.TOFUGUIDE.type)) {
+          let points = reportScore(
             playerCards,
             scoreTofu(playerCards),
             cards.TOFUGUIDE,
             area
           )
-        if (app.includes(cards.ONIGIRIGUIDE.type))
+          runningScore += points
+          if (area == 0 && points < 6) unlikelyFriendship = false
+        }
+        if (app.includes(cards.ONIGIRIGUIDE.type)) {
           runningScore += reportScore(
             playerCards,
             scoreOnigiri(playerCards),
             cards.ONIGIRIGUIDE,
             area
           )
+          if (
+            area == 0 &&
+            (countCard(playerCards, cards.ONICIRCLE) == 0 ||
+              countCard(playerCards, cards.ONISQUARE) == 0 ||
+              countCard(playerCards, cards.ONITRI) == 0 ||
+              countCard(playerCards, cards.ONIFLAT) == 0)
+          )
+            onigiriGuru = false
+        }
 
         console.log('POST APPS')
         console.log(runningScore)
+
+        if (area == 0) {
+          roundPoints += runningScore
+          if (roundPoints >= 30) flashedBrilliantly = true
+        }
 
         return runningScore
       }
 
       const scoreDessert = (playerDessert, oppsDessert, area) => {
-        if (dess.includes(cards.PUDDINGGUIDE.type))
-          return reportScore(
+        if (dess.includes(cards.PUDDINGGUIDE.type)) {
+          let points = reportScore(
             null,
             scorePudding(playerDessert, oppsDessert),
             cards.PUDDINGGUIDE,
             area
           )
-        else if (dess.includes(cards.GTICGUIDE.type))
-          return reportScore(
+          if (area == 0 && points != 6) longTermPlayer = false
+          return points
+        } else if (dess.includes(cards.GTICGUIDE.type)) {
+          let points = reportScore(
             null,
             scoreGTIC(playerDessert),
             cards.GTICGUIDE,
             area
           )
-        else
-          return reportScore(
+          if (
+            area == 0 &&
+            points >= 24 &&
+            currentUser &&
+            !currentUser.greenTeaEightCream
+          ) {
+            achievementsData.greenTeaEightCream = true
+            notify('Green Tea Eight Cream Achieved!', '🏆', 4)
+          }
+          return points
+        } else {
+          let points = reportScore(
             null,
             scoreFruit(playerDessert),
             cards.FRUITGUIDE,
             area
           )
+          if (
+            area == 0 &&
+            points == 30 &&
+            currentUser &&
+            !currentUser.fruitFiend
+          ) {
+            achievementsData.fruitFiend = true
+            notify('Fruit Fiend Achieved!', '🏆', 4)
+          }
+          return points
+        }
       }
 
       const scoreRound = () => {
@@ -2173,6 +2275,253 @@ const PlayPage = () => {
         }
 
         if (round > NUMROUNDS) {
+          if (currentUser) {
+            if (modestMaki && !currentUser.modestMaki) {
+              achievementsData.modestMaki = true
+              notify('Modest Maki Achieved!', '🏆', 4)
+            }
+
+            if (longTermPlayer && !currentUser.longTermPlayer) {
+              achievementsData.longTermPlayer = true
+              notify('Long Term Player Achieved!', '🏆', 4)
+            }
+
+            // Sushi Thief: 4 spoon uses without fail
+            if (sushiThiefs >= 4 && !badSushiThief) {
+              achievementsData.sushiThief = true
+              notify('Sushi Thief Achieved!', '🏆', 4)
+            }
+
+            if (dumplingDisciple && !currentUser.dumplingDisciple) {
+              achievementsData.dumplingDisciple = true
+              notify('Dumpling Disciple Achieved!', '🏆', 4)
+            }
+
+            // Miso Master: 6 miso uses without fail
+            if (misoUses >= 6 && !badMiso) {
+              achievementsData.misoMaster = true
+              notify('Miso Master Achieved!', '🏆', 4)
+            }
+
+            if (unlikelyFriendship && !currentUser.unlikelyFriendship) {
+              achievementsData.unlikelyFriendship = true
+              notify('An Unlikely Friendship Achieved!', '🏆', 4)
+            }
+
+            if (onigiriGuru && !currentUser.onigiriGuru) {
+              achievementsData.onigiriGuru = true
+              notify('Onigiri Guru Achieved!', '🏆', 4)
+            }
+
+            if (players[0].score < 0 && !currentUser.sushiLow) {
+              achievementsData.sushiLow = true
+              notify('Sushi Low Achieved!', '🏆', 4)
+            }
+
+            let quickScores = []
+            for (let i = 0; i < players.length; i++) {
+              let fruitCounts = parseFruit(players[i].dessert)
+              let totalFruitCount =
+                fruitCounts[0] + fruitCounts[1] + fruitCounts[2]
+              let trueDessert = dess.includes(cards.FRUITGUIDE.type)
+                ? totalFruitCount / 2
+                : players[i].dessert
+              quickScores[i] = players[i].score + 0.05 * trueDessert
+            }
+
+            let lastPlace =
+              quickScores[0] <= quickScores[1] &&
+              quickScores[0] <= quickScores[2] &&
+              quickScores[0] <= quickScores[3]
+
+            let firstPlace =
+              quickScores[0] > quickScores[1] &&
+              quickScores[0] > quickScores[2] &&
+              quickScores[0] > quickScores[3]
+
+            let seasonedCompetitorBefore =
+              currentUser.easyClear &&
+              currentUser.normalClear &&
+              currentUser.hardClear
+            let maturePalateBefore =
+              currentUser.makiClear &&
+              currentUser.temakiClear &&
+              currentUser.uramakiClear &&
+              currentUser.chopsticksClear &&
+              currentUser.spoonClear &&
+              currentUser.menuClear &&
+              currentUser.takeoutBoxClear &&
+              currentUser.wasabiClear &&
+              currentUser.teaClear &&
+              currentUser.soysauceClear &&
+              currentUser.specialOrderClear &&
+              currentUser.dumplingClear &&
+              currentUser.tempuraClear &&
+              currentUser.sashimiClear &&
+              currentUser.misoSoupClear &&
+              currentUser.edamameClear &&
+              currentUser.eelClear &&
+              currentUser.tofuClear &&
+              currentUser.onigiriClear &&
+              currentUser.puddingClear &&
+              currentUser.gticClear &&
+              currentUser.fruitClear
+
+            // Flash of Brilliance: Score 30+ in a round and get last place in the game
+            if (
+              flashedBrilliantly &&
+              lastPlace &&
+              !currentUser.flashOfBrilliance
+            ) {
+              achievementsData.flashOfBrilliance = true
+              notify('Flash of Brilliance Achieved!', '🏆', 4)
+            }
+
+            if (players[0].score >= 80 && !currentUser.headChef) {
+              achievementsData.headChef = true
+              notify('Head Chef Achieved!', '🏆', 4)
+            }
+
+            if (firstPlace && !seasonedCompetitorBefore) {
+              if (diff.includes('easy') && !currentUser.easyClear)
+                achievementsData.easyClear = true
+              else if (diff.includes('normal') && !currentUser.normalClear)
+                achievementsData.normalClear = true
+              else if (!currentUser.hardClear) achievementsData.hardClear = true
+
+              if (
+                (achievementsData.easyClear || currentUser.easyClear) &&
+                (achievementsData.normalClear || currentUser.normalClear) &&
+                (achievementsData.hardClear || currentUser.hardClear)
+              )
+                notify('Seasoned Competitor Achieved', '🏆', 4)
+            }
+
+            if (firstPlace && !maturePalateBefore) {
+              if (roll.includes(cards.MAKIGUIDE.type) && !currentUser.makiClear)
+                achievementsData.makiClear = true
+              else if (
+                roll.includes(cards.TEMAKIGUIDE.type) &&
+                !currentUser.temakiClear
+              )
+                achievementsData.temakiClear = true
+              else if (!currentUser.uramakiClear)
+                achievementsData.uramakiClear = true
+
+              if (
+                spec.includes(cards.CHOPSTICKSGUIDE.type) &&
+                !currentUser.chopsticksClear
+              )
+                achievementsData.chopsticksClear = true
+              if (
+                spec.includes(cards.SPOONGUIDE.type) &&
+                !currentUser.spoonClear
+              )
+                achievementsData.spoonClear = true
+              if (spec.includes(cards.MENUGUIDE.type) && !currentUser.menuClear)
+                achievementsData.menuClear = true
+              if (
+                spec.includes(cards.TAKEOUTGUIDE.type) &&
+                !currentUser.takeoutClear
+              )
+                achievementsData.takeoutClear = true
+              if (
+                spec.includes(cards.WASABIGUIDE.type) &&
+                !currentUser.wasabiClear
+              )
+                achievementsData.wasabiClear = true
+              if (spec.includes(cards.TEAGUIDE.type) && !currentUser.teaClear)
+                achievementsData.teaClear = true
+              if (
+                spec.includes(cards.SOYSAUCEGUIDE.type) &&
+                !currentUser.soysauceClear
+              )
+                achievementsData.soysauceClear = true
+              if (
+                spec.includes(cards.SPECIALOGUIDE.type) &&
+                !currentUser.specialOrderClear
+              )
+                achievementsData.specialOrderClear = true
+
+              if (
+                app.includes(cards.DUMPLINGGUIDE.type) &&
+                !currentUser.dumplingClear
+              )
+                achievementsData.dumplingClear = true
+              if (
+                app.includes(cards.TEMPURAGUIDE.type) &&
+                !currentUser.tempuraClear
+              )
+                achievementsData.tempuraClear = true
+              if (
+                app.includes(cards.SASHIMIGUIDE.type) &&
+                !currentUser.sashimiClear
+              )
+                achievementsData.sashimiClear = true
+              if (
+                app.includes(cards.MISOGUIDE.type) &&
+                !currentUser.misoSoupClear
+              )
+                achievementsData.misoSoupClear = true
+              if (
+                app.includes(cards.EDAMAMEGUIDE.type) &&
+                !currentUser.edamameClear
+              )
+                achievementsData.edamameClear = true
+              if (app.includes(cards.EELGUIDE.type) && !currentUser.eelClear)
+                achievementsData.eelClear = true
+              if (app.includes(cards.TOFUGUIDE.type) && !currentUser.tofuClear)
+                achievementsData.tofuClear = true
+              if (
+                app.includes(cards.ONIGIRIGUIDE.type) &&
+                !currentUser.onigiriClear
+              )
+                achievementsData.onigiriClear = true
+
+              if (
+                dess.includes(cards.PUDDINGGUIDE.type) &&
+                !currentUser.puddingClear
+              )
+                achievementsData.puddingClear = true
+              else if (
+                diff.includes(cards.GTICGUIDE.type) &&
+                !currentUser.gticClear
+              )
+                achievementsData.gticClear = true
+              else if (!currentUser.fruitClear)
+                achievementsData.fruitClear = true
+
+              if (
+                (achievementsData.makiClear || currentUser.makiClear) &&
+                (achievementsData.temakiClear || currentUser.temakiClear) &&
+                (achievementsData.uramakiClear || currentUser.uramakiClear) &&
+                (achievementsData.chopsticksClear ||
+                  currentUser.chopsticksClear) &&
+                (achievementsData.spoonClear || currentUser.spoonClear) &&
+                (achievementsData.menuClear || currentUser.menuClear) &&
+                (achievementsData.takeoutBoxClear ||
+                  currentUser.takeoutBoxClear) &&
+                (achievementsData.wasabiClear || currentUser.wasabiClear) &&
+                (achievementsData.teaClear || currentUser.teaClear) &&
+                (achievementsData.soysauceClear || currentUser.soysauceClear) &&
+                (achievementsData.specialOrderClear ||
+                  currentUser.specialOrderClear) &&
+                (achievementsData.dumplingClear || currentUser.dumplingClear) &&
+                (achievementsData.tempuraClear || currentUser.tempuraClear) &&
+                (achievementsData.sashimiClear || currentUser.sashimiClear) &&
+                (achievementsData.misoSoupClear || currentUser.misoSoupClear) &&
+                (achievementsData.edamameClear || currentUser.edamameClear) &&
+                (achievementsData.eelClear || currentUser.eelClear) &&
+                (achievementsData.tofuClear || currentUser.tofuClear) &&
+                (achievementsData.onigiriClear || currentUser.onigiriClear) &&
+                (achievementsData.puddingClear || currentUser.puddingClear) &&
+                (achievementsData.gticClear || currentUser.gticClear) &&
+                (achievementsData.fruitClear || currentUser.fruitClear)
+              )
+                notify('Mature Palate Achieved', '🏆', 4)
+            }
+          }
+
           setUserScoreF(players[0].score)
           setCpuOneScoreF(players[1].score)
           setCpuTwoScoreF(players[2].score)
@@ -2185,12 +2534,15 @@ const PlayPage = () => {
           setCpuTwoName('cpu two')
           setCpuThreeName('cpu three')
           setShowResults(true)
-          await updateAchievements({
-            variables: {
-              id: currentUser.id,
-              input: achievementsData,
-            },
-          })
+
+          // Only update achievements if new progress has been made
+          if (currentUser && Object.keys(achievementsData).length > 0)
+            await updateAchievements({
+              variables: {
+                id: currentUser.id,
+                input: achievementsData,
+              },
+            })
         } else {
           setUserHand([...players[0].hand])
           setUserStash([...players[0].stash])
@@ -2212,6 +2564,8 @@ const PlayPage = () => {
         if (spec.includes(cards.CHOPSTICKSGUIDE.type)) resetChopsticks()
         if (spec.includes(cards.SPOONGUIDE.type)) resetSpoon()
         if (app.includes(cards.MISOGUIDE.type)) resetMiso()
+        if (spec.includes(cards.SPECIALOGUIDE.type)) specialOrders = []
+        roundPoints = 0
         priority = 0
         cardsLeft = MAXHANDCARDS
         round++
@@ -2309,6 +2663,7 @@ const PlayPage = () => {
             if (players[index].stash[i].type == cards.MISO.type) {
               deck.discardPile.push(players[index].stash.splice(i, 1)[0])
               notify('Gave up non-unique miso soup', '😩', index)
+              if (index == 0) badMiso = true
               return
             }
         }
@@ -2385,7 +2740,9 @@ const PlayPage = () => {
           for (let i = 0; i < players[playerIndex].stash.length; i++)
             if (
               players[playerIndex].stash[i].type != cards.SPECIALO.type &&
-              (players[playerIndex].stash[i].type != userClickedType ||
+              players[playerIndex].stash[i].color != cards.MENUSEVEN.color &&
+              (i != 0 ||
+                players[playerIndex].stash[i].type != userClickedType ||
                 ![cards.CHOPSTICKSONE.color, cards.SPOONFOUR.color].includes(
                   players[playerIndex].stash[i].color
                 ))
@@ -2524,6 +2881,7 @@ const PlayPage = () => {
             '🥢',
             index
           )
+
           playCard(choice, index, true)
         }
 
@@ -2562,6 +2920,7 @@ const PlayPage = () => {
             notify('Did not have ' + choiceCard.text, '🥄', requesteeIndex)
           }
           notify('Did not receive ' + choiceCard.text, '🥄', requesterIndex)
+          if (requesterIndex == 0) badSushiThief = true
           deck.discardPile.push(removePriorityCard(requesterIndex))
         }
 
@@ -2596,6 +2955,7 @@ const PlayPage = () => {
             '📖',
             index
           )
+
           playCard(choice, index, true)
 
           cleanupMenu(index)
@@ -2825,6 +3185,12 @@ const PlayPage = () => {
             '🥢',
             0
           )
+
+          if (++forkForgets == 4 && currentUser && !currentUser.forkForgetter) {
+            achievementsData.forkForgetter = true
+            notify('Fork Forgetter Achieved!', '🏆', 4)
+          }
+
           playCard(parseInt(e.target.name), 0, true)
 
           if (!specialOrderFreeze) {
@@ -2869,6 +3235,17 @@ const PlayPage = () => {
           }
 
           notify('Played ' + clicked.text + ' with menu', '📖', 0)
+
+          if (
+            ++menuUses == 4 &&
+            currentUser &&
+            !currentUser.demandingCustomer &&
+            !achievementsData.demandingCustomer
+          ) {
+            achievementsData.demandingCustomer = true
+            notify('Demanding Customer Achieved!', '🏆', 4)
+          }
+
           playCard(parseInt(e.target.name), 0, true) // Play the clicked card
 
           cleanupMenu(0)
@@ -2949,6 +3326,14 @@ const PlayPage = () => {
             priority++
             if (!usedTakeout)
               notify('Took out 0 items with takeout box', '🥡', 0)
+            else if (
+              ++takeoutUses == 4 &&
+              currentUser &&
+              !currentUser.leftoverLover
+            ) {
+              achievementsData.leftoverLover = true
+              notify('Leftover Lover Achieved!', '🏆', 4)
+            }
             usedTakeout = false
             resolveTurn()
             updateData()
@@ -3039,6 +3424,20 @@ const PlayPage = () => {
                 '🌈',
                 0
               )
+
+              specialOrders.push(players[0].stash[i].type)
+
+              if (
+                specialOrders.length == 3 &&
+                specialOrders[0] == specialOrders[1] &&
+                specialOrders[1] == specialOrders[2] &&
+                currentUser &&
+                !currentUser.goingForSeconds &&
+                !achievementsData.goingForSeconds
+              ) {
+                achievementsData.goingForSeconds = true
+                notify('Going for Seconds Achieved!', '🏆', 4)
+              }
               playCard(0, 0, priority > 0)
               break
             }
@@ -3346,7 +3745,7 @@ const PlayPage = () => {
         // Display button to progress round once out of cards
         if (selection.length == 0) {
           let buttonText = round == NUMROUNDS ? 'FINAL SCORE' : 'NEXT ROUND'
-          if (priority == 0)
+          if (priority == 0 && !specialOrderFreeze)
             return (
               <Form>
                 <br />
@@ -3660,7 +4059,7 @@ const PlayPage = () => {
                 <Hand selection={userHand} />
                 <div className="flex flex-row">
                   <Scoreline
-                    name={isAuthenticated ? currentUser.name : 'Guest'}
+                    name={players[0].name}
                     score={userScore}
                     dessert={userDessert}
                   />
@@ -3679,144 +4078,6 @@ const PlayPage = () => {
             </div>
           </>
         )
-      } else {
-        /*
-        const comparePlayers = (a, b) => {
-          if (a.score != b.score) return b.score - a.score
-          if (a.dessert != b.dessert) return b.dessert - a.dessert
-          return b.tiebreak - a.tiebreaker
-        }
-
-        let userDessertCount = userDessert
-        let cpuOneDessertCount = cpuOneDessert
-        let cpuTwoDessertCount = cpuTwoDessert
-        let cpuThreeDessertCount = cpuThreeDessert
-
-        /* Change dessertCount to number of cards played for fruit
-           For fruit dessert=watermelon*11^2+pineapple*11+orange
-        if (dess.includes(cards.FRUITGUIDE.type)) {
-          let userFruitCounts = parseFruit(userDessert)
-          userDessertCount =
-            (userFruitCounts[0] + userFruitCounts[1] + userFruitCounts[2]) / 2
-          let cpuOneFruitCounts = parseFruit(cpuOneDessert)
-          cpuOneDessertCount =
-            (cpuOneFruitCounts[0] +
-              cpuOneFruitCounts[1] +
-              cpuOneFruitCounts[2]) /
-            2
-          let cpuTwoFruitCounts = parseFruit(cpuTwoDessert)
-          cpuTwoDessertCount =
-            (cpuTwoFruitCounts[0] +
-              cpuTwoFruitCounts[1] +
-              cpuTwoFruitCounts[2]) /
-            2
-          let cpuThreeFruitCounts = parseFruit(cpuThreeDessert)
-          cpuThreeDessertCount =
-            (cpuThreeFruitCounts[0] +
-              cpuThreeFruitCounts[1] +
-              cpuThreeFruitCounts[2]) /
-            2
-        }
-
-        // Tiebreak is cpuTwo > cpuThree > cpuOne > user
-        let displayInfo = [
-          {
-            name: isAuthenticated ? currentUser.name : 'Guest',
-            score: players[0].score,
-            dessert: userDessertCount,
-            tiebreak: 0,
-          },
-          {
-            name: players[1].name,
-            score: players[1].score,
-            dessert: cpuOneDessertCount,
-            tiebreak: 1,
-          },
-          {
-            name: players[2].name,
-            score: players[2].score,
-            dessert: cpuTwoDessertCount,
-            tiebreak: 3,
-          },
-          {
-            name: players[3].name,
-            score: players[3].score,
-            dessert: cpuThreeDessertCount,
-            tiebreak: 2,
-          },
-        ]
-
-        displayInfo.sort(comparePlayers)
-
-        /* Display the players in order by score, gold for 1st,
-           silver for 2nd, bronze for third, and regular for last
-        return (
-          <div className="flex h-screen flex-col items-center justify-center">
-            <p className="text-center font-cal text-6xl text-[color:var(--color-gold)]">
-              {displayInfo[0].name}: {displayInfo[0].score} (
-              {displayInfo[0].dessert})
-            </p>
-            <br />
-            <p className="text-center font-cal text-6xl text-[color:var(--color-silver)]">
-              {displayInfo[1].name}: {displayInfo[1].score} (
-              {displayInfo[1].dessert})
-            </p>
-            <br />
-            <p className="text-center font-cal text-6xl text-[color:var(--color-bronze)]">
-              {displayInfo[2].name}: {displayInfo[2].score} (
-              {displayInfo[2].dessert})
-            </p>
-            <br />
-            <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
-              {displayInfo[3].name}: {displayInfo[3].score} (
-              {displayInfo[3].dessert})
-            </p>
-            <br />
-            <Form className="flex flex-row">
-              <Label className="m-2">
-                <CheckboxField
-                  id="newgame"
-                  name="options"
-                  onChange={() => (window.location.href = '/play')}
-                />
-                <p
-                  name="newgame"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
-                >
-                  New Game
-                </p>
-              </Label>
-              <Label className="m-2">
-                <CheckboxField
-                  id="rematch"
-                  name="options"
-                  onChange={resetGame}
-                />
-                <p
-                  href="/play"
-                  name="rematch"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
-                >
-                  Rematch
-                </p>
-              </Label>
-              <Label className="m-2">
-                <CheckboxField
-                  id="home"
-                  name="options"
-                  onChange={() => (window.location.href = '/')}
-                />
-                <p
-                  name="home"
-                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
-                >
-                  Home
-                </p>
-              </Label>
-            </Form>
-          </div>
-        )
-        */
       }
     }
 
