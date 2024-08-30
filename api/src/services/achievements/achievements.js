@@ -64,6 +64,10 @@ export const getStats = ({ difficulty }) => {
         easyScore: true,
         easyDessert: true,
       },
+      where: {
+        easyScore: { not: null },
+        easyDessert: { not: null },
+      },
       orderBy: [
         {
           easyScore: 'desc',
@@ -83,6 +87,10 @@ export const getStats = ({ difficulty }) => {
         name: true,
         normalScore: true,
         normalDessert: true,
+      },
+      where: {
+        normalScore: { not: null },
+        normalDessert: { not: null },
       },
       orderBy: [
         {
@@ -104,6 +112,10 @@ export const getStats = ({ difficulty }) => {
         hardScore: true,
         hardDessert: true,
       },
+      where: {
+        hardScore: { not: null },
+        hardDessert: { not: null },
+      },
       orderBy: [
         {
           hardScore: 'desc',
@@ -124,6 +136,10 @@ export const getStats = ({ difficulty }) => {
         toxicScore: true,
         toxicDessert: true,
       },
+      where: {
+        toxicScore: { not: null },
+        toxicDessert: { not: null },
+      },
       orderBy: [
         {
           toxicScore: 'desc',
@@ -141,7 +157,10 @@ export const getStats = ({ difficulty }) => {
     return db.user.findMany({
       select: {
         name: true,
-        bestSpeedRun: true,
+        bestSpeedrun: true,
+      },
+      where: {
+        bestSpeedrun: { not: null },
       },
       orderBy: [
         {

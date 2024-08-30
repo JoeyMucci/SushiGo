@@ -726,7 +726,6 @@ const PlayPage = () => {
             <Label className="m-2">
               <CheckboxField id="rematch" name="options" onChange={resetGame} />
               <p
-                href="/play"
                 name="rematch"
                 className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]"
               >
@@ -1124,6 +1123,73 @@ const PlayPage = () => {
                   Hard
                 </p>
               </Label>
+              {currentUser &&
+                currentUser.modestMaki &&
+                currentUser.longTermPlayer &&
+                currentUser.speedEater &&
+                currentUser.forkForgetter &&
+                currentUser.sushiThief &&
+                currentUser.demandingCustomer &&
+                currentUser.leftoverLover &&
+                currentUser.wasabiWarrior &&
+                currentUser.teaTime &&
+                currentUser.soysauceSavant &&
+                currentUser.goingForSeconds &&
+                currentUser.dumplingDisciple &&
+                currentUser.tempuraTitan &&
+                currentUser.sashimiSensei &&
+                currentUser.misoMaster &&
+                currentUser.edamameExpert &&
+                currentUser.unlikelyFriendship &&
+                currentUser.onigiriGuru &&
+                currentUser.greenTeaEightCream &&
+                currentUser.fruitFiend &&
+                currentUser.sushiLow &&
+                currentUser.flashOfBrilliance &&
+                currentUser.headChef &&
+                currentUser.easyClear &&
+                currentUser.normalClear &&
+                currentUser.hardClear &&
+                currentUser.makiClear &&
+                currentUser.temakiClear &&
+                currentUser.uramakiClear &&
+                currentUser.chopsticksClear &&
+                currentUser.spoonClear &&
+                currentUser.menuClear &&
+                currentUser.takeoutBoxClear &&
+                currentUser.wasabiClear &&
+                currentUser.teaClear &&
+                currentUser.soysauceClear &&
+                currentUser.specialOrderClear &&
+                currentUser.dumplingClear &&
+                currentUser.tempuraClear &&
+                currentUser.sashimiClear &&
+                currentUser.misoSoupClear &&
+                currentUser.edamameClear &&
+                currentUser.eelClear &&
+                currentUser.tofuClear &&
+                currentUser.onigiriClear &&
+                currentUser.puddingClear &&
+                currentUser.gticClear &&
+                currentUser.fruitClear && (
+                  <Label className="m-2">
+                    <CheckboxField
+                      id="toxic"
+                      name="diff"
+                      onChange={clickDiff}
+                    />
+                    <p
+                      name="toxic"
+                      className={
+                        diff.includes('toxic')
+                          ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                          : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+                      }
+                    >
+                      Toxic
+                    </p>
+                  </Label>
+                )}
             </div>
             <Submit
               name="START"
@@ -2495,7 +2561,7 @@ const PlayPage = () => {
               )
                 achievementsData.puddingClear = true
               else if (
-                diff.includes(cards.GTICGUIDE.type) &&
+                dess.includes(cards.GTICGUIDE.type) &&
                 !currentUser.gticClear
               )
                 achievementsData.gticClear = true
