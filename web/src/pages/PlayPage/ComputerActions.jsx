@@ -808,8 +808,14 @@ const chooseIndex = (expectedVals, cardsLeft, difficulty) => {
   // Increase power (which skews towards higher exVals) as stashes differentiate, as redundancy is matters less
   let pow = 2.4 + 0.24 * (MAXHANDCARDS - cardsLeft)
 
+  // Invert the expected values of cards on toxic reverse difficulty
+  if (difficulty == 'toxic reverse') {
+    for (let i = 0; i < expectedVals.length; i++)
+      expectedVals[i] = 1 / expectedVals[i]
+  }
+
   if (difficulty == 'normal') pow /= 2
-  else if (difficulty == 'toxic') pow *= 2
+  else if (difficulty == 'toxic' || difficulty == 'toxic reverse') pow *= 2
 
   for (let i = 0; i < expectedVals.length; i++)
     sum += Math.pow(expectedVals[i], pow)

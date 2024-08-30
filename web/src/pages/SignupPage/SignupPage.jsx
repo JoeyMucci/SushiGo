@@ -84,6 +84,7 @@ const SignupPage = () => {
         <Label name="email">Email</Label>
         <TextField
           name="email"
+          className="text-[color:black]"
           ref={emailRef}
           validation={{
             required: {
@@ -103,6 +104,7 @@ const SignupPage = () => {
         <Label name="nickname">Name</Label>
         <TextField
           name="nickname"
+          className="text-[color:black]"
           validation={{
             required: {
               value: true,
@@ -123,6 +125,7 @@ const SignupPage = () => {
         <Label name="password">Password</Label>
         <PasswordField
           name="password"
+          className="text-[color:black]"
           ref={passwordRef}
           validation={{
             required: {
@@ -143,6 +146,7 @@ const SignupPage = () => {
         <Label name="retypepassword">Retype Password</Label>
         <PasswordField
           name="retypepassword"
+          className="text-[color:black]"
           validation={{
             required: {
               value: true,

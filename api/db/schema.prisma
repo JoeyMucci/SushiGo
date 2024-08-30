@@ -12,14 +12,14 @@ model User {
   id                  Int       @id @default(autoincrement())
   email               String    @unique
   name                String    @unique
-  easyScore           Int?
-  easyDessert         Int?
-  normalScore         Int?
-  normalDessert       Int?
-  hardScore           Int?
-  hardDessert         Int?
-  toxicScore          Int?
-  toxicDessert        Int?
+  easyScore           Int       @default(-999)
+  easyDessert         Int       @default(-999)
+  normalScore         Int       @default(-999)
+  normalDessert       Int       @default(-999)
+  hardScore           Int       @default(-999)
+  hardDessert         Int       @default(-999)
+  toxicScore          Int       @default(-999)
+  toxicDessert        Int       @default(-999)
   speedrunStart       DateTime  @default(now())
   bestSpeedrun        DateTime?
   hashedPassword      String

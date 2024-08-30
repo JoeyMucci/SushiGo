@@ -65,6 +65,7 @@ const LoginPage = () => {
         <Label name="email">Email</Label>
         <TextField
           name="email"
+          className="text-[color:black]"
           ref={emailRef}
           validation={{
             required: {
@@ -79,6 +80,7 @@ const LoginPage = () => {
         <Label name="password">Password</Label>
         <PasswordField
           name="password"
+          className="text-[color:black]"
           validation={{
             required: {
               value: true,

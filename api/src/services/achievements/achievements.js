@@ -65,8 +65,7 @@ export const getStats = ({ difficulty }) => {
         easyDessert: true,
       },
       where: {
-        easyScore: { not: null },
-        easyDessert: { not: null },
+        easyScore: { gt: -999 },
       },
       orderBy: [
         {
@@ -89,8 +88,7 @@ export const getStats = ({ difficulty }) => {
         normalDessert: true,
       },
       where: {
-        normalScore: { not: null },
-        normalDessert: { not: null },
+        normalScore: { gt: -999 },
       },
       orderBy: [
         {
@@ -113,8 +111,7 @@ export const getStats = ({ difficulty }) => {
         hardDessert: true,
       },
       where: {
-        hardScore: { not: null },
-        hardDessert: { not: null },
+        hardScore: { gt: -999 },
       },
       orderBy: [
         {
@@ -137,8 +134,7 @@ export const getStats = ({ difficulty }) => {
         toxicDessert: true,
       },
       where: {
-        toxicScore: { not: null },
-        toxicDessert: { not: null },
+        toxicScore: { gt: -999 },
       },
       orderBy: [
         {

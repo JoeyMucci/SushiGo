@@ -601,10 +601,6 @@ const PlayPage = () => {
   const [cpuTwoDessertF, setCpuTwoDessertF] = useState(0)
   const [cpuThreeDessertF, setCpuThreeDessertF] = useState(0)
 
-  const [cpuOneName, setCpuOneName] = useState('cpu one')
-  const [cpuTwoName, setCpuTwoName] = useState('cpu two')
-  const [cpuThreeName, setCpuThreeName] = useState('cpu three')
-
   const [roll, setRoll] = useState([])
   const [spec, setSpec] = useState([])
   const [app, setApp] = useState([])
@@ -663,19 +659,19 @@ const PlayPage = () => {
         tiebreak: 0,
       },
       {
-        name: cpuOneName,
+        name: diff.includes('toxic') ? 'Jacob' : 'cpu one',
         score: cpuOneScoreF,
         dessert: cpuOneDessertCount,
         tiebreak: 1,
       },
       {
-        name: cpuTwoName,
+        name: diff.includes('toxic') ? 'Jeff' : 'cpu two',
         score: cpuTwoScoreF,
         dessert: cpuTwoDessertCount,
         tiebreak: 3,
       },
       {
-        name: cpuThreeName,
+        name: diff.includes('toxic') ? 'Jerry' : 'cpu three',
         score: cpuThreeScoreF,
         dessert: cpuThreeDessertCount,
         tiebreak: 2,
@@ -856,36 +852,158 @@ const PlayPage = () => {
 
     // The following functions update the appropriate array depending on the card type
     const clickRoll = (e) => {
-      if (roll.includes(parseInt(e.target.name)))
+      if (roll.includes(parseInt(e.target.name))) {
         setRoll(roll.toSpliced(roll.indexOf(parseInt(e.target.name)), 1))
-      else if (roll.length < ROLLCAP)
+        if (diff.includes('toxic')) setDiff([])
+      } else if (roll.length < ROLLCAP) {
         setRoll([...roll, parseInt(e.target.name)])
+        if (diff.includes('toxic')) setDiff([])
+      }
     }
 
     const clickSpec = (e) => {
-      if (spec.includes(parseInt(e.target.name)))
+      if (spec.includes(parseInt(e.target.name))) {
         setSpec(spec.toSpliced(spec.indexOf(parseInt(e.target.name)), 1))
-      else if (spec.length < SPECCAP)
+        if (diff.includes('toxic')) setDiff([])
+      } else if (spec.length < SPECCAP) {
         setSpec([...spec, parseInt(e.target.name)])
+        if (diff.includes('toxic')) setDiff([])
+      }
     }
 
     const clickApp = (e) => {
-      if (app.includes(parseInt(e.target.name)))
+      if (app.includes(parseInt(e.target.name))) {
         setApp(app.toSpliced(app.indexOf(parseInt(e.target.name)), 1))
-      else if (app.length < APPCAP) setApp([...app, parseInt(e.target.name)])
+        if (diff.includes('toxic')) setDiff([])
+      } else if (app.length < APPCAP) {
+        setApp([...app, parseInt(e.target.name)])
+        if (diff.includes('toxic')) setDiff([])
+      }
     }
 
     const clickDess = (e) => {
-      if (dess.includes(parseInt(e.target.name)))
+      console.log(diff)
+      if (dess.includes(parseInt(e.target.name))) {
         setDess(dess.toSpliced(dess.indexOf(parseInt(e.target.name)), 1))
-      else if (dess.length < DESSCAP)
+        if (diff.includes('toxic')) setDiff([])
+      } else if (dess.length < DESSCAP) {
         setDess([...dess, parseInt(e.target.name)])
+        if (diff.includes('toxic')) setDiff([])
+      }
     }
 
     const clickDiff = (e) => {
       if (diff.includes(e.target.id))
         setDiff(diff.toSpliced(diff.indexOf(e.target.id), 1))
-      else if (diff.length < DIFFCAP) setDiff([...diff, e.target.id])
+      else if (diff.length < DIFFCAP) {
+        setDiff([...diff, e.target.id])
+        if (e.target.id == 'toxic') {
+          setRoll([cards.MAKIGUIDE.type])
+          setSpec([cards.CHOPSTICKSGUIDE.type, cards.WASABIGUIDE.type])
+          setApp([
+            cards.DUMPLINGGUIDE.type,
+            cards.TEMPURAGUIDE.type,
+            cards.SASHIMIGUIDE.type,
+          ])
+          setDess([cards.PUDDINGGUIDE.type])
+        }
+      }
+    }
+
+    const randomizeOrder = () => {
+      // ROLLS
+      if (Math.random() > 0.33)
+        if (Math.random() > 0.5) setRoll([cards.MAKIGUIDE.type])
+        else setRoll([cards.TEMAKIGUIDE.type])
+      else setRoll([cards.URAMAKIGUIDE.type])
+
+      // SPECIALS
+      let newSpec = []
+      while (newSpec.length < SPECCAP)
+        if (Math.random() > 0.5)
+          if (Math.random() > 0.5)
+            if (Math.random() > 0.5)
+              newSpec.includes(cards.CHOPSTICKSGUIDE.type) ||
+                newSpec.push(cards.CHOPSTICKSGUIDE.type)
+            else
+              newSpec.includes(cards.SPOONGUIDE.type) ||
+                newSpec.push(cards.SPOONGUIDE.type)
+          else {
+            if (Math.random() > 0.5)
+              newSpec.includes(cards.MENUGUIDE.type) ||
+                newSpec.push(cards.MENUGUIDE.type)
+            else
+              newSpec.includes(cards.TAKEOUTGUIDE.type) ||
+                newSpec.push(cards.TAKEOUTGUIDE.type)
+          }
+        else {
+          if (Math.random() > 0.5)
+            if (Math.random() > 0.5)
+              newSpec.includes(cards.WASABIGUIDE.type) ||
+                newSpec.push(cards.WASABIGUIDE.type)
+            else
+              newSpec.includes(cards.TEAGUIDE.type) ||
+                newSpec.push(cards.TEAGUIDE.type)
+          else {
+            if (Math.random() > 0.5)
+              newSpec.includes(cards.SOYSAUCEGUIDE.type) ||
+                newSpec.push(cards.SOYSAUCEGUIDE.type)
+            else
+              newSpec.includes(cards.SPECIALOGUIDE.type) ||
+                newSpec.push(cards.SPECIALOGUIDE.type)
+          }
+        }
+      setSpec(newSpec)
+
+      // APPETIZERS
+      let newApp = []
+      while (newApp.length < APPCAP)
+        if (Math.random() > 0.5)
+          if (Math.random() > 0.5)
+            if (Math.random() > 0.5)
+              newApp.includes(cards.DUMPLINGGUIDE.type) ||
+                newApp.push(cards.DUMPLINGGUIDE.type)
+            else
+              newApp.includes(cards.TEMPURAGUIDE.type) ||
+                newApp.push(cards.TEMPURAGUIDE.type)
+          else {
+            if (Math.random() > 0.5)
+              newApp.includes(cards.SASHIMIGUIDE.type) ||
+                newApp.push(cards.SASHIMIGUIDE.type)
+            else
+              newApp.includes(cards.MISOGUIDE.type) ||
+                newApp.push(cards.MISOGUIDE.type)
+          }
+        else {
+          if (Math.random() > 0.5)
+            if (Math.random() > 0.5)
+              newApp.includes(cards.EDAMAMEGUIDE.type) ||
+                newApp.push(cards.EDAMAMEGUIDE.type)
+            else
+              newApp.includes(cards.EELGUIDE.type) ||
+                newApp.push(cards.EELGUIDE.type)
+          else {
+            if (Math.random() > 0.5)
+              newApp.includes(cards.TOFUGUIDE.type) ||
+                newApp.push(cards.TOFUGUIDE.type)
+            else
+              newApp.includes(cards.ONIGIRIGUIDE.type) ||
+                newApp.push(cards.ONIGIRIGUIDE.type)
+          }
+        }
+      setApp(newApp)
+
+      // DESSERT
+      if (Math.random() > 0.33)
+        if (Math.random() > 0.5) setDess([cards.PUDDINGGUIDE.type])
+        else setDess([cards.GTICGUIDE.type])
+      else setDess([cards.FRUITGUIDE.type])
+
+      // DIFFICULTY
+      if (Math.random() > 0.33)
+        if (Math.random() > 0.5) setDiff(['easy'])
+        else setDiff(['normal'])
+      else setDiff(['hard'])
     }
 
     /* Displays guiding text at the top, then has 4 rows of cards for user to pick
@@ -1191,20 +1309,37 @@ const PlayPage = () => {
                   </Label>
                 )}
             </div>
-            <Submit
-              name="START"
-              className={
-                roll.length == ROLLCAP &&
-                spec.length == SPECCAP &&
-                app.length == APPCAP &&
-                dess.length == DESSCAP &&
-                diff.length == DIFFCAP
-                  ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
-                  : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
-              }
-            >
-              START
-            </Submit>
+            <div className="flex flex-row">
+              <Label className="m-2">
+                <CheckboxField
+                  id="randomize"
+                  name="extra"
+                  onChange={randomizeOrder}
+                />
+                <p
+                  name="randomize"
+                  className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50"
+                >
+                  Randomize
+                </p>
+              </Label>
+              <div className="m-2">
+                <Submit
+                  name="START"
+                  className={
+                    roll.length == ROLLCAP &&
+                    spec.length == SPECCAP &&
+                    app.length == APPCAP &&
+                    dess.length == DESSCAP &&
+                    diff.length == DIFFCAP
+                      ? 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)]'
+                      : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
+                  }
+                >
+                  START
+                </Submit>
+              </div>
+            </div>
             <br />
             <br />
           </div>
@@ -1261,7 +1396,7 @@ const PlayPage = () => {
         utensilUsed: false,
       },
       {
-        name: 'cpu one',
+        name: diff.includes('toxic') ? 'Jacob' : 'cpu one',
         hand: [],
         willPlayIndex: -1,
         stash: [],
@@ -1271,7 +1406,7 @@ const PlayPage = () => {
         utensilUsed: false,
       },
       {
-        name: 'cpu two',
+        name: diff.includes('toxic') ? 'Jeff' : 'cpu two',
         hand: [],
         willPlayIndex: -1,
         stash: [],
@@ -1281,7 +1416,7 @@ const PlayPage = () => {
         utensilUsed: false,
       },
       {
-        name: 'cpu three',
+        name: diff.includes('toxic') ? 'Jerry' : 'cpu three',
         hand: [],
         willPlayIndex: -1,
         stash: [],
@@ -1627,6 +1762,16 @@ const PlayPage = () => {
         if (playerCards == null || card.type == cards.TEMAKIGUIDE.type) {
           notify(
             'Scored ' + score + ' ' + pointsString + ' from ' + card.text,
+            emoji,
+            area
+          )
+          return score
+        }
+
+        // Turned over card notification
+        if (score > 0 && card.type == cards.TOC.type) {
+          notify(
+            'Scored ' + score + ' ' + pointsString + ' from leftovrs',
             emoji,
             area
           )
@@ -2598,9 +2743,8 @@ const PlayPage = () => {
                 notify('Mature Palate Achieved', '🏆', 4)
             }
 
-            if (diff.includes('easy'))
+            if (diff.includes('easy')) {
               if (
-                !currentUser.easyScore ||
                 players[0].score > currentUser.easyScore ||
                 (players[0].score == currentUser.easyScore &&
                   userTrueDessert > currentUser.easyDessert)
@@ -2608,36 +2752,36 @@ const PlayPage = () => {
                 achievementsData.easyScore = players[0].score
                 achievementsData.easyDessert = userTrueDessert
                 notify('New High Score!', '🏆', 4)
-              } else if (diff.includes('normal'))
-                if (
-                  !currentUser.normalScore ||
-                  players[0].score > currentUser.normalScore ||
-                  (players[0].score == currentUser.normalScore &&
-                    userTrueDessert > currentUser.normalDessert)
-                ) {
-                  achievementsData.normalScore = players[0].score
-                  achievementsData.normalDessert = userTrueDessert
-                  notify('New High Score!', '🏆', 4)
-                } else if (diff.includes('hard'))
-                  if (
-                    !currentUser.hardScore ||
-                    players[0].score > currentUser.hardScore ||
-                    (players[0].score == currentUser.hardScore &&
-                      userTrueDessert > currentUser.hardDessert)
-                  ) {
-                    achievementsData.hardScore = players[0].score
-                    achievementsData.hardDessert = userTrueDessert
-                    notify('New High Score!', '🏆', 4)
-                  } else if (
-                    !currentUser.toxicScore ||
-                    players[0].score > currentUser.toxicScore ||
-                    (players[0].score == currentUser.toxicScore &&
-                      userTrueDessert > currentUser.toxicDessert)
-                  ) {
-                    achievementsData.toxicScore = players[0].score
-                    achievementsData.toxicDessert = userTrueDessert
-                    notify('New High Score!', '🏆', 4)
-                  }
+              }
+            } else if (diff.includes('normal')) {
+              if (
+                players[0].score > currentUser.normalScore ||
+                (players[0].score == currentUser.normalScore &&
+                  userTrueDessert > currentUser.normalDessert)
+              ) {
+                achievementsData.normalScore = players[0].score
+                achievementsData.normalDessert = userTrueDessert
+                notify('New High Score!', '🏆', 4)
+              }
+            } else if (diff.includes('hard')) {
+              if (
+                players[0].score > currentUser.hardScore ||
+                (players[0].score == currentUser.hardScore &&
+                  userTrueDessert > currentUser.hardDessert)
+              ) {
+                achievementsData.hardScore = players[0].score
+                achievementsData.hardDessert = userTrueDessert
+                notify('New High Score!', '🏆', 4)
+              }
+            } else if (
+              players[0].score > currentUser.toxicScore ||
+              (players[0].score == currentUser.toxicScore &&
+                userTrueDessert > currentUser.toxicDessert)
+            ) {
+              achievementsData.toxicScore = players[0].score
+              achievementsData.toxicDessert = userTrueDessert
+              notify('New High Score!', '🏆', 4)
+            }
           }
 
           setUserScoreF(players[0].score)
@@ -2648,9 +2792,6 @@ const PlayPage = () => {
           setCpuOneDessertF(players[1].dessert)
           setCpuTwoDessertF(players[2].dessert)
           setCpuThreeDessertF(players[3].dessert)
-          setCpuOneName('cpu one')
-          setCpuTwoName('cpu two')
-          setCpuThreeName('cpu three')
           setShowResults(true)
 
           // Only update achievements if new progress has been made
@@ -2984,13 +3125,39 @@ const PlayPage = () => {
             return
           }
 
-          let choice = pickComputerCard(
-            players[index],
-            getOpps(index),
-            cardsLeft,
-            round,
-            diff[0]
-          )
+          let choice
+          // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
+          if (diff.includes('toxic') && index == 1) {
+            let saveHand = players[2].hand
+            players[2].hand = players[1].hand
+            choice = pickComputerCard(
+              players[2],
+              getOpps(2),
+              cardsLeft,
+              round,
+              'toxic reverse'
+            )
+            players[2].hand = saveHand
+          } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
+          else if (diff.includes('toxic') && index == 3) {
+            let saveHand = players[0].hand
+            players[0].hand = players[3].hand
+            choice = pickComputerCard(
+              players[0],
+              getOpps(0),
+              cardsLeft,
+              round,
+              diff[0]
+            )
+            players[0].hand = saveHand
+          } else
+            choice = pickComputerCard(
+              players[index],
+              getOpps(index),
+              cardsLeft,
+              round,
+              diff[0]
+            )
 
           cleanupChopsticks(index, choice)
 
@@ -3378,14 +3545,40 @@ const PlayPage = () => {
 
         const regularClick = () => {
           // Have the computers make up their mind
-          for (let i = 1; i < players.length; i++)
-            players[i].willPlayIndex = pickComputerCard(
-              players[i],
-              getOpps(i),
-              cardsLeft,
-              round,
-              diff[0]
-            )
+          for (let i = 1; i < players.length; i++) {
+            // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
+            if (diff.includes('toxic') && i == 1) {
+              let saveHand = players[2].hand
+              players[2].hand = players[1].hand
+              players[1].willPlayIndex = pickComputerCard(
+                players[2],
+                getOpps(2),
+                cardsLeft,
+                round,
+                'toxic reverse'
+              )
+              players[2].hand = saveHand
+            } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
+            else if (diff.includes('toxic') && i == 3) {
+              let saveHand = players[0].hand
+              players[0].hand = players[3].hand
+              players[3].willPlayIndex = pickComputerCard(
+                players[0],
+                getOpps(0),
+                cardsLeft,
+                round,
+                diff[0]
+              )
+              players[0].hand = saveHand
+            } else
+              players[i].willPlayIndex = pickComputerCard(
+                players[i],
+                getOpps(i),
+                cardsLeft,
+                round,
+                diff[0]
+              )
+          }
 
           // Play the user card
           playCard(parseInt(e.target.name), 0, false)
