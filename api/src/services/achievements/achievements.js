@@ -156,7 +156,7 @@ export const getStats = ({ difficulty }) => {
         bestSpeedrun: true,
       },
       where: {
-        bestSpeedrun: { not: null },
+        bestSpeedrun: { gt: -1 },
       },
       orderBy: [
         {

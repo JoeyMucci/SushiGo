@@ -21,7 +21,7 @@ model User {
   toxicScore          Int       @default(-999)
   toxicDessert        Int       @default(-999)
   speedrunStart       DateTime  @default(now())
-  bestSpeedrun        DateTime?
+  bestSpeedrun        Int       @default(-1)
   hashedPassword      String
   salt                String
   resetToken          String?

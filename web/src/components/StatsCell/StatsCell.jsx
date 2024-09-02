@@ -1,3 +1,5 @@
+import { SToHMS } from 'web/src/pages/PlayPage/PlayPage.jsx'
+
 export const QUERY = gql`
   query StatsQuery($difficulty: String!) {
     stats: getStats(difficulty: $difficulty) {
@@ -34,13 +36,14 @@ export const Failure = ({ error }) => (
 export const Success = ({ stats }) => {
   let lastScore = -1
   let lastDessert = -1
+  let lastFinishTime = -1
   let rank = 0
   return (
     <div className="flex flex-col space-y-10 p-5">
       {stats.map((stat, i) => {
         let score
         let dessert
-        let finishTime
+        let finishTime = -1
         if (stat.easyScore) {
           score = stat.easyScore
           dessert = stat.easyDessert
@@ -56,10 +59,13 @@ export const Success = ({ stats }) => {
         } else finishTime = stat.bestSpeedrun
 
         // Only increase the rank if the next user is not tied with the previous
-        if (lastScore != score || lastDessert != dessert) rank = i + 1
+        if (finishTime == -1) {
+          if (lastScore != score || lastDessert != dessert) rank = i + 1
+        } else if (lastFinishTime != finishTime) rank = i + 1
 
         lastScore = score
         lastDessert = dessert
+        lastFinishTime = finishTime
 
         let className = ''
         if (rank == 1)
@@ -75,17 +81,23 @@ export const Success = ({ stats }) => {
           className =
             'text-center font-cal text-6xl text-[color:var(--color-nature)]'
 
-        if (!finishTime)
+        if (finishTime == -1)
           return (
             <p key={i} className={className}>
               {rank}. {stat.name}: {score} ({dessert})
             </p>
           )
-        return (
-          <p key={i} className={className}>
-            {rank}. {stat.name}: {finishTime}
-          </p>
-        )
+        else {
+          let [hours, minutes, seconds] = SToHMS(finishTime)
+          if (seconds < 10) seconds = '0' + seconds
+          if (minutes < 10) minutes = '0' + minutes
+
+          return (
+            <p key={i} className={className}>
+              {rank}. {stat.name}: {hours}:{minutes}:{seconds}
+            </p>
+          )
+        }
       })}
     </div>
   )

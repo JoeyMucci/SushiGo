@@ -72,3 +72,10 @@ progress::-webkit-progress-bar {
 progress::-webkit-progress-value {
   background-color: rgb(0, 255, 0);
 }
+
+.no-highlight{
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-text-select: none;
+  -webkit-user-select: none;
+}

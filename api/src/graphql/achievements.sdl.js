@@ -8,6 +8,8 @@ export const schema = gql`
     hardDessert: Int
     toxicScore: Int
     toxicDessert: Int
+    speedrunStart: DateTime
+    bestSpeedrun: Int
     modestMaki: Boolean
     longTermPlayer: Boolean
     speedEater: Boolean
@@ -67,6 +69,8 @@ export const schema = gql`
     hardDessert: Int
     toxicScore: Int
     toxicDessert: Int
+    speedrunStart: DateTime
+    bestSpeedrun: Int
     modestMaki: Boolean
     longTermPlayer: Boolean
     speedEater: Boolean
@@ -127,7 +131,7 @@ export const schema = gql`
     hardDessert: Int
     toxicScore: Int
     toxicDessert: Int
-    bestSpeedrun: DateTime
+    bestSpeedrun: Int
   }
 
   type Query {

@@ -47,6 +47,8 @@ export const getCurrentUser = async (session) => {
       hardDessert: true,
       toxicScore: true,
       toxicDessert: true,
+      speedrunStart: true,
+      bestSpeedrun: true,
       modestMaki: true,
       longTermPlayer: true,
       speedEater: true,

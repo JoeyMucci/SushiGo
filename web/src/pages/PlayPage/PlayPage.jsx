@@ -579,6 +579,15 @@ export const parseFruit = (fruitNumber) => {
   return [watermelon, pineapple, orange]
 }
 
+// Converts milliseconds to [hours, minutes, seconds]
+export const SToHMS = (secs) => {
+  let hours = Math.floor(secs / 60 / 60)
+  let seconds = secs - hours * 60 * 60
+  let minutes = Math.floor(seconds / 60)
+  seconds -= minutes * 60
+  return [hours, minutes, seconds]
+}
+
 const UPDATE_ACHIEVEMENTS = gql`
   mutation UpdateAchievementsMutation($id: Int!, $input: AchievementsInput!) {
     updateAchievements(id: $id, input: $input) {
@@ -706,7 +715,7 @@ const PlayPage = () => {
           </p>
           <br />
           <Form className="flex flex-row">
-            <Label className="m-2">
+            <Label className="no-highlight m-2">
               <CheckboxField
                 id="newgame"
                 name="options"
@@ -719,7 +728,7 @@ const PlayPage = () => {
                 New Game
               </p>
             </Label>
-            <Label className="m-2">
+            <Label className="no-highlight m-2">
               <CheckboxField id="rematch" name="options" onChange={resetGame} />
               <p
                 name="rematch"
@@ -728,7 +737,7 @@ const PlayPage = () => {
                 Rematch
               </p>
             </Label>
-            <Label className="m-2">
+            <Label className="no-highlight m-2">
               <CheckboxField
                 id="home"
                 name="options"
@@ -1202,7 +1211,7 @@ const PlayPage = () => {
               />
             </div>
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label className="no-highlight m-2">
                 <CheckboxField id="easy" name="diff" onChange={clickDiff} />
                 <p
                   name="easy"
@@ -1215,7 +1224,7 @@ const PlayPage = () => {
                   Easy
                 </p>
               </Label>
-              <Label className="m-2">
+              <Label className="no-highlight m-2">
                 <CheckboxField id="normal" name="diff" onChange={clickDiff} />
                 <p
                   name="normal"
@@ -1228,7 +1237,7 @@ const PlayPage = () => {
                   Normal
                 </p>
               </Label>
-              <Label className="m-2">
+              <Label className="no-highlight m-2">
                 <CheckboxField id="hard" name="diff" onChange={clickDiff} />
                 <p
                   name="hard"
@@ -1290,7 +1299,7 @@ const PlayPage = () => {
                 currentUser.puddingClear &&
                 currentUser.gticClear &&
                 currentUser.fruitClear && (
-                  <Label className="m-2">
+                  <Label className="no-highlight m-2">
                     <CheckboxField
                       id="toxic"
                       name="diff"
@@ -1310,7 +1319,7 @@ const PlayPage = () => {
                 )}
             </div>
             <div className="flex flex-row">
-              <Label className="m-2">
+              <Label className="no-highlight m-2">
                 <CheckboxField
                   id="randomize"
                   name="extra"
@@ -1323,7 +1332,7 @@ const PlayPage = () => {
                   Randomize
                 </p>
               </Label>
-              <div className="m-2">
+              <div className="no-highlight m-2">
                 <Submit
                   name="START"
                   className={
@@ -1336,7 +1345,7 @@ const PlayPage = () => {
                       : 'rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-2xl text-[color:var(--color-salmon)] opacity-50'
                   }
                 >
-                  START
+                  Start
                 </Submit>
               </div>
             </div>
@@ -1658,6 +1667,7 @@ const PlayPage = () => {
           delete achievementsData['hardDessert']
           delete achievementsData['toxicScore']
           delete achievementsData['toxicDessert']
+          delete achievementsData['bestSpeedrun']
           if (Object.keys(achievementsData).length > 0)
             notify('Achievements Updated', '🏆', 4)
           achievementsData = {}
@@ -2782,6 +2792,37 @@ const PlayPage = () => {
               achievementsData.toxicDessert = userTrueDessert
               notify('New High Score!', '🏆', 4)
             }
+
+            if (firstPlace && diff.includes('toxic')) {
+              let currentDate = new Date()
+              let currentTimestamp = currentDate.getTime()
+              let oldTimestamp = new Date(currentUser.speedrunStart).getTime()
+              let [hours, minutes, seconds] = SToHMS(
+                Math.floor((currentTimestamp - oldTimestamp) / 1000)
+              )
+              let totalTime = 60 * 60 * hours + 60 * minutes + seconds
+
+              let notifString = 'You beat the game in '
+
+              if (hours == 1) notifString += '1 hour, '
+              else if (hours > 1) notifString += hours + ' hours, '
+
+              if (minutes == 1) notifString += '1 minute and '
+              else if (minutes > 1 || minutes > 0)
+                notifString += minutes + ' minutes and '
+
+              if (seconds == 1) notifString += '1 second!'
+              else if (seconds > 1) notifString += seconds + ' seconds!'
+
+              notify(notifString, '🎉', 4)
+
+              if (
+                currentUser.bestSpeedrun == -1 ||
+                totalTime < currentUser.bestSpeedrun
+              ) {
+                achievementsData.bestSpeedrun = totalTime
+              }
+            }
           }
 
           setUserScoreF(players[0].score)
@@ -3128,6 +3169,7 @@ const PlayPage = () => {
           let choice
           // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
           if (diff.includes('toxic') && index == 1) {
+            console.log('jacob pop')
             let saveHand = players[2].hand
             players[2].hand = players[1].hand
             choice = pickComputerCard(
@@ -3140,6 +3182,7 @@ const PlayPage = () => {
             players[2].hand = saveHand
           } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
           else if (diff.includes('toxic') && index == 3) {
+            console.log('jerry pop')
             let saveHand = players[0].hand
             players[0].hand = players[3].hand
             choice = pickComputerCard(
@@ -3548,6 +3591,7 @@ const PlayPage = () => {
           for (let i = 1; i < players.length; i++) {
             // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
             if (diff.includes('toxic') && i == 1) {
+              console.log('jacob pop')
               let saveHand = players[2].hand
               players[2].hand = players[1].hand
               players[1].willPlayIndex = pickComputerCard(
@@ -3560,6 +3604,7 @@ const PlayPage = () => {
               players[2].hand = saveHand
             } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
             else if (diff.includes('toxic') && i == 3) {
+              console.log('jerry pop')
               let saveHand = players[0].hand
               players[0].hand = players[3].hand
               players[3].willPlayIndex = pickComputerCard(
@@ -4061,7 +4106,7 @@ const PlayPage = () => {
               <Form>
                 <br />
                 <br />
-                <Label className="m-2">
+                <Label className="no-highlight m-2">
                   <CheckboxField
                     id="advance"
                     name="advanceButton"
@@ -4080,7 +4125,7 @@ const PlayPage = () => {
               <Form>
                 <br />
                 <br />
-                <Label className="m-2">
+                <Label className="no-highlight m-2">
                   <CheckboxField id="advance" name="advanceButton" />
                   <span className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-6xl text-[color:var(--color-salmon)] opacity-50">
                     {buttonText}
