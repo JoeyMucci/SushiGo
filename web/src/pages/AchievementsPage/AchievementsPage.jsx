@@ -8,20 +8,17 @@ import { useAuth } from 'src/auth'
 
 const AchievementsPage = () => {
   const { isAuthenticated, currentUser, loading } = useAuth()
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate(routes.signup())
+    }
+  }, [isAuthenticated])
 
-  if (loading) {
+  if (loading || !isAuthenticated) {
     return <></>
   }
 
   let currentId = currentUser.id
-
-  /*
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate(routes.home())
-    }
-  }, [isAuthenticated])
-  */
 
   return (
     <>

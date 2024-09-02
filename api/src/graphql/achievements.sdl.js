@@ -135,7 +135,7 @@ export const schema = gql`
   }
 
   type Query {
-    getResume(id: Int!): Achievements! @requireAuth
+    getResume(id: Int!): Achievements! @skipAuth
     getStats(difficulty: String!): [Stats!]! @skipAuth
   }
 

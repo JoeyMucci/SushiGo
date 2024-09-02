@@ -2761,7 +2761,7 @@ const PlayPage = () => {
               ) {
                 achievementsData.easyScore = players[0].score
                 achievementsData.easyDessert = userTrueDessert
-                notify('New High Score!', '🏆', 4)
+                notify('New High Score!', '🥇', 4)
               }
             } else if (diff.includes('normal')) {
               if (
@@ -2771,7 +2771,7 @@ const PlayPage = () => {
               ) {
                 achievementsData.normalScore = players[0].score
                 achievementsData.normalDessert = userTrueDessert
-                notify('New High Score!', '🏆', 4)
+                notify('New High Score!', '🥇', 4)
               }
             } else if (diff.includes('hard')) {
               if (
@@ -2781,7 +2781,7 @@ const PlayPage = () => {
               ) {
                 achievementsData.hardScore = players[0].score
                 achievementsData.hardDessert = userTrueDessert
-                notify('New High Score!', '🏆', 4)
+                notify('New High Score!', '🥇', 4)
               }
             } else if (
               players[0].score > currentUser.toxicScore ||
@@ -2790,7 +2790,7 @@ const PlayPage = () => {
             ) {
               achievementsData.toxicScore = players[0].score
               achievementsData.toxicDessert = userTrueDessert
-              notify('New High Score!', '🏆', 4)
+              notify('New High Score!', '🥇', 4)
             }
 
             if (firstPlace && diff.includes('toxic')) {
@@ -2814,7 +2814,7 @@ const PlayPage = () => {
               if (seconds == 1) notifString += '1 second!'
               else if (seconds > 1) notifString += seconds + ' seconds!'
 
-              notify(notifString, '🎉', 4)
+              notify(notifString, '👑', 4)
 
               if (
                 currentUser.bestSpeedrun == -1 ||

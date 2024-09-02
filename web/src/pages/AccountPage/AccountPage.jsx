@@ -1,7 +1,23 @@
-import { Link, routes } from '@redwoodjs/router'
+import { useEffect } from 'react'
+
+import { Link, routes, navigate } from '@redwoodjs/router'
 import { Metadata } from '@redwoodjs/web'
 
+import { useAuth } from 'src/auth'
+
 const AccountPage = () => {
+  const { isAuthenticated, currentUser, loading } = useAuth()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate(routes.signup())
+    }
+  }, [isAuthenticated])
+
+  if (loading || !isAuthenticated) {
+    return <></>
+  }
+
   return (
     <>
       <Metadata title="Account" description="Account page" />
