@@ -18,5 +18,6 @@ export const schema = gql`
     updateUserName(id: Int!, name: String!): UpdateResponse! @requireAuth
     updateUserPassword(id: Int!, newPassword: String!): UpdateResponse!
       @requireAuth
+    deleteUser(id: Int!): User! @requireAuth
   }
 `

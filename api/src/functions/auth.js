@@ -27,7 +27,30 @@ export const handler = async (event, context) => {
       // including the `resetToken`. The URL should look something like:
       // `http://localhost:8910/reset-password?resetToken=${resetToken}`
 
-      return user
+      let to = user.email
+      let resetLink = `http://localhost:8910/reset-password?resetToken=${resetToken}`
+
+      var SibApiV3Sdk = require('sib-api-v3-sdk')
+      var defaultClient = SibApiV3Sdk.ApiClient.instance
+      const apiKey = defaultClient.authentications['api-key']
+      apiKey.apiKey = process.env.BREVO_EMAIL_KEY
+      var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
+      var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail()
+
+      sendSmtpEmail.subject = 'Sushi Go Password Reset'
+      sendSmtpEmail.sender = {
+        name: 'Sushi Go',
+        email: 'sushicardgame314@gmail.com',
+      }
+      sendSmtpEmail.type = 'classic'
+      sendSmtpEmail.htmlContent = `Reset your password at the following link: ${resetLink}`
+      sendSmtpEmail.to = [{ email: `${to}` }]
+      try {
+        apiInstance.sendTransacEmail(sendSmtpEmail)
+        return user
+      } catch (error) {
+        throw new Error('Failed to send email')
+      }
     },
 
     // How long the resetToken is valid for, in seconds (default is 24 hours)

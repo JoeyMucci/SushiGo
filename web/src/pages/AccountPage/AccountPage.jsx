@@ -36,8 +36,16 @@ export const UPDATE_NAME = gql`
   }
 `
 
+export const DELETE = gql`
+  mutation DeleteUser($id: Int!) {
+    deleteUser(id: $id) {
+      id
+    }
+  }
+`
+
 const AccountPage = () => {
-  const { isAuthenticated, currentUser, loading } = useAuth()
+  const { logOut, isAuthenticated, currentUser, loading } = useAuth()
 
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
@@ -51,6 +59,19 @@ const AccountPage = () => {
 
   const [updateName, { loadingName, errorName }] = useMutation(UPDATE_NAME, {
     onCompleted: async () => {},
+  })
+
+  const [deleteUser, { loadingDelete, errorDelete }] = useMutation(DELETE, {
+    onCompleted: async () => {
+      toast.success('Your account is deleted!', {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
+    },
   })
 
   useEffect(() => {
@@ -260,6 +281,41 @@ const AccountPage = () => {
           Change Password
         </Submit>
       </Form>
+
+      <br />
+      <br />
+
+      <Form
+        onSubmit={async () => {
+          var isConfirm = confirm(
+            'Are you sure you want to delete your account? All achievements and leaderboard stats will be erased.'
+          )
+          if (isConfirm)
+            try {
+              await deleteUser({
+                variables: { id: currentUser.id },
+              })
+              logOut()
+            } catch (error) {
+              toast.error('Failed to delete account', {
+                position: 'bottom-center',
+                style: {
+                  background: '#004', // nightwing
+                  color: '#ff917d', // salmon
+                },
+                className: 'font-cal text-base',
+              })
+            }
+        }}
+        className="mx-auto flex w-1/4 flex-col rounded bg-[color:red] font-cal text-xl text-[color:var(--color-salmon)]"
+      >
+        <Submit className="rounded font-cal text-6xl text-[color:var(--color-salmon)]">
+          Delete Account
+        </Submit>
+      </Form>
+
+      <br />
+      <br />
       <Toaster />
     </>
   )

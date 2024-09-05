@@ -32,3 +32,9 @@ export const updateUserPassword = ({ id, password }) => {
     where: { id: id },
   })
 }
+
+export const deleteUser = ({ id }) => {
+  return db.user.delete({
+    where: { id },
+  })
+}
