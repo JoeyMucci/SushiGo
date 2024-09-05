@@ -95,7 +95,7 @@ const HomePage = () => {
               </span>
             </Link>
             <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
-              Alter your name, password, or other Sushi preferences
+              Alter your name or other Sushi preferences
             </p>
           </div>
         )}

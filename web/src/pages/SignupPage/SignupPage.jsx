@@ -41,7 +41,7 @@ const SignupPage = () => {
     })
 
     if (response.message) {
-      toast(response.message, {
+      toast.success(response.message, {
         position: 'bottom-center',
         style: {
           background: '#004', // nightwing
@@ -49,7 +49,6 @@ const SignupPage = () => {
         },
         className: 'font-cal text-base',
       })
-      toast(response.message)
     } else if (response.error) {
       let message = response.error
       if (
