@@ -14,8 +14,9 @@ const HomePage = () => {
         already (it is easy). While you can play as a guest, the achievement and
         high score features will be disabled. Regardless, you can play against
         three computers. To become Sushi King, one must complete all the
-        achievements and then defeat the toxic Jeff. Have fun playing and try to
-        enshrine yourself on the leaderboard!
+        achievements and then defeat the toxic Jeff. You are encourage to
+        complete this task as quickly as possible (a.k.a. &quot;speedrun&quot;
+        it). Have fun playing and try to enshrine yourself on the leaderboard!
       </p>
 
       <br />

@@ -8,7 +8,6 @@ import {
   FieldError,
 } from '@redwoodjs/forms'
 import { navigate, routes } from '@redwoodjs/router'
-import { Metadata } from '@redwoodjs/web'
 import { toast, Toaster } from '@redwoodjs/web/toast'
 
 import { useAuth } from 'src/auth'
@@ -17,6 +16,8 @@ const ResetPasswordPage = ({ resetToken }) => {
   const { isAuthenticated, reauthenticate, validateResetToken, resetPassword } =
     useAuth()
   const [enabled, setEnabled] = useState(true)
+
+  const passwordRef = useRef(null)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,7 +30,14 @@ const ResetPasswordPage = ({ resetToken }) => {
       const response = await validateResetToken(resetToken)
       if (response.error) {
         setEnabled(false)
-        toast.error(response.error)
+        toast.error(response.error, {
+          position: 'bottom-center',
+          style: {
+            background: '#004', // nightwing
+            color: '#ff917d', // salmon
+          },
+          className: 'font-cal text-base',
+        })
       } else {
         setEnabled(true)
       }
@@ -37,7 +45,6 @@ const ResetPasswordPage = ({ resetToken }) => {
     validateToken()
   }, [resetToken, validateResetToken])
 
-  const passwordRef = useRef(null)
   useEffect(() => {
     passwordRef.current?.focus()
   }, [])
@@ -49,9 +56,23 @@ const ResetPasswordPage = ({ resetToken }) => {
     })
 
     if (response.error) {
-      toast.error(response.error)
+      toast.error(response.error, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     } else {
-      toast.success('Password changed!')
+      toast.success('Password changed!', {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
       await reauthenticate()
       navigate(routes.login())
     }
@@ -59,61 +80,55 @@ const ResetPasswordPage = ({ resetToken }) => {
 
   return (
     <>
-      <Metadata title="Reset Password" />
+      <br />
+      <br />
+      <Form
+        onSubmit={onSubmit}
+        className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
+      >
+        <Label name="password">New Password</Label>
+        <PasswordField
+          name="password"
+          disabled={!enabled}
+          className="text-[color:black]"
+          ref={passwordRef}
+          validation={{
+            required: {
+              value: true,
+              message: 'Password is required',
+            },
+            pattern: {
+              value: /^(?=.*[A-Z0-9])(?=.*[!@#$%^&*]).{8,}$/,
+              message:
+                'Password needs 8+ characters, special character, capital, digit',
+            },
+          }}
+        />
+        <FieldError name="password" className="rw-field-error" />
 
-      <main className="rw-main">
-        <Toaster toastOptions={{ className: 'rw-toast', duration: 6000 }} />
-        <div className="rw-scaffold rw-login-container">
-          <div className="rw-segment">
-            <header className="rw-segment-header">
-              <h2 className="rw-heading rw-heading-secondary">
-                Reset Password
-              </h2>
-            </header>
+        <br />
 
-            <div className="rw-segment-main">
-              <div className="rw-form-wrapper">
-                <Form onSubmit={onSubmit} className="rw-form-wrapper">
-                  <div className="text-left">
-                    <Label
-                      name="password"
-                      className="rw-label"
-                      errorClassName="rw-label rw-label-error"
-                    >
-                      New Password
-                    </Label>
-                    <PasswordField
-                      name="password"
-                      autoComplete="new-password"
-                      className="rw-input"
-                      errorClassName="rw-input rw-input-error"
-                      disabled={!enabled}
-                      ref={passwordRef}
-                      validation={{
-                        required: {
-                          value: true,
-                          message: 'New Password is required',
-                        },
-                      }}
-                    />
+        <Label name="retypepassword">Retype Password</Label>
+        <PasswordField
+          name="retypepassword"
+          className="text-[color:black]"
+          validation={{
+            required: {
+              value: true,
+              message: 'Retyped Password is required',
+            },
+            validate: (value) =>
+              value == passwordRef.current.value || 'Passwords do not match',
+          }}
+        />
+        <FieldError name="retypepassword" className="rw-field-error" />
 
-                    <FieldError name="password" className="rw-field-error" />
-                  </div>
-
-                  <div className="rw-button-group">
-                    <Submit
-                      className="rw-button rw-button-blue"
-                      disabled={!enabled}
-                    >
-                      Submit
-                    </Submit>
-                  </div>
-                </Form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        <br />
+        <Submit className="rounded bg-[color:var(--color-oak)] px-2 py-2 font-cal text-6xl text-[color:var(--color-nature)]">
+          Reset Password
+        </Submit>
+      </Form>
+      <Toaster />
     </>
   )
 }

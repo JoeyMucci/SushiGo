@@ -37,6 +37,14 @@ export const UPDATE_NAME = gql`
   }
 `
 
+const UPDATE_ACHIEVEMENTS = gql`
+  mutation UpdateAchievementsMutation($id: Int!, $input: AchievementsInput!) {
+    updateAchievements(id: $id, input: $input) {
+      modestMaki
+    }
+  }
+`
+
 export const DELETE = gql`
   mutation DeleteUser($id: Int!) {
     deleteUser(id: $id) {
@@ -54,22 +62,32 @@ const AccountPage = () => {
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
 
-  const [updateEmail, { loadingEmail, errorEmail }] = useMutation(
-    UPDATE_EMAIL,
-    {
-      onCompleted: () => {
-        emailMethods.reset()
-      },
-    }
-  )
+  const [updateEmail] = useMutation(UPDATE_EMAIL, {
+    onCompleted: () => {
+      emailMethods.reset()
+    },
+  })
 
-  const [updateName, { loadingName, errorName }] = useMutation(UPDATE_NAME, {
+  const [updateName] = useMutation(UPDATE_NAME, {
     onCompleted: () => {
       nameMethods.reset()
     },
   })
 
-  const [deleteUser, { loadingDelete, errorDelete }] = useMutation(DELETE, {
+  const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
+    onCompleted: async () => {
+      toast.error('Achievements Reset', '🏆', 4, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
+    },
+  })
+
+  const [deleteUser] = useMutation(DELETE, {
     onCompleted: async () => {
       toast.success('Your account is deleted!', {
         position: 'bottom-center',
@@ -289,6 +307,90 @@ const AccountPage = () => {
 
         <Submit className="rounded bg-[color:var(--color-oak)] px-2 py-2 font-cal text-6xl text-[color:var(--color-nature)]">
           Change Password
+        </Submit>
+      </Form>
+
+      <br />
+      <br />
+
+      <Form
+        onSubmit={async () => {
+          var isConfirm = confirm(
+            'Are you sure you want to reset your achievements? Leaderboard stats will not be erased and your speedrun will restart.'
+          )
+          if (isConfirm)
+            try {
+              await updateAchievements({
+                variables: {
+                  id: currentUser.id,
+                  input: {
+                    speedrunStart: new Date(),
+                    modestMaki: false,
+                    longTermPlayer: false,
+                    speedEater: false,
+                    forkForgetter: false,
+                    sushiThief: false,
+                    demandingCustomer: false,
+                    leftoverLover: false,
+                    wasabiWarrior: false,
+                    teaTime: false,
+                    soysauceSavant: false,
+                    goingForSeconds: false,
+                    dumplingDisciple: false,
+                    tempuraTitan: false,
+                    sashimiSensei: false,
+                    misoMaster: false,
+                    edamameExpert: false,
+                    unlikelyFriendship: false,
+                    onigiriGuru: false,
+                    greenTeaEightCream: false,
+                    fruitFiend: false,
+                    sushiLow: false,
+                    flashOfBrilliance: false,
+                    headChef: false,
+                    easyClear: false,
+                    normalClear: false,
+                    hardClear: false,
+                    makiClear: false,
+                    temakiClear: false,
+                    uramakiClear: false,
+                    chopsticksClear: false,
+                    spoonClear: false,
+                    menuClear: false,
+                    takeoutBoxClear: false,
+                    wasabiClear: false,
+                    teaClear: false,
+                    soysauceClear: false,
+                    specialOrderClear: false,
+                    dumplingClear: false,
+                    tempuraClear: false,
+                    sashimiClear: false,
+                    misoSoupClear: false,
+                    edamameClear: false,
+                    eelClear: false,
+                    tofuClear: false,
+                    onigiriClear: false,
+                    puddingClear: false,
+                    gticClear: false,
+                    fruitClear: false,
+                  },
+                },
+              })
+            } catch (error) {
+              toast.error('Failed to reset achievements', {
+                position: 'bottom-center',
+                style: {
+                  background: '#004', // nightwing
+                  color: '#ff917d', // salmon
+                },
+                className: 'font-cal text-base',
+              })
+            }
+        }}
+        className="mx-auto flex w-1/4 flex-col rounded bg-[color:red] font-cal text-xl text-[color:var(--color-salmon)]"
+      >
+        <Submit className="rounded font-cal text-6xl text-[color:var(--color-salmon)]">
+          Reset Achievements
         </Submit>
       </Form>
 
