@@ -37,6 +37,17 @@ export const UPDATE_NAME = gql`
   }
 `
 
+export const UPDATE_PASSWORD = gql`
+  mutation UpdateUserPassword($id: Int!, $newPassword: String!) {
+    updateUserPassword(id: $id, newPassword: $newPassword) {
+      user {
+        id
+      }
+      error
+    }
+  }
+`
+
 const UPDATE_ACHIEVEMENTS = gql`
   mutation UpdateAchievementsMutation($id: Int!, $input: AchievementsInput!) {
     updateAchievements(id: $id, input: $input) {
@@ -58,6 +69,7 @@ const AccountPage = () => {
 
   const emailMethods = useForm()
   const nameMethods = useForm()
+  const passwordMethods = useForm()
 
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
@@ -71,6 +83,12 @@ const AccountPage = () => {
   const [updateName] = useMutation(UPDATE_NAME, {
     onCompleted: () => {
       nameMethods.reset()
+    },
+  })
+
+  const [updatePassword] = useMutation(UPDATE_PASSWORD, {
+    onCompleted: () => {
+      passwordMethods.reset()
     },
   })
 
@@ -260,13 +278,38 @@ const AccountPage = () => {
       <br />
 
       <Form
-        onSubmit={() => {}}
-        className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
-      >
-        <Label name="oldpass">Current Password</Label>
-        <TextField name="oldpass" className="text-[color:black]" />
-        <br />
+        onSubmit={async (data) => {
+          const response = await updatePassword({
+            variables: {
+              id: currentUser.id,
+              newPassword: data.password,
+            },
+          })
 
+          let result = response.data.updateUserPassword
+
+          if (result.user) {
+            toast.success('Password Changed', {
+              position: 'bottom-center',
+              style: {
+                background: '#004', // nightwing
+                color: '#ff917d', // salmon
+              },
+              className: 'font-cal text-base',
+            })
+          } else
+            toast.error(result.error, {
+              position: 'bottom-center',
+              style: {
+                background: '#004', // nightwing
+                color: '#ff917d', // salmon
+              },
+              className: 'font-cal text-base',
+            })
+        }}
+        className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
+        formMethods={passwordMethods}
+      >
         <Label name="password">New Password</Label>
         <PasswordField
           name="password"
