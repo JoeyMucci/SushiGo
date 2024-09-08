@@ -18,18 +18,26 @@ const ForgotPasswordPage = () => {
   }, [isAuthenticated])
 
   const onSubmit = async (data) => {
-    const response = await forgotPassword(data.username)
+    const response = await forgotPassword(data.email)
 
     if (response.error) {
-      toast.error(response.error)
+      toast.error(response.error, {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     } else {
-      // The function `forgotPassword.handler` in api/src/functions/auth.js has
-      // been invoked, let the user know how to get the link to reset their
-      // password (sent in email, perhaps?)
-      toast.success(
-        'A link to reset your password was sent to ' + response.email
-      )
-      navigate(routes.login())
+      toast.success('Email Sent Successfully', {
+        position: 'bottom-center',
+        style: {
+          background: '#004', // nightwing
+          color: '#ff917d', // salmon
+        },
+        className: 'font-cal text-base',
+      })
     }
   }
 

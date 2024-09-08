@@ -7,6 +7,7 @@ import {
   PasswordField,
   Submit,
   FieldError,
+  useForm,
 } from '@redwoodjs/forms'
 import { routes, navigate } from '@redwoodjs/router'
 import { useMutation } from '@redwoodjs/web'
@@ -47,18 +48,25 @@ export const DELETE = gql`
 const AccountPage = () => {
   const { logOut, isAuthenticated, currentUser, loading } = useAuth()
 
+  const emailMethods = useForm()
+  const nameMethods = useForm()
+
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
 
   const [updateEmail, { loadingEmail, errorEmail }] = useMutation(
     UPDATE_EMAIL,
     {
-      onCompleted: () => {},
+      onCompleted: () => {
+        emailMethods.reset()
+      },
     }
   )
 
   const [updateName, { loadingName, errorName }] = useMutation(UPDATE_NAME, {
-    onCompleted: async () => {},
+    onCompleted: () => {
+      nameMethods.reset()
+    },
   })
 
   const [deleteUser, { loadingDelete, errorDelete }] = useMutation(DELETE, {
@@ -131,6 +139,7 @@ const AccountPage = () => {
           }
         }}
         className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
+        formMethods={emailMethods}
       >
         <Label name="email">New Email</Label>
         <TextField
@@ -203,6 +212,7 @@ const AccountPage = () => {
           }
         }}
         className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
+        formMethods={nameMethods}
       >
         <Label name="nickname">New Name</Label>
         <TextField

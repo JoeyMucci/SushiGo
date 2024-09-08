@@ -22,13 +22,16 @@ export const handler = async (event, context) => {
     // so don't include anything you wouldn't want prying eyes to see. The
     // `user` here has been sanitized to only include the fields listed in
     // `allowedUserFields` so it should be safe to return as-is.
-    handler: (user, _resetToken) => {
+    handler: async (user, _resetToken) => {
       // TODO: Send user an email/message with a link to reset their password,
       // including the `resetToken`. The URL should look something like:
       // `http://localhost:8910/reset-password?resetToken=${resetToken}`
 
       let to = user.email
-      let resetLink = `http://localhost:8910/reset-password?resetToken=${resetToken}`
+      let resetLink = `http://localhost:8910/reset-password?resetToken=${_resetToken}`
+
+      console.log(to)
+      console.log(resetLink)
 
       var SibApiV3Sdk = require('sib-api-v3-sdk')
       var defaultClient = SibApiV3Sdk.ApiClient.instance
@@ -37,18 +40,20 @@ export const handler = async (event, context) => {
       var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
       var sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail()
 
-      sendSmtpEmail.subject = 'Sushi Go Password Reset'
+      sendSmtpEmail.subject = 'SushiGo Password Reset'
       sendSmtpEmail.sender = {
-        name: 'Sushi Go',
-        email: 'sushicardgame314@gmail.com',
+        name: 'SushiGo',
+        email: 'jmucci314@gmail.com',
       }
       sendSmtpEmail.type = 'classic'
-      sendSmtpEmail.htmlContent = `Reset your password at the following link: ${resetLink}`
+      sendSmtpEmail.htmlContent = `Reset your password at: ${resetLink}`
       sendSmtpEmail.to = [{ email: `${to}` }]
       try {
-        apiInstance.sendTransacEmail(sendSmtpEmail)
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
+        console.log('API called successfully. Returned data: ' + data)
         return user
       } catch (error) {
+        console.error('Error sending reset email:', error)
         throw new Error('Failed to send email')
       }
     },
@@ -60,9 +65,9 @@ export const handler = async (event, context) => {
       // for security reasons you may want to be vague here rather than expose
       // the fact that the email address wasn't found (prevents fishing for
       // valid email addresses)
-      usernameNotFound: 'Username not found',
+      usernameNotFound: 'There is no account associated with this email',
       // if the user somehow gets around client validation
-      usernameRequired: 'Username is required',
+      usernameRequired: 'Email is required',
     },
   }
 

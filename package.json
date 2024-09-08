@@ -22,5 +22,9 @@
   "prisma": {
     "seed": "yarn rw exec seed"
   },
-  "packageManager": "yarn@4.2.2"
+  "packageManager": "yarn@4.2.2",
+  "dependencies": {
+    "@getbrevo/brevo": "^2.2.0",
+    "sib-api-v3-sdk": "^8.5.0"
+  }
 }
