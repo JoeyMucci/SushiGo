@@ -1,4 +1,5 @@
 /* eslint-disable no-fallthrough */
+
 import { useState } from 'react'
 
 import chopsticks1 from 'web/public/chopsticks(1).jpg'
@@ -595,6 +596,9 @@ const UPDATE_ACHIEVEMENTS = gql`
     }
   }
 `
+document.addEventListener('keydown', function (event) {
+  if (event.key == 'Escape') window.location.href = '/'
+})
 
 const PlayPage = () => {
   const { isAuthenticated, currentUser } = useAuth()
@@ -3537,9 +3541,9 @@ const PlayPage = () => {
           ) {
             notify(
               players[0].hand[parseInt(e.target.name)].text
-                .substr(0, 1)
+                .substring(0, 1)
                 .toUpperCase() +
-                players[0].hand[parseInt(e.target.name)].text.substr(1) +
+                players[0].hand[parseInt(e.target.name)].text.substring(1) +
                 ' was not requested',
               '🥄',
               0
@@ -4445,6 +4449,12 @@ const PlayPage = () => {
   if (!showGame)
     return (
       <>
+        <span
+          className="absolute bottom-0 font-cal text-base text-[color:var(--color-nature)]"
+          style={{ left: '50%', transform: 'translateX(-50%)' }}
+        >
+          Hold escape to return home. Achievements will not be saved.
+        </span>
         <OrderScreen />
         <Toaster />
       </>
@@ -4452,6 +4462,12 @@ const PlayPage = () => {
   else
     return (
       <>
+        <span
+          className="absolute bottom-0 font-cal text-base text-[color:var(--color-nature)]"
+          style={{ left: '50%', transform: 'translateX(-50%)' }}
+        >
+          Hold escape to return home. Achievements will not be saved.
+        </span>
         <GameScreen />
         <Toaster />
       </>

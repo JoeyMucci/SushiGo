@@ -17,6 +17,7 @@ const Routes = () => {
   return (
     <Router useAuth={useAuth}>
       <Route path="/reset-password" page={ResetPasswordPage} name="resetPassword" />
+
       <Route path="/play" page={PlayPage} name="play" />
 
       <Set wrap={RollLayout}>

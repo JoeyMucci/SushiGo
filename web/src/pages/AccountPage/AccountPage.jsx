@@ -75,14 +75,18 @@ const AccountPage = () => {
   const passwordRef = useRef(null)
 
   const [updateEmail] = useMutation(UPDATE_EMAIL, {
-    onCompleted: () => {
+    onCompleted: async () => {
       emailMethods.reset()
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      location.reload()
     },
   })
 
   const [updateName] = useMutation(UPDATE_NAME, {
-    onCompleted: () => {
+    onCompleted: async () => {
       nameMethods.reset()
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      location.reload()
     },
   })
 
@@ -94,7 +98,7 @@ const AccountPage = () => {
 
   const [updateAchievements] = useMutation(UPDATE_ACHIEVEMENTS, {
     onCompleted: async () => {
-      toast.error('Achievements Reset', '🏆', 4, {
+      toast.success('Achievements Reset', {
         position: 'bottom-center',
         style: {
           background: '#004', // nightwing
@@ -119,10 +123,10 @@ const AccountPage = () => {
   })
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       navigate(routes.signup())
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, loading])
 
   if (loading || !isAuthenticated) {
     return <></>
@@ -177,6 +181,7 @@ const AccountPage = () => {
         className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
         formMethods={emailMethods}
       >
+        <p> Current Email: {currentUser.email}</p>
         <Label name="email">New Email</Label>
         <TextField
           name="email"
@@ -250,6 +255,7 @@ const AccountPage = () => {
         className="mx-auto flex w-1/4 flex-col rounded bg-[color:var(--color-nightwing)] px-2 py-2 font-cal text-xl text-[color:var(--color-salmon)]"
         formMethods={nameMethods}
       >
+        <p> Current Name: {currentUser.name}</p>
         <Label name="nickname">New Name</Label>
         <TextField
           name="nickname"

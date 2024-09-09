@@ -47,7 +47,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        {isAuthenticated && (
+        {isAuthenticated ? (
           <>
             <br />
             <div className="flex flex-row">
@@ -58,6 +58,20 @@ const HomePage = () => {
               </Link>
               <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
                 Measure progress on your journey to become Sushi King
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <br />
+            <div className="flex flex-row">
+              <Link to={routes.achievements()}>
+                <span className="rounded bg-[color:var(--color-nightwing)] px-2 py-2 text-center font-cal text-6xl text-[color:var(--color-salmon)]">
+                  🏆
+                </span>
+              </Link>
+              <p className="text-center font-cal text-6xl text-[color:var(--color-nature)]">
+                See what it takes to become Sushi King
               </p>
             </div>
           </>

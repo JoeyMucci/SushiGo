@@ -64,11 +64,30 @@ export const Failure = ({ error }) => (
 )
 
 export const Success = ({ resume }) => {
+  // PRECONDITION: length of arr > 0
+  const arrToString = (arr) => {
+    let toReturn = ''
+    for (let i = 0; i < arr.length; i++) {
+      toReturn += arr[i]
+      if (i != arr.length - 1) toReturn += ', '
+    }
+    return toReturn
+  }
   let progress = 0
 
   // Seasoned competitor is achieved after winning on all three available difficulties
   let seasonedCompetitor =
     resume.easyClear && resume.normalClear && resume.hardClear
+
+  let uncompleted = []
+  if (!resume.easyClear) uncompleted.push('easy')
+  if (!resume.normalClear) uncompleted.push('normal')
+  if (!resume.hardClear) uncompleted.push('hard')
+
+  let seasonedCompetitorTitle =
+    uncompleted.length == 0
+      ? 'Complete!'
+      : 'Still needed: ' + arrToString(uncompleted)
 
   // Mature palate is achieved after winning with each card
   let maturePalate =
@@ -94,6 +113,35 @@ export const Success = ({ resume }) => {
     resume.puddingClear &&
     resume.gticClear &&
     resume.fruitClear
+
+  uncompleted = []
+  if (!resume.makiClear) uncompleted.push('maki')
+  if (!resume.temakiClear) uncompleted.push('temaki')
+  if (!resume.uramakiClear) uncompleted.push('uramaki')
+  if (!resume.chopsticksClear) uncompleted.push('chopsticks')
+  if (!resume.spoonClear) uncompleted.push('spoon')
+  if (!resume.menuClear) uncompleted.push('menu')
+  if (!resume.takeoutBoxClear) uncompleted.push('takeout box')
+  if (!resume.wasabiClear) uncompleted.push('wasabi')
+  if (!resume.teaClear) uncompleted.push('tea')
+  if (!resume.soysauceClear) uncompleted.push('soysauce')
+  if (!resume.specialOrderClear) uncompleted.push('special order')
+  if (!resume.dumplingClear) uncompleted.push('dumpling')
+  if (!resume.tempuraClear) uncompleted.push('tempura')
+  if (!resume.sashimiClear) uncompleted.push('sashimi')
+  if (!resume.misoSoupClear) uncompleted.push('miso soup')
+  if (!resume.edamameClear) uncompleted.push('edamame')
+  if (!resume.eelClear) uncompleted.push('eel')
+  if (!resume.tofuClear) uncompleted.push('tofu')
+  if (!resume.onigiriClear) uncompleted.push('onigiri')
+  if (!resume.puddingClear) uncompleted.push('pudding')
+  if (!resume.gticClear) uncompleted.push('green tea ice cream')
+  if (!resume.fruitClear) uncompleted.push('fruit')
+
+  let maturePalateTitle =
+    uncompleted.length == 0
+      ? 'Complete!'
+      : 'Still needed: ' + arrToString(uncompleted)
 
   // 25 achievements, so each achievement counts for 4% towards completion
   for (let bool of [
@@ -147,6 +195,9 @@ export const Success = ({ resume }) => {
           {progress}%
         </span>
       </div>
+      <p className="text-center font-cal text-xl text-[color:var(--color-nature)]">
+        Hover composite achievements to see completion status
+      </p>
       <Blinker
         achName="Modest Maki"
         achDescription="Get 2nd place for maki in all 3 rounds of a game"
@@ -263,11 +314,13 @@ export const Success = ({ resume }) => {
         isCompleted={resume.headChef}
       />
       <Blinker
+        title={seasonedCompetitorTitle}
         achName="Seasoned Competitor"
         achDescription="Win on easy, normal, and hard difficulty"
         isCompleted={seasonedCompetitor}
       />
       <Blinker
+        title={maturePalateTitle}
         achName="Mature Palate"
         achDescription="Win with every card on any difficulty"
         isCompleted={maturePalate}
