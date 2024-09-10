@@ -1,33 +1,22 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Achievements` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropTable
-PRAGMA foreign_keys=off;
-DROP TABLE "Achievements";
-PRAGMA foreign_keys=on;
-
--- RedefineTables
-PRAGMA foreign_keys=OFF;
-CREATE TABLE "new_User" (
-    "email" TEXT NOT NULL PRIMARY KEY,
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "easyScore" INTEGER,
-    "easyDessert" INTEGER,
-    "normalScore" INTEGER,
-    "normalDessert" INTEGER,
-    "hardScore" INTEGER,
-    "hardDessert" INTEGER,
-    "toxicScore" INTEGER,
-    "toxicDessert" INTEGER,
-    "speedrunStart" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "bestSpeedrun" DATETIME,
+    "easyScore" INTEGER NOT NULL DEFAULT -999,
+    "easyDessert" INTEGER NOT NULL DEFAULT -999,
+    "normalScore" INTEGER NOT NULL DEFAULT -999,
+    "normalDessert" INTEGER NOT NULL DEFAULT -999,
+    "hardScore" INTEGER NOT NULL DEFAULT -999,
+    "hardDessert" INTEGER NOT NULL DEFAULT -999,
+    "toxicScore" INTEGER NOT NULL DEFAULT -999,
+    "toxicDessert" INTEGER NOT NULL DEFAULT -999,
+    "speedrunStart" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "bestSpeedrun" INTEGER NOT NULL DEFAULT -1,
     "hashedPassword" TEXT NOT NULL,
     "salt" TEXT NOT NULL,
     "resetToken" TEXT,
-    "resetTokenExpiresAt" DATETIME,
+    "resetTokenExpiresAt" TIMESTAMP(3),
     "modestMaki" BOOLEAN NOT NULL DEFAULT false,
     "longTermPlayer" BOOLEAN NOT NULL DEFAULT false,
     "speedEater" BOOLEAN NOT NULL DEFAULT false,
@@ -76,12 +65,12 @@ CREATE TABLE "new_User" (
     "puddingClear" BOOLEAN NOT NULL DEFAULT false,
     "gticClear" BOOLEAN NOT NULL DEFAULT false,
     "fruitClear" BOOLEAN NOT NULL DEFAULT false,
-    "maturePalate" BOOLEAN NOT NULL DEFAULT false
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
-INSERT INTO "new_User" ("bestSpeedrun", "easyDessert", "easyScore", "email", "hardDessert", "hardScore", "hashedPassword", "name", "normalDessert", "normalScore", "resetToken", "resetTokenExpiresAt", "salt", "speedrunStart", "toxicDessert", "toxicScore") SELECT "bestSpeedrun", "easyDessert", "easyScore", "email", "hardDessert", "hardScore", "hashedPassword", "name", "normalDessert", "normalScore", "resetToken", "resetTokenExpiresAt", "salt", "speedrunStart", "toxicDessert", "toxicScore" FROM "User";
-DROP TABLE "User";
-ALTER TABLE "new_User" RENAME TO "User";
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_name_key" ON "User"("name");
-PRAGMA foreign_key_check("User");
-PRAGMA foreign_keys=ON;

@@ -1758,17 +1758,21 @@ const PlayPage = () => {
       }
 
       // Queues toast notifications
-      const notify = (message, emoji, index) => {
-        toastNotifications[index].push({ message: message, emoji: emoji })
+      const notify = (message, emoji, index, concat) => {
+        if (concat)
+          if (toastNotifications[index][0])
+            toastNotifications[index][0].message += ' ' + message + '.'
+          else
+            toastNotifications[index].push({
+              message: message + '.',
+              emoji: emoji,
+            })
+        else toastNotifications[index].push({ message: message, emoji: emoji })
       }
 
       // Toast notifications for scoring
       const reportScore = (playerCards, score, card, area) => {
-        let emoji = ''
-        if (score >= 6) emoji = '😁'
-        else if (score > 0) emoji = '🙂'
-        else if (score == 0) emoji = '😑'
-        else emoji = '😦'
+        let emoji = '📈'
 
         let pointsString = score == 1 ? 'point' : 'points'
 
@@ -1777,7 +1781,8 @@ const PlayPage = () => {
           notify(
             'Scored ' + score + ' ' + pointsString + ' from ' + card.text,
             emoji,
-            area
+            area,
+            true
           )
           return score
         }
@@ -1787,7 +1792,8 @@ const PlayPage = () => {
           notify(
             'Scored ' + score + ' ' + pointsString + ' from leftovrs',
             emoji,
-            area
+            area,
+            true
           )
           return score
         }
@@ -1800,7 +1806,8 @@ const PlayPage = () => {
               notify(
                 'Scored ' + score + ' ' + pointsString + ' from ' + card.text,
                 emoji,
-                area
+                area,
+                true
               )
               return score
             }
@@ -2058,11 +2065,26 @@ const PlayPage = () => {
             let pineString = fruitCounts[1] == 1 ? 'pineapple' : 'pineapples'
             let orangeString = fruitCounts[2] == 1 ? 'orange' : 'oranges'
             if (fruitCounts[0])
-              notify('Stocked ' + fruitCounts[0] + ' ' + waterString, '🤤', i)
+              notify(
+                'Stocked ' + fruitCounts[0] + ' ' + waterString,
+                '📈',
+                i,
+                true
+              )
             if (fruitCounts[1])
-              notify('Stocked ' + fruitCounts[1] + ' ' + pineString, '🤤', i)
+              notify(
+                'Stocked ' + fruitCounts[1] + ' ' + pineString,
+                '📈',
+                i,
+                true
+              )
             if (fruitCounts[2])
-              notify('Stocked ' + fruitCounts[2] + ' ' + orangeString, '🤤', i)
+              notify(
+                'Stocked ' + fruitCounts[2] + ' ' + orangeString,
+                '📈',
+                i,
+                true
+              )
             continue
           }
 
@@ -2072,7 +2094,12 @@ const PlayPage = () => {
           let pluralString =
             dessertDifference == 1 ? baseString : baseString + 's'
 
-          notify('Stocked ' + dessertDifference + ' ' + pluralString, '🤤', i)
+          notify(
+            'Stocked ' + dessertDifference + ' ' + pluralString,
+            '📈',
+            i,
+            true
+          )
         }
       }
 
@@ -2225,7 +2252,7 @@ const PlayPage = () => {
           runningScore += reportScore(
             playerCards,
             scoreLeftovers(playerCards),
-            cards.TAKEOUTGUIDE,
+            cards.TOC,
             area
           )
         if (spec.includes(cards.TEAGUIDE.type)) {
