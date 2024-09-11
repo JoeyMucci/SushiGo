@@ -28,7 +28,7 @@ export const handler = async (event, context) => {
       // `http://localhost:8910/reset-password?resetToken=${resetToken}`
 
       let to = user.email
-      let resetLink = `http://localhost:8910/reset-password?resetToken=${_resetToken}`
+      let resetLink = `https://sushigo.netlify.app/reset-password?resetToken=${_resetToken}`
 
       var SibApiV3Sdk = require('sib-api-v3-sdk')
       var defaultClient = SibApiV3Sdk.ApiClient.instance
