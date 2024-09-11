@@ -3095,9 +3095,11 @@ const PlayPage = () => {
                 '🌈',
                 playerIndex
               )
-              players[playerIndex].stash[
-                players[playerIndex].stash.length - 1
-              ] = players[playerIndex].stash[choice]
+              players[playerIndex].stash.pop()
+              players[playerIndex].hand.unshift(
+                players[playerIndex].stash[choice]
+              )
+              playCard(0, playerIndex, priority > 0)
             }
           }
         }
