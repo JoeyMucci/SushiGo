@@ -180,11 +180,9 @@ const getExpectedVal = (playerCard, player, opps, cardsLeft, round) => {
 
   // TAKEOUT BOX - Made a whole function for this
   if (playerCard.color == cards.TAKEOUTTEN.color) {
-    console.log(player.stash)
     let originalStash = [...player.stash]
     let exVal = workTakeout(player, opps, cardsLeft, round)[0]
     player.stash = [...originalStash]
-    console.log(player.stash)
     return Math.max(0.1, exVal)
   }
 
@@ -524,8 +522,6 @@ const getExpectedValSpoon = (playerCard, player, opps, cardsLeft, round) => {
     )
       return cardsLeft / 27
   }
-
-  console.log('Spoon probability: ' + playerCard.text + '=' + getProbability())
 
   return (
     getExpectedVal(playerCard, player, opps, cardsLeft, round) *
@@ -928,12 +924,6 @@ const pickComputerCardFull = (
         getExpectedVal(player.hand[i], player, opps, cardsLeft, round)
       )
 
-  let j = 0
-  for (let allowedIndex of allowedIndices)
-    console.log(player.hand[allowedIndex].text + ': ' + expectedVals[j++])
-
-  console.log('--------------')
-
   return allowedIndices[chooseIndex(expectedVals, cardsLeft, difficulty)]
 }
 
@@ -1025,8 +1015,6 @@ export const pickComputerSpoon = (
       if (eligibleTypes.length > 1) spoonCards.push(typeToCard(type))
     }
 
-  console.log(spoonCards)
-
   if (difficulty == 'easy')
     return spoonCards[Math.floor(Math.random() * spoonCards.length)]
 
@@ -1036,11 +1024,6 @@ export const pickComputerSpoon = (
     expectedVals.push(
       getExpectedValSpoon(spoonCards[i], player, opps, cardsLeft, round)
     )
-
-  for (let j = 0; j < spoonCards.length; j++)
-    console.log(spoonCards[j].text + ': ' + expectedVals[j])
-
-  console.log('--------------')
 
   return spoonCards[chooseIndex(expectedVals, cardsLeft, difficulty)]
 }

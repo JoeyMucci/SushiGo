@@ -895,7 +895,6 @@ const PlayPage = () => {
     }
 
     const clickDess = (e) => {
-      console.log(diff)
       if (dess.includes(parseInt(e.target.name))) {
         setDess(dess.toSpliced(dess.indexOf(parseInt(e.target.name)), 1))
         if (diff.includes('toxic')) setDiff([])
@@ -1363,7 +1362,6 @@ const PlayPage = () => {
 
   // The screen where the user actually plays the game
   const GameScreen = () => {
-    console.log('GAME SCREEN RERENDER')
     const DESSERTCOUNTONE = 5
     const DESSERTCOUNTTWO = 3
     const DESSERTCOUNTTHREE = 2
@@ -2142,31 +2140,6 @@ const PlayPage = () => {
         if (spec.includes(cards.SPECIALOGUIDE.type)) specialOrderReplace()
 
         shuffle(deck.pile)
-
-        if (dess.includes(cards.FRUITGUIDE.type)) {
-          let allFruitCounts = [
-            parseFruit(players[0].dessert),
-            parseFruit(players[1].dessert),
-            parseFruit(players[2].dessert),
-            parseFruit(players[3].dessert),
-          ]
-          let sum = 0
-          for (let i = 0; i < allFruitCounts.length; i++)
-            for (let j = 0; j < allFruitCounts[i].length; j++)
-              sum += allFruitCounts[i][j]
-          sum /= 2
-          console.log(deck.pile.length + deck.dessertPile.length + sum)
-        } else
-          console.log(
-            deck.pile.length +
-              deck.dessertPile.length +
-              players[0].dessert +
-              players[1].dessert +
-              players[2].dessert +
-              players[3].dessert
-          )
-
-        console.log(deck.pile)
       }
 
       /* Scores a player's cards, only accounts for end of turn
@@ -2193,8 +2166,6 @@ const PlayPage = () => {
           return wnPoints
         }
 
-        console.log('SCORING START')
-        console.log(playerCards)
         let runningScore = 0
 
         // NIGIRI
@@ -2213,9 +2184,6 @@ const PlayPage = () => {
           achievementsData.wasabiWarrior = true
           notify('Wasabi Warrior Achieved!', '🏆', 4)
         }
-
-        console.log('POST NIGIRI')
-        console.log(runningScore)
 
         // ROLLS
         if (roll.includes(cards.MAKIGUIDE.type)) {
@@ -2243,9 +2211,6 @@ const PlayPage = () => {
             cards.URAMAKIGUIDE,
             area
           )
-
-        console.log('POST ROLLS')
-        console.log(runningScore)
 
         // SPECIALS
         if (spec.includes(cards.TAKEOUTGUIDE.type))
@@ -2293,9 +2258,6 @@ const PlayPage = () => {
             notify('Soysauce Savant Achieved!', '🏆', 4)
           }
         }
-
-        console.log('POST SPECIALS')
-        console.log(runningScore)
 
         // APPETIZERS
         if (app.includes(cards.DUMPLINGGUIDE.type)) {
@@ -2408,9 +2370,6 @@ const PlayPage = () => {
           )
             onigiriGuru = false
         }
-
-        console.log('POST APPS')
-        console.log(runningScore)
 
         if (area == 0) {
           roundPoints += runningScore
@@ -3158,7 +3117,6 @@ const PlayPage = () => {
 
       // Ends a round and moves to the next (or results screen)
       const advanceRound = () => {
-        console.log('advance round run')
         players[0].hand = []
         scoreRound()
 
@@ -3200,7 +3158,6 @@ const PlayPage = () => {
           let choice
           // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
           if (diff.includes('toxic') && index == 1) {
-            console.log('jacob pop')
             let saveHand = players[2].hand
             players[2].hand = players[1].hand
             choice = pickComputerCard(
@@ -3213,7 +3170,6 @@ const PlayPage = () => {
             players[2].hand = saveHand
           } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
           else if (diff.includes('toxic') && index == 3) {
-            console.log('jerry pop')
             let saveHand = players[0].hand
             players[0].hand = players[3].hand
             choice = pickComputerCard(
@@ -3622,7 +3578,6 @@ const PlayPage = () => {
           for (let i = 1; i < players.length; i++) {
             // Jacob will pretend as if he has Jeff's stash and then play a card that Jeff would not want to play
             if (diff.includes('toxic') && i == 1) {
-              console.log('jacob pop')
               let saveHand = players[2].hand
               players[2].hand = players[1].hand
               players[1].willPlayIndex = pickComputerCard(
@@ -3635,7 +3590,6 @@ const PlayPage = () => {
               players[2].hand = saveHand
             } // Jerry will pretend as if he has the user's stash and then play a card that the user would want to play
             else if (diff.includes('toxic') && i == 3) {
-              console.log('jerry pop')
               let saveHand = players[0].hand
               players[0].hand = players[3].hand
               players[3].willPlayIndex = pickComputerCard(
@@ -3681,7 +3635,6 @@ const PlayPage = () => {
 
         for (let i = 1; i < players.length; i++) {
           for (let j = 0; j < players[i].hand.length; j++) {
-            console.log(players[i].hand[j].type)
             if (seeking.includes(players[i].hand[j].type)) {
               cleanupSpoon(0, i, seeking)
 

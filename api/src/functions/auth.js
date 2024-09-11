@@ -30,9 +30,6 @@ export const handler = async (event, context) => {
       let to = user.email
       let resetLink = `http://localhost:8910/reset-password?resetToken=${_resetToken}`
 
-      console.log(to)
-      console.log(resetLink)
-
       var SibApiV3Sdk = require('sib-api-v3-sdk')
       var defaultClient = SibApiV3Sdk.ApiClient.instance
       const apiKey = defaultClient.authentications['api-key']
@@ -49,11 +46,9 @@ export const handler = async (event, context) => {
       sendSmtpEmail.htmlContent = `Reset your password at: ${resetLink}`
       sendSmtpEmail.to = [{ email: `${to}` }]
       try {
-        const data = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        console.log('API called successfully. Returned data: ' + data)
+        await apiInstance.sendTransacEmail(sendSmtpEmail)
         return user
       } catch (error) {
-        console.error('Error sending reset email:', error)
         throw new Error('Failed to send email')
       }
     },
