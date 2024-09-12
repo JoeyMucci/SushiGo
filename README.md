@@ -13,3 +13,5 @@ What Skills did I Improve?
 - Maintaining a large codebase by leaving comments to help future me
 
 Please start your journey as Sushi Squire and move your way up the leaderboard!
+
+https://sushigo.netlify.app/
