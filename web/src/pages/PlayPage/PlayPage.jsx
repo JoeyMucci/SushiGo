@@ -2609,7 +2609,8 @@ const PlayPage = () => {
                 achievementsData.easyClear = true
               else if (diff.includes('normal') && !currentUser.normalClear)
                 achievementsData.normalClear = true
-              else if (!currentUser.hardClear) achievementsData.hardClear = true
+              else if (diff.includes('hard') && currentUser.hardClear)
+                achievementsData.hardClear = true
 
               if (
                 (achievementsData.easyClear || currentUser.easyClear) &&
@@ -2627,7 +2628,10 @@ const PlayPage = () => {
                 !currentUser.temakiClear
               )
                 achievementsData.temakiClear = true
-              else if (!currentUser.uramakiClear)
+              else if (
+                roll.includes(cards.URAMAKIGUIDE.type) &&
+                !currentUser.uramakiClear
+              )
                 achievementsData.uramakiClear = true
 
               if (
@@ -2710,7 +2714,10 @@ const PlayPage = () => {
                 !currentUser.gticClear
               )
                 achievementsData.gticClear = true
-              else if (!currentUser.fruitClear)
+              else if (
+                dess.includes(cards.FRUITGUIDE.type) &&
+                !currentUser.fruitClear
+              )
                 achievementsData.fruitClear = true
 
               if (
