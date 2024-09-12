@@ -635,7 +635,7 @@ const PlayPage = () => {
     const comparePlayers = (a, b) => {
       if (a.score != b.score) return b.score - a.score
       if (a.dessert != b.dessert) return b.dessert - a.dessert
-      return b.tiebreak - a.tiebreaker
+      return b.tiebreak - a.tiebreak
     }
 
     let userDessertCount = userDessertF
