@@ -2609,7 +2609,7 @@ const PlayPage = () => {
                 achievementsData.easyClear = true
               else if (diff.includes('normal') && !currentUser.normalClear)
                 achievementsData.normalClear = true
-              else if (diff.includes('hard') && currentUser.hardClear)
+              else if (diff.includes('hard') && !currentUser.hardClear)
                 achievementsData.hardClear = true
 
               if (
