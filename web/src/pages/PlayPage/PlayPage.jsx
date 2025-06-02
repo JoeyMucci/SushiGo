@@ -1788,7 +1788,7 @@ const PlayPage = () => {
         // Turned over card notification
         if (score > 0 && card.type == cards.TOC.type) {
           notify(
-            'Scored ' + score + ' ' + pointsString + ' from leftovrs',
+            'Scored ' + score + ' ' + pointsString + ' from leftovers',
             emoji,
             area,
             true
